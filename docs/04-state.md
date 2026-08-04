@@ -107,17 +107,30 @@ Tambem nao existem: barramento de eventos (M4), painel de tuning (M5),
 
 ## Proximo passo
 
-**Milestone 2 — Save.** Persistencia local atras da interface `SaveRepository`,
-versionamento com migrations e exportar/importar em arquivo JSON.
+**Milestone 2 — Mundo 1.** Terreno, colisao, iluminacao, organizacao espacial,
+atmosfera, estrutura do mapa e o marco visual do portal.
 
-Vem cedo de proposito: adicionar serializacao a dez sistemas prontos e doloroso
-e gera bugs silenciosos. Com o save existindo agora, cada sistema seguinte ja
-nasce com sua fatia e sua migration.
+Escopo deliberadamente estrutural: a ambientacao detalhada evolui junto com
+combate e HUD. O sistema de transicao entre mundos fica para o M12.
 
-Area: **Save Agent**, com o Tech Lead expondo o ponto de serializacao no
-`GameState`.
+Areas: **World Agent** e **Rendering Agent**, com o Tech Lead integrando.
+
+O roadmap foi reordenado — mundo antes de mobs, save depois de combate. Os
+motivos estao em `03-roadmap.md`.
+
+## Direcao visual definida
+
+- **Direcao de arte** em `07-art-direction.md`: low-poly cosmico, cor chapada,
+  luz emissiva, paleta fechada, duas luzes, sem sombras projetadas, sem PBR.
+- **Personagens em 3D**, revertendo os sprites 2.5D — `decisions/0009`.
+- **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`.
+  O sistema de animacao so chega no M3.
+- **Referencias** em `references/`: analise escrita apenas, sem midia de
+  terceiros.
 
 ## Decisoes em aberto
 
-- **Origem da arte.** Sprites de personagens e mobs precisam existir antes do
-  M4. Definir fonte e estilo antes de escrever o sistema de mobs.
+- **FOV horizontal.** Hoje 75 graus contra ~113 da referencia, que mostra bem
+  mais mundo. Julgar no M3, com mundo de verdade na tela.
+- **Tecnica de animacao dos mobs comuns.** Depende do benchmark obrigatorio no
+  inicio do M3.
