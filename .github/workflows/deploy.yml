@@ -1,0 +1,57 @@
+# Publica a build no GitHub Pages.
+#
+# Isto NAO e CI: nao roda suite de testes nem gate de qualidade. E o unico
+# caminho para o jogo chegar ao Safari do iPhone enquanto nao ha um computador
+# disponivel para rodar `npm run dev` na rede local. Ver docs/decisions/0003.
+#
+# Efeito colateral util: `npm run build` roda `tsc --noEmit` antes de empacotar,
+# entao um erro de tipo impede a publicacao de uma build quebrada.
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      # Permite testar no iPhone antes de integrar em main.
+      - 'claude/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicacao por vez. Push novo cancela a anterior ainda em andamento.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
