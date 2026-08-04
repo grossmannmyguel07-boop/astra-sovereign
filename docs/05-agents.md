@@ -22,7 +22,12 @@ Cada arquivo do projeto tem exatamente um dono.
 | **Data & Balance** | `src/data/`, `src/config/balance.ts` | qualquer logica |
 | **Save** | `src/save/` | logica de sistemas |
 | **Debug** | `src/debug/` | todo o resto |
-| **Docs** | `docs/00-` a `docs/04-`, `docs/decisions/` | `docs/systems/` |
+| **Docs** | `docs/README.md`, `docs/00-` a `docs/04-`, `docs/decisions/`, `docs/lore/`, `docs/worlds/`, `docs/references/` | `docs/systems/`, `docs/design/` |
+
+`docs/design/` pertence a quem e dono da area: `art-direction.md` e do Rendering
+Agent, `combat.md` do Combat, `progression.md`/`units.md`/`gacha.md` do
+Progression, `economy.md` do Data & Balance, `ui.md` do UI/UX.
+`gameplay-pillars.md` e do Tech Lead.
 
 `docs/systems/<nome>.md` pertence a quem e dono do sistema. Quem escreve o
 codigo escreve o documento — nao existe agente que documente o trabalho alheio.

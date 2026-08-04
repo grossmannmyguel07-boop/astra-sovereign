@@ -20,7 +20,7 @@ Elementos visiveis na interface sugerem a estrutura, sem provar comportamento:
 - Um acompanhante pequeno ao lado do jogador, sem acao observavel
 
 Tudo acima esta marcado como **hipotese a validar** em
-`docs/06-referencia-gameplay.md`. Nada disso deve virar codigo antes de ser
+`docs/references/analise-video-01.md`. Nada disso deve virar codigo antes de ser
 observado.
 
 ## O que precisa ser observado

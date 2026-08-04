@@ -69,5 +69,5 @@ disso entra aqui, nem adaptado.
 | `ui/` | Pendente |
 
 A analise completa que originou boa parte disto esta em
-`docs/06-referencia-gameplay.md`. As pastas aqui detalham por area e registram
+`docs/references/analise-video-01.md`. As pastas aqui detalham por area e registram
 o que ainda falta observar.

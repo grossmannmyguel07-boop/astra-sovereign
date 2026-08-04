@@ -91,7 +91,9 @@ para onde o jogador esta olhando.
 ## Player view
 
 Capsula com marcador de frente e uma marca de contato com o chao. Provisorio
-ate a arte existir (`docs/decisions/0002` — sprites 2.5D).
+ate existir um personagem de verdade — que sera **geometria 3D low-poly**
+seguindo o contrato de rig em `docs/decisions/0008`, e nao sprite
+(`decisions/0009` reverteu a `0002`).
 
 O marcador de frente nao e enfeite: sem ele nao da para perceber que o corpo
 gira, e o giro e metade da sensacao de controle. A marca no chao evita a

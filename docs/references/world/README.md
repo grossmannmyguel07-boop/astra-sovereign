@@ -35,7 +35,7 @@ Nomes de sistemas tambem sao deles.
 ## Diferenca estrutural que assumimos
 
 O horizonte da referencia tem conteudo; o nosso e nevoa. Isso e consequencia da
-direcao de arte escolhida (`docs/07-art-direction.md`): mundo escuro, atores
+direcao de arte escolhida (`docs/design/art-direction.md`): mundo escuro, atores
 luminosos, nevoa como ferramenta de composicao.
 
 Nao e tentativa fracassada de imitar — e outra escolha. Mas significa que o

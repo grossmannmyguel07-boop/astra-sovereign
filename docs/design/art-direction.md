@@ -152,7 +152,7 @@ ocupando a faixa superior e o que separa "mundo" de "mapa visto de cima".
 
 ## Camera
 
-Definida pelas decisoes `0006` e pelo ajuste medido em `06-referencia-gameplay`.
+Definida pelas decisoes `0006` e pelo ajuste medido em `references/analise-video-01.md`.
 
 | Parametro | Valor | Motivo |
 |---|---|---|
@@ -195,7 +195,7 @@ grid e marcas espalhadas — senao andar nao produz sensacao de andar.
 
 **Progressao continua.** Alguma coisa precisa subir na tela a cada poucos
 segundos. Essa e a sensacao central do genero, medida na referencia em ~6 itens
-por segundo. Ver `06-referencia-gameplay`.
+por segundo. Ver `references/analise-video-01.md`.
 
 ---
 
@@ -244,7 +244,7 @@ das units sem ler nada.
 
 ## HUD
 
-Regras derivadas da analise da referencia (`06-referencia-gameplay`), incluindo
+Regras derivadas da analise da referencia (`references/analise-video-01.md`), incluindo
 o que ela faz de errado.
 
 **O centro da tela e sagrado.** Toda densidade vai para as bordas. A referencia

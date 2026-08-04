@@ -36,13 +36,13 @@
 **Render**
 - Camera orbital: yaw livre, pitch padrao ~15 graus limitado entre 6 e 66,
   distancia fixa, suavizacao exponencial independente de framerate e look-ahead
-  curto (`src/render/camera.ts`). Ver `decisions/0006` e `06-referencia`.
+  curto (`src/render/camera.ts`). Ver `decisions/0006` e `references/analise-video-01.md`.
   O pitch foi calibrado para trazer o horizonte a ~20% do topo, como na
   referencia do genero.
 - Player provisorio: capsula com marcador de frente e marca de contato com o
   chao (`src/render/views/player-view.ts`).
-- Mundo plano temporario: chao, grid, 56 marcas instanciadas e circulo do
-  limite (`src/render/world/ground.ts`). **Substituido no M3.**
+- Mundo plano temporario: chao de 324 unidades, grid, 120 marcas instanciadas e circulo do
+  limite (`src/render/world/ground.ts`). **Substituido no M2.**
 
 **Orientacao**
 - Exclusivamente paisagem. Em retrato o portao cobre a tela e pausa a
@@ -81,16 +81,16 @@ de producao. Posicao lida do overlay:
 | Arrastar 250px a direita | visao gira a direita | yaw -89 |
 | Arrastar 250px a esquerda | visao gira a esquerda | yaw +89 |
 | Arrastar muito para baixo | pitch trava no teto | 66 |
-| Arrastar muito para cima | pitch trava no piso | 8 |
+| Arrastar muito para cima | pitch trava no piso | 6 |
 | Girar ~90 e empurrar "para cima" | anda para onde a camera olha | x +6.8, z +0.1 |
 | Retrato | portao aparece | sim |
 
-8 draw calls, 474 triangulos. Sem erros de console, de pagina ou requisicoes
+8 draw calls, 730 triangulos. Sem erros de console, de pagina ou requisicoes
 falhas.
 
 Corrigido durante a verificacao: o chao original lia como listras e nao como
 grade, e a cena vazia nao dava referencia de movimento lateral. Grid ganhou
-celulas maiores e mais contraste, e entraram 56 marcas instanciadas.
+celulas maiores e mais contraste, e entraram 120 marcas instanciadas.
 
 O framerate do ambiente de verificacao reflete renderizacao por software
 (SwiftShader). Com 8 draw calls o custo real no iPhone e irrelevante.
@@ -103,7 +103,7 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 
 Save, colisao, mobs, combate, XP, HUD, units, gacha, quests, boss, portal.
 Tambem nao existem: barramento de eventos (M4), painel de tuning (M5),
-`src/data/` (M4), `src/game/systems/world.ts` (M3).
+`src/data/` (M4), `src/game/systems/world.ts` (M2).
 
 ## Proximo passo
 
@@ -120,12 +120,12 @@ motivos estao em `03-roadmap.md`.
 
 ## Direcao visual definida
 
-- **Direcao de arte** em `07-art-direction.md`: low-poly cosmico, cor chapada,
+- **Direcao de arte** em `design/art-direction.md`: low-poly cosmico, cor chapada,
   luz emissiva, paleta fechada, duas luzes, sem sombras projetadas, sem PBR.
 - **Personagens em 3D**, revertendo os sprites 2.5D — `decisions/0009`.
 - **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`.
   O sistema de animacao so chega no M3.
-- **Referencias** em `references/`: analise escrita apenas, sem midia de
+- **Referencias** em `docs/references/`: analise escrita apenas, sem midia de
   terceiros.
 
 ## Decisoes em aberto

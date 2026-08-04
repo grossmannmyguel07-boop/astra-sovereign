@@ -6,6 +6,12 @@ Objetivo imediato: **chegar rapido a um MVP jogavel**. Ver `docs/03-roadmap.md`.
 
 Este arquivo e regulamento, nao documentacao. O "porque" mora em `docs/`.
 
+**Antes de implementar qualquer coisa, leia a Game Bible** — `docs/lore/`,
+`docs/worlds/` e `docs/design/`. Indice em `docs/README.md`.
+
+Nada marcado como `[PROPOSTA]` ou `[PENDENTE]` vira codigo. Se um milestone
+precisa de algo nesses estados, a decisao vem antes da implementacao.
+
 ## Prioridades, nesta ordem
 
 1. Gameplay

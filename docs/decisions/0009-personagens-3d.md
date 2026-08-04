@@ -42,7 +42,7 @@ Producao em duas fases:
 
 **Fase 1 — M2 ate M4.** Personagens montados por codigo a partir de primitivas,
 obedecendo ao contrato de juntas. Zero arquivo de arte no repositorio. Nao e
-placeholder: e estilo assumido, definido em `docs/07-art-direction.md`.
+placeholder: e estilo assumido, definido em `docs/design/art-direction.md`.
 
 **Fase 2 — a partir do M5.** Com combate funcionando, sabemos quantos mobs, que
 silhuetas e quantas animacoes. So entao entram modelos de pack CC0 riggados.

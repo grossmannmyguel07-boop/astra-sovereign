@@ -35,9 +35,16 @@ Precisa de evento novo ou de constante de motor? Descreva no resumo final.
 
 1. **Voce le o estado, nunca decide regra.** Se um mob morre, quem decidiu foi
    o Combat. Voce so reage ao evento e desenha.
-2. **2.5D:** mundo em 3D, personagens/mobs/units como billboards em
-   `InstancedMesh`. Nunca uma mesh por entidade. Ver `docs/decisions/0002`.
-3. **Orientacao paisagem** e definitiva. Ver `docs/decisions/0005`.
+2. **Personagens sao geometria 3D low-poly**, seguindo o contrato de rig em
+   `docs/decisions/0008`. A decisao `0002` (billboards 2.5D) foi revertida pela
+   `0009` — nao use sprites para personagens.
+3. **`SkinnedMesh` nao instancia.** Cada personagem esqueletado e uma draw call.
+   A tecnica para mobs comuns depende do benchmark obrigatorio do M3; nao
+   assuma esqueleto para tudo. Ver `docs/decisions/0008`.
+4. **Props repetidos sempre em `InstancedMesh`.** Nunca uma mesh por prop.
+5. **Orientacao paisagem** e definitiva. Ver `docs/decisions/0005`.
+6. **A direcao de arte manda:** paleta fechada, duas luzes, sem sombra
+   projetada, sem PBR, brilho por `emissive`. Ver `docs/design/art-direction.md`.
 4. **`devicePixelRatio` limitado** ao valor em `src/config/constants.ts`. Nao
    aumente esse teto — e a maior alavanca de performance do projeto.
 5. **Nada de `new` por frame.** Vetores e matrizes temporarios sao instancias de

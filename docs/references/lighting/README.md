@@ -5,7 +5,7 @@
 A referencia usa dia claro, ceu azul com nuvens, sombras suaves e cores
 saturadas. Nossa direcao e o oposto: mundo escuro, atores luminosos.
 
-Isso e escolha deliberada, registrada em `docs/07-art-direction.md`, e nao
+Isso e escolha deliberada, registrada em `docs/design/art-direction.md`, e nao
 tentativa fracassada de imitar. A referencia de iluminacao serve para entender
 **funcao**, nao para copiar aparencia.
 

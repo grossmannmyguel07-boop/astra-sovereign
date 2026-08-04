@@ -15,7 +15,7 @@ Nenhum efeito de combate aparece no material analisado.
 
 ## Padroes ja definidos
 
-Ver `docs/07-art-direction.md`:
+Ver `docs/design/art-direction.md`:
 
 - Todo evento de jogo precisa de sinal visivel
 - Efeito e emissivo e curto; acima de 1 segundo atrapalha a leitura
