@@ -37,13 +37,14 @@ passa ao sistema de movimento como um numero. A simulacao continua sem saber o
 que e uma camera: para ela e apenas "o angulo em que a tela do jogador esta em
 relacao ao mundo". A regra de `src/game/` nunca importar `three` segue intacta.
 
-## Por que a discretizacao em 8 direcoes virou relativa a tela
+## Nota posterior: a discretizacao em 8 direcoes foi removida
 
-A discretizacao acontece **antes** de girar para o mundo. Se fosse depois, o
-mesmo empurrao do polegar cairia em setores diferentes conforme a camera
-girasse, e o controle mudaria de sentido sem o jogador ter mudado nada.
+Esta decisao descrevia originalmente como os 8 setores de direcao passavam a
+ser relativos a tela. A discretizacao inteira foi revertida em seguida — ver
+`0007-movimento-analogico.md`.
 
-Consequencia: os 8 setores acompanham a camera. Andar "para frente" e sempre
+O que permanece valido e a conversao em si: a intencao de tela e girada pelo
+yaw da camera antes de virar direcao de mundo. Andar "para frente" e sempre
 para onde se olha.
 
 ## Limites verticais
