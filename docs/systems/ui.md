@@ -58,6 +58,37 @@ Expoe apenas `intent: { x, z }` em coordenadas de tela. Nao conhece o player
 nem a simulacao. A zona morta e a discretizacao em 8 direcoes sao regra de
 jogo e ficam no sistema de movimento.
 
+## Arrasto de camera (`src/input/camera-drag.ts`)
+
+Metade direita da tela. Acumula o deslocamento do dedo e entrega em `consume()`,
+uma vez por frame.
+
+Acumular e entregar por frame, em vez de aplicar direto no evento, mantem a
+rotacao no mesmo ritmo do desenho: os eventos de ponteiro chegam em blocos
+irregulares e as vezes varios por frame.
+
+| Gesto | Efeito |
+|---|---|
+| Arrastar para a direita | Visao gira para a direita |
+| Arrastar para baixo | Camera sobe, visao mais de cima |
+| Arrastar para cima | Camera desce em direcao ao horizonte |
+
+A sensibilidade vertical e menor que a horizontal de proposito: a faixa util de
+inclinacao e pequena, e igualar as duas faz a camera bater nos limites com
+qualquer arrasto diagonal.
+
+Nao conhece a camera — so relata quanto o jogador pediu para girar. Quem aplica
+e o `main.ts`.
+
+### Convivencia com o joystick
+
+Zonas distintas (esquerda e direita) e cada uma rastreia o proprio `pointerId`,
+entao girar a camera e andar ao mesmo tempo funciona — que e o caso normal.
+
+**Pendencia para o M6:** os botoes de acao vao ficar na metade direita, junto
+com a area de rotacao. Ou ficam fora do caminho, ou o arrasto passa a ignorar
+toques iniciados sobre eles.
+
 ## Camadas
 
 | z-index | Elemento |

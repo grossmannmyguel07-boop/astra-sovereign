@@ -25,7 +25,7 @@ Integracao e QA nunca sao delegados.
 | # | Nome | Entrega | Estado |
 |---|---|---|---|
 | 0 | Fundacao | Projeto Vite + TS + Three.js, loop de passo fixo, cena de teste, debug overlay, console in-game, publicacao funcionando, portao de orientacao paisagem, equipe de agentes definida | **concluido** |
-| 1 | Player + Input | Joystick virtual flutuante, movimento em 8 direcoes com aceleracao e atrito, camera com follow suave e look-ahead, mundo plano temporario | **concluido** |
+| 1 | Player + Input | Joystick virtual flutuante, movimento em 8 direcoes relativo a camera, camera orbital com pitch limitado, mundo plano temporario | **concluido** |
 | 2 | Save | Persistencia local, migrations, exportar/importar save | proximo |
 | 3 | Mundo 1 | Terreno, limites, colisao simples, props | |
 | 4 | Mobs + Combate | Spawn, auto attack, dano, morte, numeros de dano. Chega o barramento de eventos | |

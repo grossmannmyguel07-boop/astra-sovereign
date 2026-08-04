@@ -20,18 +20,22 @@
 - `GameState` com a fatia do player (`src/game/state.ts`).
 - Entidade do player: posicao, posicao anterior, velocidade e angulo
   (`src/game/entities/player.ts`).
-- Sistema de movimento em passo fixo: discretizacao em 8 direcoes, zona morta
-  descontada, aceleracao e atrito, giro suave e limite circular do mundo
-  (`src/game/systems/movement.ts`). **Nao importa `three`.**
+- Sistema de movimento em passo fixo: discretizacao em 8 direcoes **relativa a
+  camera**, zona morta descontada, aceleracao e atrito, giro suave e limite
+  circular do mundo (`src/game/systems/movement.ts`). **Nao importa `three`** —
+  recebe o angulo da camera como um numero.
 
 **Entrada**
 - Joystick virtual flutuante: nasce onde o dedo encosta na metade esquerda,
   anel de descanso como dica visual, um unico `pointerId` rastreado
   (`src/input/joystick.ts`).
+- Arrasto na metade direita gira a camera (`src/input/camera-drag.ts`). Zonas
+  independentes: andar e olhar ao mesmo tempo funciona.
 
 **Render**
-- Camera em terceira pessoa com suavizacao exponencial independente de
-  framerate e look-ahead proporcional a velocidade (`src/render/camera.ts`).
+- Camera orbital: yaw livre, pitch limitado entre 8 e 66 graus, distancia fixa,
+  suavizacao exponencial independente de framerate e look-ahead proporcional a
+  velocidade (`src/render/camera.ts`). Ver `decisions/0006`.
 - Player provisorio: capsula com marcador de frente e marca de contato com o
   chao (`src/render/views/player-view.ts`).
 - Mundo plano temporario: chao, grid, 56 marcas instanciadas e circulo do
@@ -70,6 +74,11 @@ de producao. Posicao lida do overlay:
 | Arrasto a ~20 graus | discretiza para direita pura | x +7.2, z 0.0 |
 | Soltar o joystick | velocidade a zero | 8.5 -> 0.0 |
 | Correr contra a borda | distancia trava no raio | 38.0 |
+| Arrastar 250px a direita | visao gira a direita | yaw -89 |
+| Arrastar 250px a esquerda | visao gira a esquerda | yaw +89 |
+| Arrastar muito para baixo | pitch trava no teto | 66 |
+| Arrastar muito para cima | pitch trava no piso | 8 |
+| Girar ~90 e empurrar "para cima" | anda para onde a camera olha | x +6.8, z +0.1 |
 | Retrato | portao aparece | sim |
 
 8 draw calls, 474 triangulos. Sem erros de console, de pagina ou requisicoes
