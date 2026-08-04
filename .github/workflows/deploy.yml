@@ -9,12 +9,16 @@
 
 name: Deploy
 
+# Somente `main`.
+#
+# O gatilho ja incluiu branches de trabalho, e foi um erro: o ambiente
+# `github-pages` so aceita deploy da branch padrao, entao esses runs nunca
+# publicavam -- mas, por causa do `concurrency` abaixo, cancelavam o run do
+# `main` que estava publicando de verdade.
 on:
   push:
     branches:
       - main
-      # Permite testar no iPhone antes de integrar em main.
-      - 'claude/**'
   workflow_dispatch:
 
 permissions:
