@@ -34,9 +34,11 @@
   independentes: andar e olhar ao mesmo tempo funciona.
 
 **Render**
-- Camera orbital: yaw livre, pitch limitado entre 8 e 66 graus, distancia fixa,
-  suavizacao exponencial independente de framerate e look-ahead proporcional a
-  velocidade (`src/render/camera.ts`). Ver `decisions/0006`.
+- Camera orbital: yaw livre, pitch padrao ~15 graus limitado entre 6 e 66,
+  distancia fixa, suavizacao exponencial independente de framerate e look-ahead
+  curto (`src/render/camera.ts`). Ver `decisions/0006` e `06-referencia`.
+  O pitch foi calibrado para trazer o horizonte a ~20% do topo, como na
+  referencia do genero.
 - Player provisorio: capsula com marcador de frente e marca de contato com o
   chao (`src/render/views/player-view.ts`).
 - Mundo plano temporario: chao, grid, 56 marcas instanciadas e circulo do
