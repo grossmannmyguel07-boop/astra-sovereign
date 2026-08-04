@@ -5,18 +5,26 @@ camada abstrata. O objetivo e chegar rapido ao MVP.
 
 ## Definition of Done (vale para todos)
 
-1. Funciona no Safari do iPhone (confirmado com screenshot).
+1. Funciona no Safari do iPhone em paisagem (confirmado com screenshot).
 2. `npm run check` passa.
 3. Rodado e inspecionado via Playwright, sem erros no console.
 4. `docs/04-state.md` atualizado.
 5. Sistema novo tem doc em `docs/systems/`.
-6. Commit feito.
+6. Commit feito, merge para `main`, deploy confirmado.
+
+## Como o trabalho e dividido
+
+A partir daqui o projeto tem uma equipe de agentes com fronteiras de propriedade
+fixas — ver `docs/05-agents.md`. Cada milestone abaixo indica quais areas toca,
+e o Tech Lead decide se vale trabalho paralelo ou execucao direta.
+
+Integracao e QA nunca sao delegados.
 
 ## Milestones
 
 | # | Nome | Entrega | Estado |
 |---|---|---|---|
-| 0 | Fundacao | Projeto Vite + TS + Three.js, loop de passo fixo, cena de teste, debug overlay, console in-game, publicacao funcionando | **concluido** |
+| 0 | Fundacao | Projeto Vite + TS + Three.js, loop de passo fixo, cena de teste, debug overlay, console in-game, publicacao funcionando, portao de orientacao paisagem, equipe de agentes definida | **concluido** |
 | 1 | Player + Input | Joystick virtual, player se movendo, camera seguindo | proximo |
 | 2 | Save | Persistencia local, migrations, exportar/importar save | |
 | 3 | Mundo 1 | Terreno, limites, colisao simples, props | |
