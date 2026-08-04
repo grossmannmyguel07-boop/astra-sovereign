@@ -20,10 +20,11 @@
 - `GameState` com a fatia do player (`src/game/state.ts`).
 - Entidade do player: posicao, posicao anterior, velocidade e angulo
   (`src/game/entities/player.ts`).
-- Sistema de movimento em passo fixo: discretizacao em 8 direcoes **relativa a
-  camera**, zona morta descontada, aceleracao e atrito, giro suave e limite
+- Sistema de movimento em passo fixo: **direcao analogica em 360 graus**
+  relativa a camera, intensidade com saturacao antecipada, zona morta
+  descontada, aceleracao alta para resposta imediata, giro suave e limite
   circular do mundo (`src/game/systems/movement.ts`). **Nao importa `three`** —
-  recebe o angulo da camera como um numero.
+  recebe o angulo da camera como um numero. Ver `decisions/0007`.
 
 **Entrada**
 - Joystick virtual flutuante: nasce onde o dedo encosta na metade esquerda,
@@ -66,12 +67,13 @@ de producao. Posicao lida do overlay:
 
 | Caso | Esperado | Medido |
 |---|---|---|
-| Frente | z negativo | -8.4 |
-| Tras | z positivo | +8.5 |
-| Direita | x positivo | +6.7 |
-| Esquerda | x negativo | -8.7 |
-| Diagonal | x e z simetricos | +5.4 / -5.4 |
-| Arrasto a ~20 graus | discretiza para direita pura | x +7.2, z 0.0 |
+| Empurrar a 22.5 graus | anda a 22.5 graus | **22.9** (erro 0.4) |
+| Empurrar a 30 graus | anda a 30 graus | **30.3** (erro 0.3) |
+| Empurrar a 67.5 graus | anda a 67.5 graus | **67.5** (erro 0.0) |
+| Empurrar a 105 graus | anda a 105 graus | **104.9** (erro 0.1) |
+| Inclinacao 0.20 / 0.35 / 0.50 | velocidade proporcional | 1.2 / 3.4 / 5.6 |
+| Inclinacao 0.65 / 1.00 | satura perto do maximo | 7.9 / 8.5 |
+| Velocidade apos 300ms parado | ja no maximo | 8.5 |
 | Soltar o joystick | velocidade a zero | 8.5 -> 0.0 |
 | Correr contra a borda | distancia trava no raio | 38.0 |
 | Arrastar 250px a direita | visao gira a direita | yaw -89 |

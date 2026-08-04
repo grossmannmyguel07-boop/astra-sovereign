@@ -1,5 +1,6 @@
 import {
   JOYSTICK_DEADZONE,
+  JOYSTICK_FULL_TILT,
   PLAYER_ACCEL,
   PLAYER_FRICTION,
   PLAYER_SPEED,
@@ -32,9 +33,6 @@ export interface MoveIntent {
   yaw: number;
 }
 
-/** Um oitavo de volta: o tamanho do setor de cada uma das 8 direcoes. */
-const SECTOR = Math.PI / 4;
-
 /**
  * Movimento do player.
  *
@@ -59,18 +57,11 @@ export class MovementSystem {
     const magnitude = Math.hypot(intent.x, intent.z);
 
     if (magnitude > JOYSTICK_DEADZONE) {
-      // Discretiza a direcao em 8 setores. Num joystick de toque isso vale a
-      // pena: o polegar nunca segura um angulo exato, e sem a discretizacao o
-      // personagem fica corrigindo o rumo sozinho o tempo todo.
-      //
-      // A discretizacao acontece ANTES de girar para o mundo, ou seja, os 8
-      // setores sao relativos a tela. Discretizar depois deixaria o controle
-      // inconsistente: o mesmo empurrao do polegar cairia em setores
-      // diferentes conforme a camera girasse.
-      const raw = Math.atan2(intent.z, intent.x);
-      const snapped = Math.round(raw / SECTOR) * SECTOR;
-      const screenX = Math.cos(snapped);
-      const screenZ = Math.sin(snapped);
+      // Direcao analogica em 360 graus: normaliza o vetor e usa o angulo exato
+      // do polegar. Sem discretizacao -- ver docs/decisions/0007.
+      const inverse = 1 / magnitude;
+      const screenX = intent.x * inverse;
+      const screenZ = intent.z * inverse;
 
       // Gira a intencao de tela para coordenadas de mundo pelo angulo da
       // camera. Com yaw 0 a conversao e a identidade.
@@ -81,7 +72,12 @@ export class MovementSystem {
 
       // A zona morta e descontada em vez de cortada, para que a velocidade
       // comece do zero na borda dela e nao pule para um valor ja alto.
-      const throttle = Math.min(1, (magnitude - JOYSTICK_DEADZONE) / (1 - JOYSTICK_DEADZONE));
+      const beyondDeadzone = (magnitude - JOYSTICK_DEADZONE) / (1 - JOYSTICK_DEADZONE);
+
+      // Satura antes do fim do curso: num joystick virtual o polegar nao sente
+      // onde esta, e exigir a borda para correr a toda torna o controle
+      // impreciso. Abaixo do ponto de saturacao a intensidade e analogica.
+      const throttle = Math.min(1, beyondDeadzone / JOYSTICK_FULL_TILT);
 
       const targetVx = dirX * PLAYER_SPEED * throttle;
       const targetVz = dirZ * PLAYER_SPEED * throttle;

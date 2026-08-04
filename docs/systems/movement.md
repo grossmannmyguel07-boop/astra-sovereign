@@ -39,19 +39,28 @@ renderizador interpola com o alpha do loop. Sem isso o movimento treme.
 
 ## Regras
 
-### Discretizacao em 8 direcoes
+### Direcao analogica em 360 graus
 
-A direcao do joystick e arredondada para o setor mais proximo de 45 graus. Num
-controle de toque isso vale a pena: o polegar nunca segura um angulo exato, e
-sem a discretizacao o personagem fica corrigindo o rumo sozinho o tempo todo.
+O vetor do joystick e normalizado e usado como esta — o personagem anda no
+angulo exato do polegar. Ver `docs/decisions/0007`.
 
-O **modulo** do vetor continua analogico e controla a velocidade — direcao
-discreta, intensidade continua.
+Uma versao anterior discretizava em 8 setores de 45 graus. Foi revertido: a
+diferenca entre o que o dedo faz e o que aparece na tela **e** a sensacao de
+imprecisao.
 
-A discretizacao acontece **antes** de girar para o mundo, ou seja, os 8 setores
-sao relativos a tela. Se fosse depois, o mesmo empurrao do polegar cairia em
-setores diferentes conforme a camera girasse. Andar "para frente" e sempre para
-onde se olha.
+A unica transformacao aplicada a direcao e o giro pelo yaw da camera, entao
+andar "para frente" e sempre para onde se olha.
+
+### Intensidade com saturacao antecipada
+
+O modulo do vetor controla a velocidade. Depois de descontada a zona morta,
+**65% do curso ja produz velocidade maxima**; abaixo disso a intensidade e
+proporcional.
+
+Num joystick virtual o polegar nao sente o curso: nao ha como saber se esta a
+80% ou a 100% do raio sem olhar. Exigir a borda para correr a toda tornaria a
+corrida — que e o estado normal do jogo — dependente de precisao que o dedo nao
+tem. A faixa abaixo da saturacao continua servindo para posicionamento fino.
 
 ### Zona morta
 
@@ -61,9 +70,12 @@ borda dela e nao pule para um valor ja alto.
 
 ### Aceleracao e atrito
 
-O atrito e maior que a aceleracao de proposito: responde rapido ao soltar, mas
-ainda desliza o suficiente para nao parecer mecanico. Igualar os dois deixa o
-controle escorregadio.
+Altos de proposito: o player atinge a velocidade maxima em ~0.06s e para em
+~0.09s, cerca de quatro e seis quadros a 60fps. E o que elimina a sensacao de
+atraso — o corpo comeca a andar no quadro seguinte ao toque.
+
+A rampa nao foi eliminada de vez porque trocar a velocidade instantaneamente
+produz tremor visivel ao mudar de direcao: o vetor salta em vez de girar.
 
 ### Limite do mundo
 

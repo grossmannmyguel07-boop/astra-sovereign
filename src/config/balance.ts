@@ -16,15 +16,22 @@ export const PLAYER_SPEED = 8.5;
 /**
  * Aceleracao e atrito, em unidades por segundo ao quadrado.
  *
- * O atrito e maior que a aceleracao de proposito: o player responde rapido ao
- * soltar o joystick, mas ainda desliza o suficiente para o movimento nao
- * parecer mecanico. Igualar os dois deixa o controle "escorregadio".
+ * Altos de proposito. A partir da velocidade maxima, o player atinge o topo em
+ * ~0.06s e para em ~0.09s -- cerca de quatro e seis quadros a 60fps. E o que
+ * elimina a sensacao de atraso: o corpo comeca a andar no quadro seguinte ao
+ * toque. Valores baixos aqui parecem "peso", mas no celular leem como lag.
+ *
+ * Ainda ha rampa em vez de troca instantanea de velocidade, porque o corte
+ * seco produz tremor visivel ao trocar de direcao.
  */
-export const PLAYER_ACCEL = 55;
-export const PLAYER_FRICTION = 70;
+export const PLAYER_ACCEL = 140;
+export const PLAYER_FRICTION = 95;
 
-/** Velocidade de giro do corpo, em taxa de suavizacao por segundo. */
-export const PLAYER_TURN_LAMBDA = 16;
+/**
+ * Velocidade de giro do corpo, em taxa de suavizacao por segundo.
+ * E puramente visual: a direcao do movimento muda na hora.
+ */
+export const PLAYER_TURN_LAMBDA = 20;
 
 /** Raio do mundo jogavel. O player e mantido dentro dele. */
 export const WORLD_RADIUS = 38;
@@ -34,8 +41,21 @@ export const WORLD_RADIUS = 38;
 /**
  * Fracao do raio ignorada no centro. Sem isso, o polegar apenas encostado
  * produz deriva constante.
+ *
+ * Pequena porque o joystick e flutuante: ele nasce exatamente sob o dedo,
+ * entao o risco de deriva involuntaria e menor que num joystick ancorado.
  */
-export const JOYSTICK_DEADZONE = 0.16;
+export const JOYSTICK_DEADZONE = 0.12;
+
+/**
+ * Fracao da inclinacao util que ja produz velocidade maxima.
+ *
+ * Num joystick virtual o polegar nao sente onde esta. Exigir que ele encoste
+ * na borda para correr a toda torna o controle impreciso e cansativo. Com 0.65,
+ * a faixa de 0 a 65% e analogica de verdade -- serve para posicionar com
+ * cuidado -- e o resto do curso ja e velocidade cheia.
+ */
+export const JOYSTICK_FULL_TILT = 0.65;
 
 /** Raio do joystick em pixels de CSS. */
 export const JOYSTICK_RADIUS = 58;
