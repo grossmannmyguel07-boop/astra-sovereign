@@ -25,19 +25,42 @@ Dono: **Rendering Agent** (`src/render/`, exceto `world/`).
 
 ## Camera
 
-Terceira pessoa, altura e distancia fixas, seguindo o player no plano.
+Orbital em coordenadas esfericas ao redor do player. Ver `docs/decisions/0006`.
+
+| Eixo | Comportamento |
+|---|---|
+| Yaw | Livre, arrastando na metade direita da tela |
+| Pitch | Limitado entre 8 e 66 graus acima do horizonte |
+| Distancia | Fixa. Zoom fica para depois do MVP |
+
+Com yaw 0 a camera fica em +Z olhando para -Z: o mesmo enquadramento que
+existia antes da rotacao entrar.
+
+**Alvo e valor atual sao separados.** O arrasto altera o alvo; o valor que
+aparece persegue o alvo. E o que permite responder na hora sem repassar o
+serrilhado dos eventos de ponteiro, que chegam em blocos irregulares.
 
 **Suavizacao exponencial** (`damp` em `core/math.ts`), nao `lerp` por frame. Um
 `lerp(atual, alvo, 0.1)` parece suave mas muda de velocidade junto com o
 framerate: a 30fps fica visivelmente mais lento que a 60fps. A forma
 exponencial resolve — `lambda` e taxa por segundo.
 
-**Look-ahead:** o alvo se adianta na direcao do movimento, proporcional a
-velocidade atual. Da visao do que vem pela frente sem exigir girar nada, e ao
-parar o alvo volta sozinho para cima do player.
+A rotacao usa lambda bem maior que o follow (22 contra 7): ela precisa parecer
+presa ao dedo. Alcanca o alvo em menos de um decimo de segundo.
 
-`snapTo()` posiciona sem suavizacao. Usado ao iniciar e, no futuro, ao trocar
-de mundo — sem ele a camera faria uma varredura pelo mundo inteiro.
+**O yaw acumula sem normalizar.** Como alvo e atual crescem juntos, a
+suavizacao nunca precisa decidir para que lado dar a volta.
+
+**Look-ahead:** o alvo se adianta na direcao do movimento, proporcional a
+velocidade atual. Ao parar, volta sozinho para cima do player.
+
+`snapTo()` posiciona sem suavizacao, incluindo os angulos. Usado ao iniciar e,
+no futuro, ao trocar de mundo — sem ele a camera faria uma varredura pelo mundo
+inteiro.
+
+**`worldYaw` e lido de fora.** O integrador o usa para converter a intencao de
+tela do joystick em direcao de mundo. Sem isso o movimento nao acompanharia
+para onde o jogador esta olhando.
 
 ## Interpolacao
 

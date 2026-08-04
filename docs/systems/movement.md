@@ -11,12 +11,20 @@ joystick, nao conhece a camera, nao importa `three`.
 ## Entrada
 
 ```ts
-interface MoveIntent { x: number; z: number }  // coordenadas de tela, -1..1
+interface MoveIntent {
+  x: number;    // coordenadas de tela, -1..1
+  z: number;
+  yaw: number;  // angulo que converte tela em mundo
+}
 ```
 
-Passado como argumento em `update(dt, state, intent)`. Deliberadamente um dado
-simples e nao uma dependencia: trocar a fonte de entrada (joystick, teclado,
+Passado como argumento em `update(dt, state, intent)`. Deliberadamente dados
+simples e nao dependencias: trocar a fonte de entrada (joystick, teclado,
 gamepad, um bot de teste) nao encosta na simulacao.
+
+O `yaw` vem da camera, mas o sistema trata como um numero — nao sabe o que e
+uma camera, so que a tela do jogador esta girada em relacao ao mundo. E o que
+mantem a regra de `src/game/` nunca importar `three`.
 
 O barramento de eventos chega no M4; ate la o `main.ts` faz a ligacao.
 
@@ -39,6 +47,11 @@ sem a discretizacao o personagem fica corrigindo o rumo sozinho o tempo todo.
 
 O **modulo** do vetor continua analogico e controla a velocidade — direcao
 discreta, intensidade continua.
+
+A discretizacao acontece **antes** de girar para o mundo, ou seja, os 8 setores
+sao relativos a tela. Se fosse depois, o mesmo empurrao do polegar cairia em
+setores diferentes conforme a camera girasse. Andar "para frente" e sempre para
+onde se olha.
 
 ### Zona morta
 

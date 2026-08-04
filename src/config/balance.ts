@@ -42,17 +42,46 @@ export const JOYSTICK_RADIUS = 58;
 
 // --- Camera -----------------------------------------------------------------
 
-export const CAMERA_HEIGHT = 10.5;
-export const CAMERA_DISTANCE = 14;
+/** Distancia do player ate a camera, em linha reta. Zoom fixo por enquanto. */
+export const CAMERA_DISTANCE = 17.5;
 
 /** Altura do ponto observado, na altura do peito do player. */
 export const CAMERA_LOOK_HEIGHT = 1.4;
+
+/**
+ * Inclinacao vertical, em radianos acima do horizonte.
+ *
+ * Os limites existem para o jogador nunca conseguir olhar completamente de
+ * lado (a camera entraria no chao) nem completamente de cima (o mundo vira um
+ * mapa e a nocao de profundidade some).
+ */
+export const CAMERA_PITCH_DEFAULT = 0.64;
+export const CAMERA_PITCH_MIN = 0.14;
+export const CAMERA_PITCH_MAX = 1.15;
+
+/**
+ * Sensibilidade do arrasto, em radianos por pixel de CSS.
+ *
+ * A vertical e mais lenta que a horizontal de proposito: a faixa util de
+ * inclinacao e pequena, e igualar as duas faz a camera bater nos limites com
+ * qualquer arrasto diagonal.
+ */
+export const CAMERA_YAW_SENSITIVITY = 0.0062;
+export const CAMERA_PITCH_SENSITIVITY = 0.0042;
 
 /**
  * Taxa de suavizacao do follow, por segundo. Mais alto gruda mais na
  * movimentacao; mais baixo fica cinematografico e desconfortavel de controlar.
  */
 export const CAMERA_LAMBDA = 7;
+
+/**
+ * Taxa de suavizacao da rotacao. Bem mais alta que a do follow: a rotacao
+ * precisa parecer presa ao dedo. Serve so para tirar o serrilhado dos eventos
+ * de ponteiro, que chegam em blocos irregulares -- alcanca o alvo em menos de
+ * um decimo de segundo, entao nao se percebe atraso.
+ */
+export const CAMERA_ROTATE_LAMBDA = 22;
 
 /**
  * Quanto a camera se adianta na direcao do movimento, em segundos de
