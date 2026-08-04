@@ -32,21 +32,50 @@ partir do genero e da estrutura visivel na HUD, e sinaliza cada um como
 
 Feitas sobre quadros extraidos do video, nao no olho.
 
-| Medida | Referencia | Astra Sovereign hoje |
-|---|---|---|
-| Linha do horizonte | 18–23% do topo | ~30% |
-| Inclinacao da camera | ~20–25 graus abaixo da horizontal | **37 graus** |
-| Posicao do personagem na tela | 50% largura, 52% altura, **estavel** | centro, mas desloca ao andar |
-| Altura do personagem na tela | ~12% da altura | ~10% |
-| Aspecto da tela | 2.16 (paisagem) | 2.16 (paisagem) |
+| Medida | Referencia | Antes do ajuste | Depois |
+|---|---|---|---|
+| FOV vertical | 70 graus | 48 graus | 48 graus |
+| Inclinacao da camera | 22.8 graus | 36.7 graus | **14.9 graus** |
+| Linha do horizonte | 20% do topo | **fora da tela, acima** | ~20% |
+| Altura do personagem na tela | ~12% | ~10% | ~12.4% |
+| Posicao do personagem | estavel no centro | desloca ao correr | quase estavel |
+| Aspecto da tela | 2.16 (paisagem) | 2.16 | 2.16 |
 
-O calculo da inclinacao assume FOV vertical de 70 graus, padrao do Roblox. Ha
-margem de erro, mas a direcao e clara: **nossa camera esta mais de cima e mais
-longe que a referencia.**
+## Correcao: a primeira versao desta tabela estava errada
 
-A posicao estavel do personagem indica que a referencia **nao usa look-ahead**.
-O nosso desloca o alvo na direcao do movimento, o que muda o enquadramento
-durante a corrida.
+A comparacao original dizia "horizonte a 18–23% na referencia contra ~30% no
+nosso". Eram coisas diferentes: na referencia foi medida a fronteira real entre
+ceu e chao; no nosso foi observada a transicao escura no alto da tela, que
+**nao e o horizonte** — e o limite da nevoa sobre um plano finito. O horizonte
+verdadeiro do nosso jogo estava fora da tela.
+
+A posicao do horizonte depende de **duas** variaveis, nao so da inclinacao:
+
+```
+horizonte = 0.5 - tan(pitch) / (2 * tan(fov_vertical / 2))
+```
+
+Por isso o angulo da referencia nao podia ser copiado: com FOV vertical de 70
+graus, 22.8 graus de inclinacao dao 20% de horizonte; com os nossos 48 graus, o
+mesmo angulo daria ~5%, quase colado no topo. Para 20% aqui, a inclinacao
+precisa ser ~15 graus.
+
+A recomendacao original de **aproximar a camera** tambem caiu junto: baixar a
+inclinacao reduz o escorco vertical do personagem, que passou a ocupar 12.4% da
+altura sem mexer na distancia.
+
+A posicao estavel do personagem na referencia indica que ela **nao usa
+look-ahead**. O nosso foi reduzido de 0.28 para 0.10 segundo de velocidade.
+
+## Diferenca que permanece: campo de visao
+
+A referencia usa FOV vertical de 70 graus, que no aspecto 2.16 resulta em ~113
+graus na horizontal. O nosso alvo horizontal e 75 graus. Ou seja, **a
+referencia mostra bem mais mundo ao redor do jogador do que nos**.
+
+Alargar o FOV deixaria a exploracao mais aberta, ao custo de distorcao nas
+bordas e de objetos menores na tela. Nao foi alterado — fica como decisao em
+aberto para o M3, quando existir mundo de verdade para julgar.
 
 ---
 
@@ -120,16 +149,16 @@ Ordenados por quanto contribuem para a sensacao, nao por dificuldade.
 8. **Feedback imediato para cada acao.** Todo evento (drop, level, morte de
    mob) precisa de um sinal visual, ainda que pequeno.
 
-## Ajustes imediatos ao M1 sugeridos pela medicao
+## Ajustes ao M1 — aplicados
 
-Nao implementados — dependem da sua aprovacao.
-
-- **Baixar a inclinacao padrao da camera** de 37 para ~24 graus. Mostra mais
-  horizonte e da sensacao de mundo em vez de mapa.
-- **Aproximar a camera** para o personagem ocupar ~12% da altura da tela em
-  vez de ~10%.
-- **Reduzir o look-ahead.** A referencia mantem o personagem fixo no centro; o
-  nosso desloca visivelmente ao correr.
+- **Inclinacao padrao de 36.7 para 14.9 graus.** Traz o horizonte para ~20% do
+  topo, como na referencia. O jogo deixa de ler como mapa visto de cima.
+- **Distancia mantida em 17.5.** Baixar a inclinacao ja levou o personagem a
+  12.4% da altura da tela, o alvo medido.
+- **Look-ahead de 0.28 para 0.10 segundo.** Mantem o personagem praticamente
+  fixo no centro, com uma pista do que vem pela frente.
+- **Plano do chao de 120 para 324 unidades.** Com a camera baixa a vista alcanca
+  muito mais longe, e a borda do plano apareceria antes da nevoa fechar.
 
 ---
 
@@ -241,7 +270,7 @@ Alinhado ao `03-roadmap.md`.
 
 | Milestone | O que entra desta analise |
 |---|---|
-| **M1** (concluido, revisao) | Inclinacao da camera para ~24 graus, camera mais proxima, look-ahead reduzido, personagem estavel no centro |
+| **M1** (concluido) | Inclinacao da camera para ~15 graus, look-ahead reduzido, personagem estavel no centro — **aplicado** |
 | **M2** Save | Formatacao de numeros grandes com sufixo, decidida antes de existir numero para salvar |
 | **M3** Mundo 1 | Marcos visuais que dao rumo; densidade de pontos de interesse que sustente exploracao |
 | **M4** Mobs + Combate | Auto attack por proximidade; numeros de dano com pooling; drop imediato e visivel; **primeira fonte da recompensa continua** |

@@ -20,9 +20,15 @@ export class Ground {
     this.addBoundary();
   }
 
+  /**
+   * O plano precisa terminar depois de onde a nevoa ja fechou, senao a borda
+   * aparece. Com a camera baixa (~15 graus) a vista alcanca muito mais longe
+   * que antes, entao 324 unidades: a nevoa fecha em 78 e o jogador nunca chega
+   * a menos de 78 da borda. Continua sendo um plano de dois triangulos.
+   */
   private addFloor(): void {
     const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(120, 120),
+      new THREE.PlaneGeometry(324, 324),
       new THREE.MeshLambertMaterial({ color: 0x141a33 })
     );
     floor.rotation.x = -Math.PI / 2;
@@ -36,7 +42,10 @@ export class Ground {
     // era fino e escuro, e na pratica so as linhas perpendiculares a camera
     // apareciam -- o chao lia como listras, nao como grade, e andar de lado
     // quase nao dava retorno visual.
-    const grid = new THREE.GridHelper(120, 40, 0x5f74c8, 0x33407a);
+    // 108 divisoes em 324 unidades mantem a celula em 3 unidades, do mesmo
+    // tamanho de antes. O grid distante vira serrilhado, mas a nevoa fecha em
+    // 78 unidades e o esconde antes disso.
+    const grid = new THREE.GridHelper(324, 108, 0x5f74c8, 0x33407a);
     grid.position.y = 0.01;
     this.group.add(grid);
   }
@@ -51,7 +60,10 @@ export class Ground {
    * Um unico InstancedMesh: 56 marcas, uma draw call.
    */
   private addScatter(): void {
-    const COUNT = 56;
+    // Mais marcas e alcance maior que na primeira versao: com a camera baixa a
+    // vista chega mais longe, e a area entre o limite do mundo e a nevoa ficava
+    // vazia. Continua uma unica draw call.
+    const COUNT = 120;
     const mesh = new THREE.InstancedMesh(
       new THREE.PlaneGeometry(2.4, 2.4),
       new THREE.MeshBasicMaterial({
@@ -73,7 +85,7 @@ export class Ground {
       // Espalhamento deterministico: a mesma cena em toda sessao, o que torna
       // as screenshots de verificacao comparaveis entre milestones.
       const angle = i * 2.39996; // angulo aureo, distribui sem aglomerar
-      const radius = 7 + ((i * 5.13) % 29);
+      const radius = 6 + ((i * 5.13) % 62);
 
       position.set(Math.cos(angle) * radius, 0.02, Math.sin(angle) * radius);
       euler.set(-Math.PI / 2, 0, (i * 1.7) % Math.PI);

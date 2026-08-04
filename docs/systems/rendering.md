@@ -30,8 +30,25 @@ Orbital em coordenadas esfericas ao redor do player. Ver `docs/decisions/0006`.
 | Eixo | Comportamento |
 |---|---|
 | Yaw | Livre, arrastando na metade direita da tela |
-| Pitch | Limitado entre 8 e 66 graus acima do horizonte |
+| Pitch | Padrao ~15 graus, limitado entre 6 e 66 |
 | Distancia | Fixa. Zoom fica para depois do MVP |
+
+### Por que o pitch padrao e 15 graus
+
+A posicao da linha do horizonte na tela depende da inclinacao **e** do FOV
+vertical:
+
+```
+horizonte = 0.5 - tan(pitch) / (2 * tan(fov_vertical / 2))
+```
+
+O alvo e ~20% do topo, medido na referencia do genero. Com o nosso FOV vertical
+de 48 graus, isso da ~15 graus de inclinacao. Copiar o angulo da referencia
+(22.8 graus) nao funcionaria: la o FOV vertical e 70, e aqui o mesmo angulo
+colocaria o horizonte a ~5% do topo.
+
+Com o padrao anterior de 36.7 graus o horizonte ficava **fora da tela**, e o
+que parecia ceu era apenas a nevoa.
 
 Com yaw 0 a camera fica em +Z olhando para -Z: o mesmo enquadramento que
 existia antes da rotacao entrar.
