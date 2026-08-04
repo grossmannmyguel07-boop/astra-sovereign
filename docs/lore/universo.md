@@ -15,7 +15,7 @@ mecanicas ja decididas:
 | Por que ha criaturas hostis em todo lugar? | Justifica a densidade de mobs |
 | O que o jogador quer, no fim? | Da direcao ao MVP e ao pos-MVP |
 
-Um bom premissa responde as seis sem esforco. Uma premissa ruim briga com elas
+Uma boa premissa responde as seis sem esforco. Uma premissa ruim briga com elas
 e obriga a explicacoes que ninguem le.
 
 ## O que ja esta fixo
@@ -32,11 +32,15 @@ de natureza e dia.
 `[DEFINIDO]` **Estrutura: mundos numerados ligados por portais**, desbloqueados
 por progressao.
 
-## Premissa — tres caminhos
+## Premissa — adiada de proposito
 
-`[PROPOSTA]` Nao escrevo a historia sozinho. Abaixo estao tres formatos
-possiveis, avaliados pelo quanto sustentam o loop. Escolher um fecha metade das
-perguntas acima de uma vez.
+`[DEFINIDO]` **Nenhuma premissa sera escolhida ate a experiencia existir.**
+Ver `decisions/0010`. A prioridade e criar algo divertido; a historia nasce
+depois, para explicar o que ja se provou bom.
+
+As tres opcoes abaixo ficam registradas como material para quando a hora chegar
+— provavelmente perto do M12, com um segundo mundo jogavel e o loop fechado.
+**Nao sao bloqueantes para nenhum milestone.**
 
 ### A. O imperio estilhacado
 
@@ -98,13 +102,16 @@ jogado em sessoes curtas.
 
 ## Pendencias
 
-`[PENDENTE]` **Qual premissa?** A, B, C, uma combinacao, ou outra sua.
+**Adiadas por decisao, nao por falta de informacao.** Ver `decisions/0010`.
 
-`[PENDENTE]` **Qual o tom?** Sombrio e solitario, epico e grandioso, ou leve e
-aventuresco. Isso muda paleta, som e escrita de tudo o mais.
+`[PENDENTE — pos-experiencia]` **Qual premissa?** A, B, C, uma combinacao, ou
+outra.
 
-`[PENDENTE]` **O que sao "Astras"?** O termo vem do nome do jogo e pede
-definicao: sao as Units, uma moeda, uma unidade de poder, ou os proprios mundos.
+`[PENDENTE — pos-experiencia]` **Qual o tom?** Sombrio e solitario, epico e
+grandioso, ou leve e aventuresco. Isso muda paleta, som e escrita de tudo o mais.
 
-`[PENDENTE]` **Existe antagonista?** Um oponente com nome muda a estrutura das
-quests e dos bosses.
+`[PENDENTE — pos-experiencia]` **O que sao "Astras"?** O termo vem do nome do
+jogo e pede definicao: sao as Units, uma moeda, uma unidade de poder, ou os proprios mundos.
+
+`[PENDENTE — pos-experiencia]` **Existe antagonista?** Um oponente com nome muda
+a estrutura das quests e dos bosses.

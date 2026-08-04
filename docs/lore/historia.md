@@ -1,8 +1,9 @@
 # Historia
 
-`[PENDENTE]` **Este documento so pode ser escrito depois que a premissa de
-`universo.md` for escolhida.** Escrever antes seria inventar sobre uma base que
-ainda pode mudar.
+`[DEFINIDO]` **Adiado por decisao.** Ver `decisions/0010`: a ficcao nasce da
+experiencia. Este documento so sera escrito depois que a premissa de
+`universo.md` for escolhida, o que acontece depois do jogo existir. Escrever
+antes seria inventar sobre uma base que ainda pode mudar.
 
 ## O que precisa existir aqui, e quando
 
@@ -11,8 +12,8 @@ sistemas que a comunicam vao existindo.
 
 | Elemento | Necessario a partir de | Por que |
 |---|---|---|
-| Premissa em uma frase | **agora** | Define tom, paleta e nomes de tudo |
-| Situacao inicial do jogador | M2 | O Mundo 1 precisa comunicar onde voce esta |
+| Premissa em uma frase | pos-experiencia | Adiada pela `0010` |
+| Situacao inicial do jogador | pos-experiencia | O Mundo 1 comunica por espaco, nao por texto |
 | Motivo do conflito | M3 | Justifica por que ha hostis |
 | Origem das Units | M8 | Da peso a invocacao |
 | Motivo de atravessar mundos | M12 | Justifica o portal |
@@ -44,7 +45,7 @@ Perguntas em aberto o que fica sem resposta de proposito
 
 ## Pendencias
 
-`[PENDENTE]` Premissa escolhida em `universo.md`.
+`[PENDENTE — pos-experiencia]` Premissa escolhida em `universo.md`.
 
 `[PENDENTE]` **O jogador sabe quem e no inicio?** Comecar sem memoria e barato
 de justificar e comum demais; comecar sabendo exige explicar mais cedo.
