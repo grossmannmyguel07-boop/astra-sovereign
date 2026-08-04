@@ -63,7 +63,12 @@ export class DebugOverlay {
     document.body.appendChild(this.root);
   }
 
-  update(frameDt: number, stats: FrameStats, steps: number): void {
+  /**
+   * @param extra Linhas adicionais de quem chamou. O overlay nao conhece
+   *              nenhum sistema de jogo -- quem quiser mostrar algo compoe o
+   *              texto e passa aqui.
+   */
+  update(frameDt: number, stats: FrameStats, steps: number, extra?: string): void {
     this.frames++;
     this.sinceUpdate += frameDt;
     this.worstFrame = Math.max(this.worstFrame, frameDt);
@@ -75,7 +80,7 @@ export class DebugOverlay {
     const worstMs = this.worstFrame * 1000;
 
     if (!this.collapsed) {
-      this.body.textContent = [
+      const lines = [
         `fps    ${fps.toFixed(0)}  (pior ${(1 / this.worstFrame).toFixed(0)})`,
         `frame  ${avgMs.toFixed(1)}ms  pico ${worstMs.toFixed(1)}ms`,
         `sim    ${steps} tick/frame`,
@@ -83,7 +88,10 @@ export class DebugOverlay {
         `dpr    ${window.devicePixelRatio} -> ${Math.min(window.devicePixelRatio, 2)}`,
         `res    ${window.innerWidth}x${window.innerHeight}`,
         `heap   ${this.heapText()}`,
-      ].join('\n');
+      ];
+      if (extra) lines.push(extra);
+
+      this.body.textContent = lines.join('\n');
       this.body.style.whiteSpace = 'pre';
     }
 
