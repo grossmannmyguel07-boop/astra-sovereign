@@ -4,7 +4,10 @@ import type { GameState } from '@/game/state';
 import type { WorldSystem } from '@/game/systems/world';
 import { CameraRig } from '@/render/camera';
 import { PlayerView } from '@/render/views/player-view';
+import { MobView } from '@/render/views/mob-view';
 import { WorldView } from '@/render/world/world-view';
+import { buildHumanoidGeometry } from '@/render/characters/humanoid';
+import { buildClips } from '@/render/characters/clips';
 import { damp } from '@/core/math';
 
 /**
@@ -25,6 +28,9 @@ export class Scene {
   readonly world: WorldView;
 
   private playerView: PlayerView;
+  private mobView: MobView;
+  /** Uma geometria para todos os personagens do jogo, player incluso. */
+  private characterGeometry: THREE.BufferGeometry;
   private hemisphere: THREE.HemisphereLight;
   private key: THREE.DirectionalLight;
   private fog: THREE.Fog;
@@ -36,7 +42,7 @@ export class Scene {
   private fogNear = 30;
   private fogFar = 130;
 
-  constructor(worldSystem: WorldSystem) {
+  constructor(worldSystem: WorldSystem, state: GameState) {
     this.three = new THREE.Scene();
     this.three.background = new THREE.Color(0x05060f);
 
@@ -59,8 +65,16 @@ export class Scene {
     this.world = new WorldView(worldSystem);
     this.three.add(this.world.group);
 
-    this.playerView = new PlayerView();
+    // Uma geometria e um conjunto de clipes, compartilhados por todo
+    // personagem em cena. O que e proprio de cada um e so o esqueleto.
+    this.characterGeometry = buildHumanoidGeometry();
+    const clips = buildClips();
+
+    this.playerView = new PlayerView(this.characterGeometry, clips);
     this.three.add(this.playerView.object);
+
+    this.mobView = new MobView(state.mobs, this.characterGeometry, clips);
+    this.three.add(this.mobView.group);
 
     this.rig = new CameraRig();
   }
@@ -71,8 +85,18 @@ export class Scene {
 
   /** Chamado uma vez por frame, na renderizacao. */
   sync(state: GameState, worldSystem: WorldSystem, alpha: number, frameDt: number): void {
-    this.playerView.sync(state.player, alpha);
+    this.playerView.sync(state.player, alpha, frameDt);
     this.rig.sync(state.player, alpha, frameDt);
+    // Depois do rig: o corte usa a posicao da camera **deste** frame, e o
+    // alcance da nevoa da regiao atual, que muda conforme se anda.
+    this.mobView.sync(
+      state.mobs,
+      alpha,
+      frameDt,
+      this.camera.position.x,
+      this.camera.position.z,
+      this.fog.far
+    );
     this.world.update(frameDt);
     this.applyAmbience(worldSystem, frameDt);
   }
@@ -134,5 +158,7 @@ export class Scene {
   dispose(): void {
     this.world.dispose();
     this.playerView.dispose();
+    this.mobView.dispose();
+    this.characterGeometry.dispose();
   }
 }

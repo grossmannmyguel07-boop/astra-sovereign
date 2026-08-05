@@ -1,7 +1,8 @@
 import { GameLoop } from '@/core/loop';
-import { createInitialState } from '@/game/state';
+import { createInitialState, type GameState } from '@/game/state';
 import { playerSpeed } from '@/game/entities/player';
 import { MovementSystem, type MoveIntent } from '@/game/systems/movement';
+import { MobSystem } from '@/game/systems/mobs';
 import { WorldSystem } from '@/game/systems/world';
 import { VirtualJoystick } from '@/input/joystick';
 import { CameraDrag } from '@/input/camera-drag';
@@ -16,6 +17,13 @@ import { REGIONS } from '@/data/world-01';
 // Primeira linha executada no projeto: a captura de erros precisa existir
 // antes de qualquer coisa que possa falhar.
 installDebugConsole();
+
+/** Quantos mobs perceberam o jogador. Existe para o QA enxergar a deteccao. */
+function alertCount(state: GameState): number {
+  let count = 0;
+  for (const mob of state.mobs) if (mob.state === 'alert') count++;
+  return count;
+}
 
 function boot(): void {
   const container = document.getElementById('app');
@@ -34,7 +42,12 @@ function boot(): void {
   state.player.prevY = state.player.y;
   world.updateRegionWeights(state.player.x, state.player.z);
 
-  const scene = new Scene(world);
+  // Os mobs nascem antes da cena porque a cena constroi uma malha por mob. Eles
+  // sao estacionarios: esta e a unica vez que o sistema toca no terreno.
+  const mobs = new MobSystem();
+  mobs.spawn(state, world);
+
+  const scene = new Scene(world, state);
   const renderer = new Renderer(container, scene.camera);
   const joystick = new VirtualJoystick();
   const cameraDrag = new CameraDrag();
@@ -58,6 +71,7 @@ function boot(): void {
       intent.yaw = scene.rig.worldYaw;
 
       movement.update(dt, state, intent, world);
+      mobs.update(dt, state);
       world.updateRegionWeights(state.player.x, state.player.z);
     },
     render(alpha, frameDt) {
@@ -79,7 +93,8 @@ function boot(): void {
         `pos    ${p.x.toFixed(1)}, ${p.z.toFixed(1)}  alt ${p.y.toFixed(1)}\n` +
           `vel    ${playerSpeed(p).toFixed(1)}\n` +
           `regiao ${world.dominantRegion().id}\n` +
-          `cam    yaw ${yawDegrees.toFixed(0)}`
+          `cam    yaw ${yawDegrees.toFixed(0)}\n` +
+          `mobs   ${state.mobs.length} (${alertCount(state)} alerta)`
       );
     },
   });
@@ -95,7 +110,7 @@ function boot(): void {
   if (!gate.blocked) loop.start();
 
   document.getElementById('boot')?.classList.add('hidden');
-  console.log('[boot] Astra Sovereign iniciado. Milestone 2.');
+  console.log('[boot] Astra Sovereign iniciado. Milestone 3.');
 }
 
 try {

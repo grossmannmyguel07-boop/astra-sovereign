@@ -134,3 +134,43 @@ export const CAMERA_ROTATE_LAMBDA = 22;
  * pista do que vem pela frente -- sem tirar o personagem do centro.
  */
 export const CAMERA_LOOKAHEAD = 0.1;
+
+// ---------------------------------------------------------------------------
+// Mobs (M3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Distancia em que o mob percebe o jogador, em unidades.
+ *
+ * Calibrado contra a camera, nao contra o mundo: ela fica ~17 atras do player,
+ * e a nevoa mais curta do mundo (Floresta) fecha em 16. Um raio de 11 garante
+ * que o mob **ja esteja na tela** quando reage -- reagir fora de vista e um
+ * evento que ninguem percebe acontecer.
+ */
+export const MOB_DETECT_RADIUS = 11;
+
+/**
+ * Histerese da deteccao, em unidades.
+ *
+ * O mob so volta ao repouso depois de o jogador se afastar mais do que o raio
+ * de entrada. Sem isso, andar exatamente na borda faz o estado piscar entre
+ * alerta e repouso varias vezes por segundo.
+ */
+export const MOB_RELEASE_MARGIN = 2.5;
+
+/**
+ * Taxa de suavizacao do giro do mob, por segundo.
+ *
+ * Bem menor que a do player (20). O player responde ao dedo e precisa parecer
+ * imediato; o mob esta reagindo a algo que percebeu, e girar instantaneamente
+ * pareceria uma torre, nao uma criatura.
+ */
+export const MOB_TURN_LAMBDA = 6;
+
+/**
+ * Distancia minima entre mobs no nascimento, em unidades.
+ *
+ * Eles nunca se movem, entao nao ha separacao em runtime para desfazer
+ * sobreposicao: se dois nascerem no mesmo lugar, ficam ali para sempre.
+ */
+export const MOB_MIN_SPACING = 3.4;

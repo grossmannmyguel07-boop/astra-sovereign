@@ -25,8 +25,8 @@ paralelo e execucao direta. Integracao e QA nunca sao delegados.
 | 0 | Fundacao | Vite + TS + Three.js, loop de passo fixo, debug overlay, console in-game, publicacao, orientacao paisagem, equipe de agentes | Tech Lead | **concluido** |
 | 1 | Player | Joystick flutuante, movimento analogico 360 relativo a camera, camera orbital com pitch limitado, enquadramento calibrado | UI, Render, Combat | **concluido** |
 | 2 | Mundo 1 | Terreno, colisao, iluminacao, organizacao espacial, atmosfera, estrutura do mapa, marco visual do portal | World, Render | **concluido** |
-| 3 | Mobs | **Benchmark de personagens animados no aparelho**, sistema de animacao, spawn, respawn, IA de perseguicao | Combat, Render, Data | proximo |
-| 4 | Combate | Auto attack, dano, morte, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data |
+| 3 | Mobs | Benchmark no aparelho, personagem animado, mobs estacionarios com deteccao e alerta | Combat, Render, Data | **concluido** |
+| 4 | Combate | Auto attack, dano, morte, **respawn**, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data | proximo |
 | 5 | Save | Persistencia local, versionamento, migrations, exportar/importar | Save |
 | 6 | Progressao | XP, level, stats, duas trilhas simultaneas. Chega o painel de tuning | Progression, Data |
 | 7 | HUD | Vida, XP, nivel, moeda, objetivo visivel. Resolver a disputa entre botoes e area de rotacao | UI |

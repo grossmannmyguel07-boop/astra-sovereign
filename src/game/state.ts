@@ -11,13 +11,24 @@
  */
 
 import { createPlayer, type PlayerState } from '@/game/entities/player';
+import type { Mob } from '@/game/entities/mob';
 
 export interface GameState {
   player: PlayerState;
+  /**
+   * Mobs comuns. Preenchido uma vez por `MobSystem.spawn`, no boot.
+   *
+   * Sao estacionarios: depois do spawn so o campo `facing` muda. Quando o save
+   * chegar no M5, posicao e tipo saem da semente e nao precisam ser
+   * serializados -- so o que o jogador alterou (vida, morte, respawn) vai
+   * precisar.
+   */
+  mobs: Mob[];
 }
 
 export function createInitialState(): GameState {
   return {
     player: createPlayer(),
+    mobs: [],
   };
 }

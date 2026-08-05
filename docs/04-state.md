@@ -3,8 +3,7 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 2 concluido e publicado. Benchmark do M3
-medido no aparelho: a tecnica de animacao esta congelada em `decisions/0011`.
+**Ultima atualizacao:** Milestone 3 concluido e publicado.
 
 ## O que existe e funciona
 
@@ -31,10 +30,15 @@ medido no aparelho: a tecnica de animacao esta congelada em `decisions/0011`.
 - **Sistema de mundo** (`src/game/systems/world.ts`): altura do terreno,
   bloqueadores, limite do mundo e pesos de regiao. Tambem **nao importa
   `three`**. Ver `systems/world.md`.
+- **Sistema de mobs** (`src/game/systems/mobs.ts`): 40 mobs **estacionarios**
+  em tres regioes, com deteccao por distancia e histerese, e giro para encarar.
+  Nao perseguem e nao voltam ao spawn -- nunca saem dele. Ver `systems/mobs.md`.
 
 **Conteudo**
 - `src/data/world-01.ts`: as seis regioes do Mundo 1, os cinco corredores e a
   semente dos bloqueadores. Primeiro arquivo de `src/data/`.
+- `src/data/mobs.ts`: tres tipos de mob e as regras de quantos nascem em cada
+  regiao. A Inicial fica sem mobs de proposito.
 
 **Entrada**
 - Joystick virtual flutuante: nasce onde o dedo encosta na metade esquerda,
@@ -57,6 +61,11 @@ medido no aparelho: a tecnica de animacao esta congelada em `decisions/0011`.
   em deriva na regiao Inicial.
 - Iluminacao e nevoa **interpoladas por regiao** com apenas duas luzes na cena
   inteira. Zero draw calls por regiao — so atualizacao de uniforme.
+- **Personagem animado** (`src/render/characters/`): rig procedural obedecendo
+  a `decisions/0008`, com clipes idle, walk, run e alert. Uma geometria
+  compartilhada por todos; so o esqueleto e proprio.
+- O player **deixou de ser capsula**. O clipe sai da velocidade que a simulacao
+  ja calculou — `src/game/` nao sabe que animacao existe.
 
 **Orientacao**
 - Exclusivamente paisagem. Em retrato o portao cobre a tela e pausa a
@@ -81,6 +90,38 @@ medido no aparelho: a tecnica de animacao esta congelada em `decisions/0011`.
 **Organizacao**
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
+
+## Verificado no M3
+
+Playwright emulando iPhone em paisagem (844x390, DPR 3, toque), sobre a build de
+producao.
+
+| Caso | Medido |
+|---|---|
+| Mobs gerados | **40**, nas tres regioes previstas |
+| Folga ao bloqueador mais proximo | **0.70** — o raio de resolucao, exato |
+| Mobs dentro de bloqueador | **0** |
+| Mobs fora da propria regiao | **0** |
+| Deteccao ao andar em Campos | 0 -> **3** alerta -> 0 ao se afastar |
+| Regiao Inicial e Arena | **0 alerta**, como projetado |
+| Draw calls por regiao | 8 (Arena) a **44** (Ruinas) |
+| Triangulos | 25 mil a **44 mil** |
+| Erros de console, pagina e requisicao | **nenhum** |
+
+Corrigido durante a verificacao:
+
+1. **81 draw calls nas Ruinas**, contra 26 no M2. Nevoa esconde mas nao
+   descarta: dezenas de mobs invisiveis continuavam sendo desenhados. Entrou
+   corte por distancia da nevoa da regiao, e as marcas de chao viraram um
+   `InstancedMesh` unico. Caiu para 44.
+2. **Player e mobs eram quase a mesma cor** (`0x4a63d8` contra `0x5a6bb8`),
+   indistinguiveis em movimento. O player passou a ser o unico personagem claro
+   em cena. No M4 eles atacam — nao dar para saber quem e quem seria falha de
+   jogabilidade, nao de arte.
+
+O framerate do ambiente de verificacao e renderizacao por software e nao diz
+nada sobre o iPhone. Os numeros que valem sao draw calls e triangulos, e a
+`decisions/0011` mediu 200 personagens animados a 59fps no aparelho.
 
 ## Verificado no M2
 
@@ -163,7 +204,7 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 
 ## O que NAO existe ainda
 
-Save, mobs, combate, XP, HUD, units, gacha, quests, boss. Tambem nao existem:
+Save, combate, XP, HUD, units, gacha, quests, boss. Tambem nao existem:
 barramento de eventos (M4), painel de tuning (M5), transicao entre mundos (M12).
 
 O portal existe como marco visual nos dois estados, mas **nao leva a lugar
@@ -172,13 +213,17 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 3 — Mobs**, desbloqueado.
+**Milestone 4 — Combate.** Auto attack, dano, morte, respawn, numeros de dano e
+drop. Chega o **barramento de eventos**, que a `decisions/0008` pressupoe para o
+gameplay pedir animacao sem conhecer animacao.
 
-O benchmark mediu **200 personagens esqueletados a 59fps sem derrubar um frame**,
-contra os 49 previstos. `SkinnedMesh` fica como esta, sem instanciamento e sem
-VAT — `decisions/0011`. Os mobs comecam sem nenhuma camada de otimizacao.
+O respawn migrou do M3 para ca: respawn exige morte, que exige dano.
 
-Areas: **Combat Agent** e **Rendering Agent**, com o Tech Lead integrando.
+A animacao de ataque tambem so entra aqui, junto do dano. Acao sem consequencia
+na tela e mentira que o QA aprende a ignorar.
+
+Areas: **Combat Agent**, **Rendering Agent** e **Data & Balance**, com o Tech
+Lead integrando.
 
 ## Direcao visual definida
 

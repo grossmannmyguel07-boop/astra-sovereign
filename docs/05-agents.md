@@ -14,10 +14,10 @@ Cada arquivo do projeto tem exatamente um dono.
 | Agente | Possui | Nunca toca |
 |---|---|---|
 | **Tech Lead** | `src/main.ts`, `src/core/`, `src/config/constants.ts`, `src/game/state.ts`, `src/game/events.ts`, raiz do repositorio, `.github/`, `.claude/`, `CLAUDE.md` | nada — integra tudo |
-| **Combat** | `src/game/systems/{movement,combat,spawn,boss}.ts`, `src/game/entities/` | `render/`, `ui/`, `data/` |
+| **Combat** | `src/game/systems/{movement,mobs,combat,boss}.ts`, `src/game/entities/` | `render/`, `ui/`, `data/` |
 | **Progression** | `src/game/systems/{progression,quests,units,gacha}.ts` | `render/`, `ui/`, `data/` |
 | **World** | `src/game/systems/{world,portal}.ts`, `src/render/world/` | sistemas de combate |
-| **Rendering** | `src/render/` exceto `world/` | `src/game/` inteiro |
+| **Rendering** | `src/render/` exceto `world/`, incluindo `characters/` e `views/` | `src/game/` inteiro |
 | **UI/UX** | `src/ui/`, `src/input/` | `src/game/`, `src/render/` |
 | **Data & Balance** | `src/data/`, `src/config/balance.ts` | qualquer logica |
 | **Save** | `src/save/` | logica de sistemas |
