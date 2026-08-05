@@ -21,8 +21,8 @@ Cada arquivo do projeto tem exatamente um dono.
 | **UI/UX** | `src/ui/`, `src/input/` | `src/game/`, `src/render/` |
 | **Data & Balance** | `src/data/`, `src/config/balance.ts` | qualquer logica |
 | **Save** | `src/save/` | logica de sistemas |
-| **Debug** | `src/debug/` | todo o resto |
-| **Docs** | `docs/README.md`, `docs/00-` a `docs/04-`, `docs/decisions/`, `docs/lore/`, `docs/worlds/`, `docs/references/` | `docs/systems/`, `docs/design/` |
+| **Debug** | `src/debug/`, `src/bench/`, `bench.html` | todo o resto |
+| **Docs** | `docs/README.md`, `docs/00-` a `docs/06-`, `docs/decisions/`, `docs/lore/`, `docs/worlds/`, `docs/references/` | `docs/systems/`, `docs/design/` |
 
 `docs/design/` pertence a quem e dono da area: `art-direction.md` e do Rendering
 Agent, `combat.md` do Combat, `progression.md`/`units.md`/`gacha.md` do

@@ -3,7 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 2 concluido e publicado.
+**Ultima atualizacao:** Milestone 2 concluido e publicado. M3 iniciado pelo
+benchmark obrigatorio, que aguarda medicao em aparelho.
 
 ## O que existe e funciona
 
@@ -67,6 +68,9 @@
 - Cheats de teleporte por regiao e alternancia do portal (`src/debug/cheats.ts`).
   Atravessar o mundo leva ~39 segundos; verificar a Arena a pe a cada build
   seriam minutos perdidos por rodada.
+- **Benchmark de personagens animados** em `bench.html`, entrada Vite separada
+  do jogo. Ferramenta permanente, com protocolo versionado para comparar
+  medicoes entre milestones. Ver `06-benchmark.md`.
 - Console in-game capturando `console.*`, `window.onerror` e promises
   rejeitadas.
 
@@ -168,10 +172,17 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 3 — Mobs.** Comeca com o **benchmark obrigatorio de animacao** no
-iPhone, medindo FPS, memoria, draw calls e tempo de render, conforme
-`decisions/0008`. `SkinnedMesh` nao instancia, e a tecnica de animacao dos mobs
-comuns depende desse numero.
+**Milestone 3 — Mobs**, bloqueado numa medicao que so o desenvolvedor pode
+fazer.
+
+A ferramenta esta pronta e publicada. Falta abrir `bench.html` no iPhone e
+mandar o print. Enquanto o numero nao vier, nenhuma linha de mob e escrita:
+`SkinnedMesh` nao instancia, e a tecnica de animacao e decisao de arquitetura,
+nao otimizacao tardia.
+
+Se o estagio A atender o orcamento de 49 personagens, a decisao se encerra ali
+e os mobs comecam sem complexidade nenhuma a mais. So se reprovar e que existem
+os estagios B (skinning instanciado) e C (VAT).
 
 Areas: **Combat Agent** e **Rendering Agent**, com o Tech Lead integrando.
 
@@ -187,7 +198,10 @@ Areas: **Combat Agent** e **Rendering Agent**, com o Tech Lead integrando.
 
 ## Decisoes em aberto
 
+- **Tecnica de animacao.** Bloqueada na primeira medicao em aparelho. Ver
+  `06-benchmark.md`.
 - **FOV horizontal.** Hoje 75 graus contra ~113 da referencia, que mostra bem
   mais mundo. Julgar no M3, com mundo de verdade na tela.
-- **Tecnica de animacao dos mobs comuns.** Depende do benchmark obrigatorio no
-  inicio do M3.
+- **Orcamento do personagem.** ~900 triangulos e 22 ossos, congelado
+  **provisoriamente** para o benchmark. Vira definitivo quando o primeiro
+  modelo real existir.

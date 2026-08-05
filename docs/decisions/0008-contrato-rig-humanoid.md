@@ -21,6 +21,22 @@ so existem quando aparecer o primeiro personagem concreto que os exija.
 **Nomenclatura de ossos: padrao Mixamo**, exportado como esta, com o prefixo
 `mixamorig:`.
 
+> **Correcao (M3).** O prefixo sai assim **no arquivo**, mas os dois pontos
+> nunca chegam ao runtime. O `PropertyBinding` do Three.js trata `:` como
+> separador de caminho, entao `mixamorig:LeftArm` e lido como diretorio
+> `mixamorig:` mais um no chamado `LeftArm` — que nao existe. O `GLTFLoader`
+> sabe disso e sanitiza os nomes ao carregar, **dos dois lados**, osso e
+> trilha, entao dentro do jogo o osso se chama `mixamorigLeftArm`.
+>
+> Quem escrever codigo que procura osso pelo nome tem que usar a forma
+> sanitizada (`THREE.PropertyBinding.sanitizeNodeName`), nunca a do arquivo.
+>
+> Isto foi descoberto pelo benchmark do M3, antes de existir qualquer arte. O
+> modo de falha e o pior possivel: o Three.js imprime um aviso, segue em frente
+> e a animacao fica **parada**, sem quebrar nada. Por isso `src/bench/` valida
+> a amarracao de toda trilha antes de medir, e qualquer sistema de animacao
+> futuro deve fazer o mesmo.
+
 ### Esqueleto obrigatorio
 
 ```
@@ -131,6 +147,14 @@ sobe uma cena de estresse com N personagens esqueletados e mede-se no aparelho:
 - Draw calls e triangulos
 - Consumo de memoria
 - Tempo de renderizacao
+
+**Status:** a ferramenta existe (`bench.html`, ver `docs/06-benchmark.md`) e
+ficou permanente no projeto. Duas das quatro metricas acima nao tem API no
+Safari: memoria e tempo de CPU. O benchmark **calcula** a memoria que aloca em
+vez de medi-la, e usa o tempo de JS por frame como substituto de CPU. Isso esta
+documentado na ferramenta, e nao contornado em silencio.
+
+Falta a medicao em aparelho real, que e do desenvolvedor.
 
 Se o custo for alto, as saidas sao conhecidas: esqueleto apenas para player,
 units e boss; mobs comuns com animacao procedural em malha nao-esqueletada
