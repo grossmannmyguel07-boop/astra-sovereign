@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import {
   CAMERA_DISTANCE,
+  CAMERA_DISTANCE_MAX,
+  CAMERA_DISTANCE_MIN,
+  CAMERA_ZOOM_LAMBDA,
   CAMERA_LAMBDA,
   CAMERA_LOOKAHEAD,
   CAMERA_LOOK_HEIGHT,
@@ -18,8 +21,8 @@ import type { PlayerState } from '@/game/entities/player';
  * Dono: **Rendering Agent**.
  *
  * Orbita o player em coordenadas esfericas: `yaw` livre em volta, `pitch`
- * limitado. O jogador gira arrastando na metade direita da tela; a camera
- * segue a posicao do player sozinha.
+ * limitado e **distancia ajustavel por pinca**. A camera segue a posicao do
+ * player sozinha.
  *
  * O FOV nao e definido aqui: o `Renderer` recalcula o FOV vertical a cada
  * resize a partir de um alvo horizontal.
@@ -35,8 +38,10 @@ export class CameraRig {
   // que permite responder na hora sem repassar o serrilhado dos eventos.
   private targetYaw = 0;
   private targetPitch = CAMERA_PITCH_DEFAULT;
+  private targetDistance = CAMERA_DISTANCE;
   private yaw = 0;
   private pitch = CAMERA_PITCH_DEFAULT;
+  private distance = CAMERA_DISTANCE;
 
   constructor() {
     this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
@@ -56,6 +61,11 @@ export class CameraRig {
     return this.pitch;
   }
 
+  /** Distancia atual. Lida pelo overlay de debug. */
+  get currentDistance(): number {
+    return this.distance;
+  }
+
   /** Pedido de rotacao, em radianos. Acumulado pela camada de entrada. */
   rotate(deltaYaw: number, deltaPitch: number): void {
     if (deltaYaw === 0 && deltaPitch === 0) return;
@@ -64,6 +74,25 @@ export class CameraRig {
     // O yaw acumula sem normalizar: como alvo e atual crescem juntos, a
     // suavizacao nunca precisa decidir para que lado dar a volta.
     this.targetPitch = clamp(this.targetPitch + deltaPitch, CAMERA_PITCH_MIN, CAMERA_PITCH_MAX);
+  }
+
+  /**
+   * Pedido de zoom, como **razao multiplicativa**.
+   *
+   * Razao e nao incremento porque pinca e um gesto de escala: afastar os dedos
+   * pela metade da tela precisa aproximar tanto de longe quanto de perto. Com
+   * incremento fixo, o mesmo gesto seria imperceptivel a 32 unidades e violento
+   * a 9.
+   *
+   * @param ratio Menor que 1 aproxima; maior que 1 afasta.
+   */
+  zoom(ratio: number): void {
+    if (ratio === 1) return;
+    this.targetDistance = clamp(
+      this.targetDistance * ratio,
+      CAMERA_DISTANCE_MIN,
+      CAMERA_DISTANCE_MAX
+    );
   }
 
   /**
@@ -89,6 +118,7 @@ export class CameraRig {
 
     this.yaw = damp(this.yaw, this.targetYaw, CAMERA_ROTATE_LAMBDA, frameDt);
     this.pitch = damp(this.pitch, this.targetPitch, CAMERA_ROTATE_LAMBDA, frameDt);
+    this.distance = damp(this.distance, this.targetDistance, CAMERA_ZOOM_LAMBDA, frameDt);
 
     this.apply();
   }
@@ -100,6 +130,7 @@ export class CameraRig {
     this.focusZ = player.z;
     this.yaw = this.targetYaw;
     this.pitch = this.targetPitch;
+    this.distance = this.targetDistance;
     this.apply();
   }
 
@@ -110,9 +141,9 @@ export class CameraRig {
     // Com yaw 0 a camera fica em +Z, olhando para -Z: o mesmo enquadramento
     // que existia antes da rotacao entrar.
     this.camera.position.set(
-      this.focusX + CAMERA_DISTANCE * cosPitch * Math.sin(this.yaw),
-      this.focusY + CAMERA_LOOK_HEIGHT + CAMERA_DISTANCE * sinPitch,
-      this.focusZ + CAMERA_DISTANCE * cosPitch * Math.cos(this.yaw)
+      this.focusX + this.distance * cosPitch * Math.sin(this.yaw),
+      this.focusY + CAMERA_LOOK_HEIGHT + this.distance * sinPitch,
+      this.focusZ + this.distance * cosPitch * Math.cos(this.yaw)
     );
 
     this.camera.lookAt(this.focusX, this.focusY + CAMERA_LOOK_HEIGHT, this.focusZ);

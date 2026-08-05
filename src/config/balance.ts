@@ -174,3 +174,41 @@ export const MOB_TURN_LAMBDA = 6;
  * sobreposicao: se dois nascerem no mesmo lugar, ficam ali para sempre.
  */
 export const MOB_MIN_SPACING = 3.4;
+
+// ---------------------------------------------------------------------------
+// Zoom da camera (M3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Limites da distancia da camera, controlada por pinca de dois dedos.
+ *
+ * **O horizonte nao se move com o zoom.** Ele sai de
+ * `0.5 - tan(pitch) / (2 * tan(fov_v / 2))`, que nao depende da distancia --
+ * afastar a camera afasta tambem a altura dela na mesma proporcao, e o angulo
+ * de visada continua o mesmo. Por isso o enquadramento calibrado no M1 contra a
+ * referencia sobrevive intacto a qualquer zoom.
+ *
+ * O minimo e onde a camera comeca a entrar em props e relevo. O maximo e onde o
+ * personagem fica pequeno demais para se acompanhar a animacao dele, que e a
+ * unica coisa que a tela precisa comunicar durante o combate.
+ */
+export const CAMERA_DISTANCE_MIN = 9;
+export const CAMERA_DISTANCE_MAX = 32;
+
+/**
+ * Taxa de suavizacao do zoom, por segundo.
+ *
+ * Alta como a da rotacao: pinca e manipulacao direta e precisa parecer presa
+ * aos dedos. Serve so para tirar o serrilhado dos eventos de ponteiro.
+ */
+export const CAMERA_ZOOM_LAMBDA = 18;
+
+/**
+ * Alcance da area de toque do joystick, em multiplos do raio visual.
+ *
+ * A area e maior que o desenho de proposito: o polegar nao acerta um alvo de
+ * 58px no escuro. Mas nao e a metade da tela inteira -- com o joystick ancorado,
+ * um toque longe do centro viraria inclinacao maxima instantanea, e o
+ * personagem sairia correndo por um encostar de dedo.
+ */
+export const JOYSTICK_ZONE_REACH = 1.6;

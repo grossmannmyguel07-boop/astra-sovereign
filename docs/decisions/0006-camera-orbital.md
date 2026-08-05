@@ -19,6 +19,20 @@ Camera orbital em coordenadas esfericas ao redor do player:
 - **Yaw livre**, arrastando na metade direita da tela.
 - **Pitch limitado** entre 8 e 66 graus acima do horizonte.
 - **Distancia fixa.** Zoom fica para depois do MVP.
+
+> **Revisto no M3.** A distancia passou a ser ajustavel pelo jogador, por pinca
+> de dois dedos, entre 9 e 32 unidades (padrao 17.5). O pedido veio de jogar no
+> aparelho: com um personagem de verdade em cena, querer chegar perto para ver a
+> animacao ou afastar para se situar e legitimo, e nao ha razao para o
+> desenvolvedor decidir isso pelo jogador.
+>
+> **O enquadramento calibrado aqui sobrevive.** A posicao do horizonte sai de
+> `0.5 - tan(pitch) / (2 * tan(fov_v / 2))` e **nao depende da distancia** —
+> afastar a camera afasta tambem a altura dela na mesma proporcao. Verificado
+> nos dois extremos: o horizonte fica no mesmo lugar a 9 e a 32.
+>
+> A **oclusao** muda, isso sim: quanto mais longe a camera, mais coisa pode
+> ficar entre ela e o player. Zoom aproximado reduz oclusao; afastado, aumenta.
 - **Movimento relativo a camera:** a intencao do joystick e girada pelo yaw
   antes de virar direcao de mundo.
 

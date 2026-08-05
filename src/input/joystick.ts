@@ -1,17 +1,29 @@
-import { JOYSTICK_RADIUS } from '@/config/balance';
+import { JOYSTICK_RADIUS, JOYSTICK_ZONE_REACH } from '@/config/balance';
 
 /**
- * Joystick virtual flutuante.
+ * Joystick virtual **ancorado** no canto inferior esquerdo.
  *
- * Dono: **UI/UX Agent**. Criado pelo Tech Lead como semente da area no M1.
+ * Dono: **UI/UX Agent**. Criado pelo Tech Lead como semente da area no M1;
+ * mudou de flutuante para ancorado no M3.
  *
- * Flutuante e nao fixo: o joystick nasce onde o dedo encosta, dentro da metade
- * esquerda da tela. Num aparelho de mao isso e bem melhor que um joystick
- * ancorado -- o polegar nunca precisa procurar o controle, e nao existe posicao
- * "certa" para segurar o aparelho.
+ * A versao flutuante nascia onde o dedo encostasse, em qualquer ponto da metade
+ * esquerda. O argumento era que o polegar nunca precisaria procurar o controle.
+ * Na pratica no aparelho, o efeito foi o oposto: o joystick aparecia no meio da
+ * tela, por cima do mundo, em posicao diferente a cada toque, e nao dava para
+ * criar memoria muscular de nada.
+ *
+ * Ancorado, ele tambem libera a maior parte da tela para a camera -- o que e o
+ * que permite a pinca de dois dedos do M3 funcionar em quase qualquer lugar.
+ *
+ * A **area de toque e maior que o desenho**, porque o polegar nao acerta um
+ * alvo de 58px no escuro. Mas nao e a metade da tela: com o joystick ancorado,
+ * um toque longe do centro vira inclinacao maxima instantanea.
  *
  * Expoe apenas `intent`. Nao conhece o player nem a simulacao.
  */
+
+/** Margem do canto ate a borda do desenho, em pixels. */
+const MARGIN = 28;
 export class VirtualJoystick {
   /** Direcao desejada em coordenadas de tela, cada eixo em -1..1. */
   readonly intent = { x: 0, z: 0 };
@@ -22,8 +34,6 @@ export class VirtualJoystick {
   private knob: HTMLElement;
 
   private pointerId: number | null = null;
-  private originX = 0;
-  private originY = 0;
 
   constructor() {
     this.zone = this.createZone();
@@ -46,15 +56,20 @@ export class VirtualJoystick {
     return this.pointerId !== null;
   }
 
+  /**
+   * Area de toque, ancorada no canto. Fica **acima** da zona da camera na pilha
+   * de z-index: o que cair aqui e movimento, o resto da tela e camera.
+   */
   private createZone(): HTMLElement {
     const zone = document.createElement('div');
+    const reach = MARGIN + JOYSTICK_RADIUS * (1 + JOYSTICK_ZONE_REACH);
     zone.style.cssText = [
       'position:fixed',
       'left:0',
-      'top:0',
-      'width:50%',
-      'height:100%',
-      'z-index:40',
+      'bottom:0',
+      `width:calc(${reach}px + var(--safe-left))`,
+      `height:calc(${reach}px + var(--safe-bottom))`,
+      'z-index:43',
       // A area precisa receber o toque, mas nao pode rolar nem selecionar.
       'touch-action:none',
     ].join(';');
@@ -62,17 +77,16 @@ export class VirtualJoystick {
   }
 
   /**
-   * Anel discreto na posicao de descanso. Nao e o joystick -- e a dica visual
-   * de onde encostar. Sem ele, um jogador novo nao descobre que a metade
-   * esquerda controla o movimento.
+   * Anel discreto em repouso, no lugar exato onde o joystick vai aparecer.
+   * Sem ele, um jogador novo nao descobre onde encostar.
    */
   private createIdleRing(): HTMLElement {
     const ring = document.createElement('div');
     const size = JOYSTICK_RADIUS * 2;
     ring.style.cssText = [
       'position:fixed',
-      `left:calc(28px + var(--safe-left))`,
-      `bottom:calc(28px + var(--safe-bottom))`,
+      `left:calc(${MARGIN}px + var(--safe-left))`,
+      `bottom:calc(${MARGIN}px + var(--safe-bottom))`,
       `width:${size}px`,
       `height:${size}px`,
       'z-index:41',
@@ -89,6 +103,9 @@ export class VirtualJoystick {
     const size = JOYSTICK_RADIUS * 2;
     base.style.cssText = [
       'position:fixed',
+      // Ancorado: mesma posicao do anel de repouso, sempre.
+      `left:calc(${MARGIN}px + var(--safe-left))`,
+      `bottom:calc(${MARGIN}px + var(--safe-bottom))`,
       `width:${size}px`,
       `height:${size}px`,
       'z-index:42',
@@ -122,14 +139,15 @@ export class VirtualJoystick {
     if (this.pointerId !== null) return;
 
     this.pointerId = event.pointerId;
-    // Captura garante que o dedo continue sendo seguido mesmo saindo da zona.
-    this.zone.setPointerCapture(event.pointerId);
+    // Captura garante que o dedo continue sendo seguido ao sair da zona -- que e
+    // o caso normal, porque a zona e pequena e o polegar passa dela. Se for
+    // recusada, o joystick ainda funciona dentro da area.
+    try {
+      this.zone.setPointerCapture(event.pointerId);
+    } catch {
+      /* segue sem captura */
+    }
 
-    this.originX = event.clientX;
-    this.originY = event.clientY;
-
-    this.base.style.left = `${this.originX - JOYSTICK_RADIUS}px`;
-    this.base.style.top = `${this.originY - JOYSTICK_RADIUS}px`;
     this.base.style.opacity = '1';
     this.idleRing.style.opacity = '0';
 
@@ -153,9 +171,21 @@ export class VirtualJoystick {
     this.idleRing.style.opacity = '1';
   };
 
+  /**
+   * O centro e lido do proprio elemento a cada toque, em vez de calculado a
+   * partir das constantes: as `safe-area-inset` do iPhone so existem em CSS, e
+   * duplicar a conta aqui daria um centro deslocado no aparelho e certo no
+   * emulador -- o pior tipo de erro para achar.
+   */
+  private center(): { x: number; y: number } {
+    const box = this.base.getBoundingClientRect();
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  }
+
   private updateFrom(event: PointerEvent): void {
-    let dx = event.clientX - this.originX;
-    let dy = event.clientY - this.originY;
+    const origin = this.center();
+    let dx = event.clientX - origin.x;
+    let dy = event.clientY - origin.y;
 
     const distance = Math.hypot(dx, dy);
     if (distance > JOYSTICK_RADIUS) {

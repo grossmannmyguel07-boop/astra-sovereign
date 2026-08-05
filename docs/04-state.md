@@ -41,16 +41,18 @@
   regiao. A Inicial fica sem mobs de proposito.
 
 **Entrada**
-- Joystick virtual flutuante: nasce onde o dedo encosta na metade esquerda,
-  anel de descanso como dica visual, um unico `pointerId` rastreado
-  (`src/input/joystick.ts`).
-- Arrasto na metade direita gira a camera (`src/input/camera-drag.ts`). Zonas
-  independentes: andar e olhar ao mesmo tempo funciona.
+- Joystick virtual **ancorado** no canto inferior esquerdo, com area de toque
+  maior que o desenho (`src/input/joystick.ts`). Era flutuante ate o M2; mudou
+  depois de testar no aparelho, onde ele aparecia no meio da tela tapando a
+  cena.
+- **Um dedo gira a camera, dois dedos dao zoom** por pinca, entre 9 e 32
+  unidades (`src/input/camera-drag.ts`). A zona ocupa a tela inteira, por baixo
+  da do joystick. Andar e girar ao mesmo tempo funciona.
 
 **Render**
 - Camera orbital: yaw livre, pitch padrao ~15 graus limitado entre 6 e 66,
-  distancia fixa, suavizacao exponencial independente de framerate e look-ahead
-  curto (`src/render/camera.ts`). Ver `decisions/0006` e `references/analise-video-01.md`.
+  **distancia ajustavel pelo jogador** entre 9 e 32, suavizacao exponencial
+  independente de framerate e look-ahead curto (`src/render/camera.ts`). Ver `decisions/0006` e `references/analise-video-01.md`.
   O pitch foi calibrado para trazer o horizonte a ~20% do topo, como na
   referencia do genero.
 - Player provisorio: capsula com marcador de frente e marca de contato com o
@@ -108,6 +110,17 @@ producao.
 | Triangulos | 25 mil a **44 mil** |
 | Erros de console, pagina e requisicao | **nenhum** |
 
+Ajustes de controle pedidos depois de jogar no aparelho, ja verificados:
+
+| Caso | Medido |
+|---|---|
+| Afastar os dedos | distancia 17.5 -> **9** (limite minimo) |
+| Aproximar os dedos | distancia -> **32** (limite maximo) |
+| Insistir alem dos limites | segura em **9** e **32** |
+| Andar e girar com dois dedos | velocidade **8.4** constante, yaw 0 -> **50** |
+| Soltar o joystick | velocidade a **zero** |
+| Horizonte a 9 e a 32 | **mesma altura** — o enquadramento do M1 sobrevive |
+
 Corrigido durante a verificacao:
 
 1. **81 draw calls nas Ruinas**, contra 26 no M2. Nevoa esconde mas nao
@@ -119,9 +132,10 @@ Corrigido durante a verificacao:
    em cena. No M4 eles atacam — nao dar para saber quem e quem seria falha de
    jogabilidade, nao de arte.
 
-O framerate do ambiente de verificacao e renderizacao por software e nao diz
-nada sobre o iPhone. Os numeros que valem sao draw calls e triangulos, e a
-`decisions/0011` mediu 200 personagens animados a 59fps no aparelho.
+**Medido no iPhone 14:** o jogo completo roda a **60fps travados**, inclusive
+nas Ruinas, a regiao mais pesada — 16 a 26 draw calls conforme o angulo da
+camera, com 40 mobs no mundo. Isso fecha a segunda ressalva da `decisions/0011`,
+que era nao ter medido a soma de mundo mais personagens.
 
 ## Verificado no M2
 

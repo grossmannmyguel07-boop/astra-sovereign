@@ -77,8 +77,9 @@ function boot(): void {
     render(alpha, frameDt) {
       // A rotacao pedida no frame e aplicada antes de desenhar, para o giro
       // aparecer no mesmo quadro em que o dedo se moveu.
-      const rotation = cameraDrag.consume();
-      scene.rig.rotate(rotation.yaw, rotation.pitch);
+      const camera = cameraDrag.consume();
+      scene.rig.rotate(camera.yaw, camera.pitch);
+      scene.rig.zoom(camera.zoom);
 
       scene.sync(state, world, alpha, frameDt);
       renderer.render(scene.three);
@@ -93,7 +94,7 @@ function boot(): void {
         `pos    ${p.x.toFixed(1)}, ${p.z.toFixed(1)}  alt ${p.y.toFixed(1)}\n` +
           `vel    ${playerSpeed(p).toFixed(1)}\n` +
           `regiao ${world.dominantRegion().id}\n` +
-          `cam    yaw ${yawDegrees.toFixed(0)}\n` +
+          `cam    yaw ${yawDegrees.toFixed(0)}  dist ${scene.rig.currentDistance.toFixed(1)}\n` +
           `mobs   ${state.mobs.length} (${alertCount(state)} alerta)`
       );
     },
