@@ -2,11 +2,10 @@
 
 O corte final: **so o que o MVP precisa**, e nada mais.
 
-Dos **476 modelos levantados**, entram **30**. Os outros 446 ficam de fora — os
-motivos estao em `direcao-visual.md`.
+Dos **526 modelos levantados** em seis pacotes, entram **34**. Os outros 492
+ficam de fora — os motivos estao em `direcao-visual.md`.
 
-> **Esta lista nao esta fechada.** O Ultimate Monsters ainda nao chegou, e e ele
-> que decide as duas maiores lacunas: boss e variedade de mob.
+**Lista fechada.** Os seis pacotes chegaram e as quatro decisoes foram tomadas.
 
 Isso nao e economia de espaco. E a regra 5 do `CLAUDE.md` aplicada a arte:
 asset que nao serve a um milestone existente e peso morto que alguem vai
@@ -17,23 +16,33 @@ carregar, versionar e tentar encaixar depois.
 ## A lista
 
 **K** = Kenney (GLB pronto, x2.5 para unidade de jogo).
-**Q** = Quaternius (precisa conversao, escala ja proxima da real).
+**Q** = Quaternius. Monsters ja vem em glTF; Nature e RPG precisam de conversao.
 Tudo CC0.
 
-### Personagens — 2 modelos, 839 triangulos
+### Personagens, mobs e boss — 6 modelos
 
-| Modelo | Pacote | Tris | Serve a | Milestone |
-|---|---|---|---|---|
-| `character-human` | Mini Dungeon | 465 | Player | M3 (substitui o placeholder) |
-| `character-orc` | Mini Dungeon | 374 | Os tres tipos de mob, por cor e escala | M3 |
+Todos de **Ultimate Monsters**, escolhidos pelo criterio da Decisao 1: quanto do
+contrato da `0008` o rig alcanca.
 
-Os dois trazem 32 animacoes e compartilham o rig. **Depende da Decisao 1** em
-`direcao-visual.md`.
+| Papel | Modelo | Corpo | Ossos | Tris | Em cena |
+|---|---|---|---|---|---|
+| **Player** | `Big/Ninja` | Big | 43 (17/22 do contrato) | ~6 400 | 1 |
+| **Mob — errante** | `Blob/PinkBlob` | Blob | 4 | **1 030** | ~14 |
+| **Mob — sentinela** | `Blob/Mushnub` | Blob | 4 | 1 248 | ~12 |
+| **Mob — espreita** | `Blob/Dog` | Blob | 4 | 1 392 | ~14 |
+| **Boss** | `Big/Orc_Skull` | Big | 43 | 7 364 | 1, no M10 |
+| Boss reserva | `Big/Demon` | Big | 43 | 6 712 | — |
 
-Bom sinal de orcamento: o teto de personagem congelado no M3 e ~900 triangulos,
-e o placeholder procedural tem 880 com 22 ossos. Os modelos reais tem **465 e
-374 com 7 ossos** — mais leves que a medicao da `0011`, que portanto e
-conservadora.
+**O corpo Big so entra onde ha um em cena.** A 6 400 triangulos e 43 ossos, ele
+e caro; para quarenta mobs seria 257 mil triangulos, contra os 176 mil que o
+iPhone 14 segurou na `0011`.
+
+**Blob resolve o mob comum melhor do que qualquer alternativa levantada:** 4
+ossos contra os 22 medidos, e 1 030 triangulos no mais leve. E o corpo mais
+barato dos tres pacotes de personagem.
+
+**Os tres mobs agora tem silhueta propria**, nao so cor e escala. Era a lacuna
+mais seria da versao anterior da biblioteca.
 
 ### Ruinas — 6 modelos, 856 triangulos
 
@@ -128,18 +137,26 @@ jogo.
 
 | | Triangulos |
 |---|---|
-| 30 modelos do set | **~12 400** |
+| Cena tipica: player + 14 mobs + mundo | **~46 000** |
+| Pior caso: Arena com boss + mundo | **~40 000** |
 | Mundo 1 hoje (terreno, props, portal) | ~25 000 |
 | Medido no aparelho, pior regiao | 44 000 |
 | Segurado pelo iPhone 14 a 59fps (`0011`) | 176 000 |
 
-O set inteiro cabe folgado. **Nao ha decisao de performance aqui** — a escolha
-foi de identidade visual, nao de orcamento.
+Cabe, com folga menor do que antes. E **precisa ser medido de novo**.
 
-Ressalva honesta: as arvores da Quaternius sozinhas sao ~8 000 dos ~12 400. Se
-a Floresta desenhar muitas de uma vez, e a primeira coisa a medir. O corte por
-distancia do M3 e a nevoa curta da regiao devem segurar, mas **isso e previsao,
-nao medicao** — e este projeto ja aprendeu a diferenca.
+O teto de ~900 triangulos por personagem foi congelado no M3 e **estes modelos
+passam dele**: 1 030 no mob mais barato, 6 400 no player. A contagem de ossos
+tambem muda — 4 no Blob, 43 no Big, contra os 22 medidos.
+
+Por `docs/06-benchmark.md`, mudar orcamento de triangulo ou contagem de osso
+**invalida o protocolo v1**. Antes de importar:
+
+1. Subir o benchmark para **protocolo v2** com os modelos reais.
+2. Medir de novo no iPhone 14.
+3. Registrar a linha nova no historico.
+
+A `0011` continua valendo para o que mediu; ela so nao mediu isto.
 
 Peso em disco: ~408KB nos dois personagens (as 32 animacoes dominam) e ~180KB
 em todo o resto.
@@ -152,9 +169,9 @@ Lacunas reais. Nenhuma bloqueia agora; todas bloqueiam algum milestone.
 
 | Falta | Bloqueia | Saida provisoria |
 |---|---|---|
-| **Boss** | M10 | `character-orc` em escala grande. Funciona e le mal — escala nao e silhueta |
-| **Variedade de mob** | M3 em diante | Um orc recolorido cobre os tres tipos. Perde-se o eixo de leitura mais forte, que e a silhueta |
-| **Units companheiras** | M8 | `character-human` recolorido, respeitando que a cor do player e exclusiva |
+| ~~Boss~~ | — | **Resolvido.** 16 candidatos no corpo Big, com `Death`, `HitReact` e `Punch` |
+| ~~Variedade de mob~~ | — | **Resolvido.** 17 corpos Blob, cada um com silhueta propria |
+| **Units companheiras** | M8 | Um Blob recolorido na faixa fria, respeitando que a cor do player e exclusiva |
 | **Icones e HUD** | M7 | Nao ha asset de UI nos pacotes. HUD e DOM/CSS, entao provavelmente nem precisa |
 | **Efeitos** | M4 em diante | Nao e lacuna: efeito neste projeto e codigo, nao asset |
 
@@ -169,11 +186,12 @@ Vale a pena manter no inventario para milestones futuros, sem importar agora:
 
 ## O que precisa acontecer antes de importar
 
-1. **O Ultimate Monsters chegar.** E ele que fecha boss e variedade de mob.
-2. **Decisao 1** — adotar ou nao o rig da Kenney, emendando a `0008`.
-3. **Decisao 2** — cor dos inimigos, quente ou fria.
-4. **Decisao 3** — aprovar o conversor e a estrutura de pastas
-   (`estrutura-e-pipeline.md`).
-5. **Decisao 4** — aprovar `#ffca6b` como a unica cor quente do mundo, exclusiva
-   de recompensa (`paleta-mundo-01.md`).
-6. Autorar os dois atlas de paleta da Kenney.
+Todas as decisoes de biblioteca estao tomadas. O que resta e execucao:
+
+1. **Escrever o pipeline** — conversor, renomeacao de osso, recolorizacao,
+   normalizacao de pivo e escala. Tudo automatizado, sem Blender.
+2. **Benchmark protocolo v2** com os modelos reais, no aparelho.
+3. **Corrigir a cor dos mobs** do M3 para a faixa quente.
+4. **Emendar a `0008`** com os contratos `blob` e `flying`. _(feito)_
+
+Nada disso bloqueia o M4, que continua com os placeholders procedurais.

@@ -88,6 +88,68 @@ renomeacao aplicado no carregamento. E uma tabela por modelo, nao codigo novo.
 desktop. Enquanto o desenvolvimento acontecer so pelo celular isso incomoda, e
 packs ja riggados contornam. Nao muda o padrao — muda so de onde vem o arquivo.
 
+## Emenda (M4) — dois contratos novos, e a tabela de renomeacao em uso
+
+Esta decisao foi **reafirmada** quando os pacotes de asset chegaram: o contrato
+do projeto fica, e todo asset externo se adapta a ele.
+
+Isso virou criterio objetivo de selecao. Cada rig externo foi medido por quantos
+dos 22 ossos consegue preencher:
+
+| Rig externo | Cobre | Resultado |
+|---|---|---|
+| Quaternius **Big** (43 ossos) | **17 / 22** | Adotado como `humanoid` |
+| Kenney (7 ossos) | 7 / 22 | **Recusado** |
+
+O rig da Kenney foi recusado por nao alcancar o contrato — falta antebraco,
+ombro, pescoco, joelho e pe. Adaptar exigiria re-riggar a malha, e o pipeline de
+asset e automatizado por decisao: **nenhuma etapa em Blender**.
+
+### Os dois rigs que agora existem
+
+Este documento dizia que Quadruped, Flying e outros so existiriam "quando
+aparecer o primeiro personagem concreto que os exija". Eles apareceram.
+
+```ts
+rig: 'humanoid' | 'blob' | 'flying'
+```
+
+| Rig | Ossos | Origem | Papel |
+|---|---|---|---|
+| `humanoid` | 22 (contrato) | Quaternius Big, 17/22 pela tabela | Player, boss |
+| `blob` | `Body, Head, Head2, Head3` | Quaternius Blob | **Mobs comuns** |
+| `flying` | `Root, Torso, Neck, Head, Wing1-4.L/R, Body1` | Quaternius Flying | Reservado |
+
+`blob` e `flying` **nao sao humanoides degradados** — nao tem membro nenhum, e
+forcar o contrato humanoide sobre eles seria mentira de tipo. Cada um e um
+contrato proprio, com os clipes que o corpo dele consegue tocar.
+
+O `blob` entra em uso no primeiro milestone que trocar o placeholder dos mobs.
+O `flying` fica declarado e sem uso ate um milestone pedir.
+
+### A tabela de renomeacao, na pratica
+
+Este documento ja previa: *"Modelos de outras fontes entram com um mapa de
+renomeacao aplicado no carregamento."* O mapa do corpo Big:
+
+```
+Hips        -> Hips          UpperArm.L  -> LeftArm
+Abdomen     -> Spine         LowerArm.L  -> LeftForeArm
+Torso       -> Spine1        UpperLeg.L  -> LeftUpLeg
+Neck        -> Neck          LowerLeg.L  -> LeftLeg
+Head        -> Head          Foot.L      -> LeftFoot
+Shoulder.L  -> LeftShoulder  (idem para .R)
+```
+
+Sem correspondente no Big: `Spine2`, `LeftHand`, `RightHand`, `LeftToeBase`,
+`RightToeBase`. Os dedos e os `PoleTarget` do modelo ficam fora do contrato —
+existem na malha, sao animados pelos clipes proprios dela, e nenhum sistema do
+jogo os referencia.
+
+**A renomeacao acontece na conversao, nao em runtime.** O `.glb` produzido ja sai
+com os nomes do contrato, entao o carregador do jogo nao precisa saber de onde o
+modelo veio.
+
 ## O personagem e um conjunto de dados
 
 Nenhum sistema de jogo conhece a aparencia de nada. A definicao visual vive em

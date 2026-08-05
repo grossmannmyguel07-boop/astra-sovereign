@@ -10,36 +10,69 @@ Tudo CC0.
 
 ---
 
-## Characters
+## Characters, Mobs e Bosses — Quaternius Ultimate Monsters
 
-| Modelo | Pacote | Tris | Dim nativa | Onde usa | Observacoes |
-|---|---|---|---|---|---|
-| `character-human` | Mini Dungeon | 465 | 0.78 x 0.76 | **Player** | 7 ossos, 32 animacoes. 213KB — 5x o peso de um prop, por causa das animacoes |
+**50 monstros, tres corpos, todos riggados e animados.** Formato glTF com atlas
+de paleta compartilhado por corpo.
 
-**E o unico personagem nao-hostil dos tres pacotes.** Nao ha variacao de
-aparencia, genero ou classe.
+### Big — 16 modelos, 43 ossos, 14 animacoes
 
-## Mobs
+O unico corpo que alcanca o contrato humanoide da `0008`: **17 dos 22 ossos**.
 
-| Modelo | Pacote | Tris | Dim nativa | Onde usa | Observacoes |
-|---|---|---|---|---|---|
-| `character-orc` | Mini Dungeon | 374 | 0.78 x 0.78 | **Todos os mobs comuns** | Mesmo rig e mesmas 32 animacoes do human. 195KB |
+`Idle, Walk, Run, Punch, HitReact, Death, Jump, Jump_Idle, Jump_Land, Duck,
+Weapon, Wave, Yes, No`
 
-**Ha exatamente um personagem hostil em todos os pacotes.** O M3 tem tres tipos
-de mob (`errante`, `sentinela`, `espreita`).
+| Modelo | Tris | Altura | Serve a |
+|---|---|---|---|
+| `Ninja` | ~6 400 | ~3.2 | **Candidato a player** — humanoide, sem tracos de bicho |
+| `Tribal` | ~6 400 | ~3.3 | Candidato a player alternativo |
+| `Demon`, `BlueDemon` | 6 712 | 3.3 | **Boss** |
+| `Orc_Skull` | 7 364 | 3.27 | **Boss** |
+| `Yeti`, `MushroomKing` | ~6 800 | ~3.4 | Boss de outro mundo |
+| `Frog` | **5 016** | 2.7 | O mais leve do corpo |
+| `Bunny` | **8 284** | 3.44 | O mais pesado. Fora |
+| `Alien`, `Birb`, `Cactoro`, `Dino`, `Fish`, `Monkroose`, `Orc` | 5 414–7 676 | 2.7–3.6 | Reserva |
 
-Isso **nao e bloqueio**, e por acaso: o sistema de mobs ja diferencia os tres
-por **cor e escala**, nao por malha. Um orc recolorido e reescalado cobre os
-tres tipos sem mudar uma linha de logica. O que se perde e variedade de
-silhueta, que a `art-direction` classifica como o eixo mais forte de leitura.
+**Ressalva de custo:** 6 445 triangulos de media, contra o teto de ~900 por
+personagem congelado no M3. Serve para **um** boss ou **um** player em cena —
+nunca para quarenta mobs.
 
-## Bosses
+### Blob — 17 modelos, 4 ossos, 9 animacoes
 
-**Vazio.** Nenhum dos tres pacotes tem um modelo de boss.
+`Body, Head, Head2, Head3`. **Nao e humanoide** — nao tem membro nenhum. Exige
+contrato de rig proprio, que a `0008` ja previa para este caso.
 
-Saida provisoria para o M10: `character-orc` numa escala bem maior. Funciona
-mecanicamente e e ruim de leitura — um boss precisa de silhueta propria, e
-escala nao e silhueta. **Fica registrado como lacuna.**
+`Idle, Walk, Jump, Bite_Front, HitRecieve, Death, Dance, Yes, No`
+
+| Modelo | Tris | Altura | Serve a |
+|---|---|---|---|
+| `PinkBlob` | **1 030** | 2.01 | **Mob comum.** O mais barato dos 50 |
+| `Mushnub` | 1 248 | 3.3 | Mob comum |
+| `Dog`, `Cat`, `Chicken`, `Pigeon` | 1 392–1 800 | 1.8–2.2 | Mob comum |
+| `GreenBlob`, `Orc`, `Ninja`, `Wizard`, `Yeti` | ~1 500–2 300 | ~2 | Mob comum |
+| `GreenSpikyBlob` | 4 888 | 4.14 | Caro demais. Fora |
+
+**E o corpo certo para mob comum:** 4 ossos contra os 22 medidos na `0011`, e
+1 030 triangulos no mais leve.
+
+### Flying — 17 modelos, 13 ossos, 8 animacoes
+
+`Root, Torso, Neck, Head, Wing1-4.L, Wing1-4.R, Body1`. Tambem nao e humanoide.
+
+`Flying_Idle, Fast_Flying, Headbutt, Punch, HitReact, Death, Yes, No`
+
+Nenhum inimigo voador esta previsto no MVP. **Arquivado inteiro** — entra quando
+um milestone pedir, com o contrato `flying` que a `0008` ja nomeia.
+
+`Dragon` e `Dragon_Evolved` ficam anotados como candidatos a boss de mundo
+futuro.
+
+### Kenney — removidos
+
+`character-human` e `character-orc` **sairam da biblioteca**. Cobrem 7 dos 22
+ossos do contrato; adaptar exigiria re-riggar a malha, que e Blender.
+
+Ficam registrados aqui so para nao serem reconsiderados por engano.
 
 ## Nature — Quaternius (150 modelos)
 

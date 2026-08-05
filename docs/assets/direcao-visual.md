@@ -174,49 +174,87 @@ Kenney: 107 triangulos contra 128–200, com 21 variacoes contra 4.
 Forma de pedra e abstrata o bastante para nao denunciar autor, entao aqui a
 regra do autor unico nao se aplica. E o unico lugar onde vale misturar.
 
-## As duas decisoes que precisam da sua palavra
+## Decisoes tomadas
 
-### Decisao 1 — o rig
+### 1 — O rig do projeto fica. Asset se adapta.
 
-A `decisions/0008` manda **Mixamo, 22 ossos**. Os personagens da Kenney tem
-**7 ossos** com nomes proprios, e trazem 32 animacoes prontas.
+`[DEFINIDO]` A `decisions/0008` permanece como esta. O contrato oficial e o
+nosso; todo asset externo entra pela **tabela de renomeacao** que a propria
+`0008` ja previa, nunca o contrario.
 
-| | Mixamo (0008) | Kenney |
+Isso virou criterio objetivo, e o criterio decidiu sozinho:
+
+| Rig | Cobre do contrato | Veredito |
 |---|---|---|
-| Ossos | 22 | 7 |
-| Animacoes prontas | nenhuma no projeto | **32, incluindo idle, walk, sprint, die, attack-melee** |
-| Como se obtem | upload no site do Mixamo, orientado a desktop | **ja vem no arquivo** |
-| Custo por personagem | maior | menor |
-| Dedos, coluna, pescoco | sim | nao |
-| Osso de mao | sim | **nao** — a arma prende no braco |
+| **Quaternius Big** (43 ossos) | **17 / 22** | Entra |
+| Quaternius Blob (4 ossos) | nao e humanoide | Contrato proprio |
+| Quaternius Flying (13 ossos) | nao e humanoide | Contrato proprio |
+| Kenney (7 ossos) | **7 / 22** | **Sai** |
 
-**Recomendo adotar o rig da Kenney e emendar a 0008.**
+**Os personagens da Kenney sairam.** Sem antebraco, ombro, pescoco, joelho nem
+pe, o rig deles nao alcanca o contrato. Adaptar exigiria re-riggar a malha —
+trabalho de Blender, proibido pela Decisao 3.
 
-O argumento inteiro da 0008 para escolher Mixamo foi *"acesso a uma biblioteca
-grande de animacoes gratuitas, todas com a mesma nomenclatura — trocar o
-modelo, manter as animacoes"*. A Kenney entrega **exatamente essa propriedade**,
-ja verificada: human e orc compartilham osso por osso e clipe por clipe.
+A `0008` ja tinha previsto os outros dois: *"Quadruped, Flying e qualquer outro
+so existem quando aparecer o primeiro personagem concreto que os exija."* Blob e
+Flying **sao** esses personagens concretos. Ver a emenda na `0008`.
 
-E resolve o atrito que a propria 0008 registra: *"o Mixamo funciona por upload
-no site e e orientado a desktop. Enquanto o desenvolvimento acontecer so pelo
-celular isso incomoda."* Com a Kenney nao ha upload nenhum.
+### 2 — Inimigo e quente. O mundo continua frio.
 
-O preco e real e deve ser aceito de olhos abertos: **7 ossos nao dobram a
-coluna, nao viram o pescoco e nao tem mao.** Mira procedural e ponto de encaixe
-fino — que a `0011` celebrou ter preservado — ficam limitados.
+`[DEFINIDO]` A regra escrita na `art-direction` volta a valer, e o M3 sera
+corrigido: os tres mobs passam de frios para quentes.
 
-### Decisao 2 — a cor dos inimigos
+O mundo permanece na faixa fria e fechada. O contraste nao vem de esquentar o
+ambiente — vem de o inimigo ser **a unica coisa quente alem da recompensa**.
 
-A `art-direction` diz: **"inimigo e quente, aliado e frio"**.
+Isso resolve tambem a colisao de cor que motivou o erro do M3: player claro e
+frio, inimigo quente, e a leitura acontece antes de qualquer texto.
 
-O M3 fez o contrario. Os tres mobs sao frios (`#44507f`, `#6a5596`, `#35697a`)
-e o player e o mais claro da cena. Funciona na tela e voce aprovou, mas
-**contradiz a regra escrita** — e isso foi decisao minha, nao sua, tomada
-enquanto eu corrigia a colisao de cor entre player e mob.
+| | Antes (M3) | Agora |
+|---|---|---|
+| Player | `#9fb6ff` claro e frio | mantem |
+| Errante | `#44507f` frio | quente |
+| Sentinela | `#6a5596` frio | quente |
+| Espreita | `#35697a` frio | quente |
 
-Agora que a paleta esta sendo consolidada, e a hora de resolver: ou os mobs
-ficam quentes e a regra vale, ou a regra muda para "o player e o unico claro" e
-a `art-direction` e corrigida.
+### 3 — Pipeline automatizado, sem Blender
 
-Nao ha resposta obviamente certa. A regra escrita comunica hostilidade mais
-rapido; a solucao do M3 preserva melhor a paleta fria fechada.
+`[DEFINIDO]` Nenhuma etapa manual. Ver `estrutura-e-pipeline.md`.
+
+Isso tem uma consequencia que muda o plano anterior: **os dois atlas da Kenney
+nao serao autorados a mao.** Recolorir vira codigo — ler o PNG, mapear cada
+amostra para a paleta do projeto por regra, escrever o novo. Sem editor de
+imagem, sem ninguem com um computador.
+
+### 4 — `#ffca6b` e a cor da recompensa
+
+`[DEFINIDO]` Exclusiva de recompensa, progresso e item importante. Parte da
+identidade visual do projeto.
+
+Com a Decisao 2, o mundo passa a ter **duas** familias quentes, e elas nao podem
+se confundir:
+
+| Quente | Significa | Onde |
+|---|---|---|
+| `#ffca6b` dourado | **recompensa, progresso** | Moeda, bau, marco, numero de XP |
+| Faixa laranja-vermelha | **ameaca** | Inimigos |
+
+A separacao e por **matiz**, nao por temperatura: dourado puxa para amarelo,
+ameaca puxa para vermelho. Ver `paleta-mundo-01.md`.
+
+## A questao de tom que sobrou
+
+Os monstros da Quaternius sao **desenhos animados**: olhos brancos grandes,
+cores saturadas, silhuetas fofas. Recolorir resolve a cor; **nao resolve o
+olho**, que e assinatura de forma.
+
+Nao chamo isso de erro porque o tom do jogo ainda nao foi decidido — a
+`decisions/0010` deixou a ficcao de proposito para depois, para nascer da
+experiencia. Mas vale registrar antes de virar surpresa:
+
+**Um mundo cosmico escuro povoado por monstros fofos e uma escolha de tom, e ela
+esta sendo feita por omissao.** Se o Astra Sovereign for sombrio, esses assets
+brigam. Se for colorido e leve como o genero costuma ser, encaixam bem.
+
+Nao ha decisao a tomar agora. Ha uma coisa a notar quando o mundo estiver
+montado e voce olhar para ele.

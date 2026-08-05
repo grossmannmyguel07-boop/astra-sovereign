@@ -34,6 +34,7 @@ analise, nao palpite.
 | Skyboxes | Kenney | CC0 1.0 | 5 imagens | PNG | — |
 | Ultimate Nature Pack | Quaternius | CC0 | 150 | FBX, OBJ, blend | **1 223** |
 | Ultimate RPG | Quaternius | CC0 | 106 | FBX, OBJ, blend | **857** |
+| Ultimate Monsters | Quaternius | CC0 | **50** | **glTF** + atlas | **2 341 – 6 445** |
 
 CC0 e uso livre, inclusive comercial, sem exigencia de credito. Creditar e
 voluntario e vamos creditar mesmo assim.
@@ -66,29 +67,45 @@ esqueleto; `.blend` exige Blender, que e desktop.
 Como os pacotes Quaternius nao trazem GLB, eles precisam de uma etapa de
 conversao. Ver `estrutura-e-pipeline.md`.
 
+### Ultimate Monsters fecha as duas lacunas
+
+Chegou por ultimo e resolveu exatamente o que faltava: **50 monstros em tres
+corpos**, todos riggados e animados, em glTF.
+
+| Corpo | Qtd | Ossos | Anims | Tris med |
+|---|---|---|---|---|
+| **Big** (bipede) | 16 | 43, com dedos | 14 | 6 445 |
+| **Blob** (pequeno, redondo) | 17 | 4 | 9 | 2 341 |
+| **Flying** | 17 | 13, com asas | 8 | 4 075 |
+
+Animacoes do Big: `Idle, Walk, Run, Punch, HitReact, Death, Jump, Duck, Weapon,
+Wave, Yes, No`. Cobrem o contrato da `0008` quase inteiro.
+
 ### Ainda nao levantado
 
-- **Ultimate Monsters** — anunciado, ainda nao enviado. **A biblioteca nao esta
-  fechada ate ele chegar**: e o pacote que decide a lacuna de boss e de
-  variedade de mob.
-- Os dois links do Google Drive **nao foram acessados** — o proxy bloqueia
-  `drive.google.com`, do mesmo jeito que bloqueia `github.io`. Precisam vir como
-  arquivo.
+Os dois links do Google Drive **nao foram acessados** — o proxy bloqueia
+`drive.google.com`, do mesmo jeito que bloqueia `github.io`. Precisam vir como
+arquivo.
 
 ## As tres descobertas que mudam decisoes ja tomadas
 
-### 1. Os personagens sao riggados, e o rig nao e o nosso
+### 1. O rig do projeto ficou, e isso elegeu os assets
 
-`character-human` e `character-orc` tem **7 ossos e 32 animacoes cada**, e os
-dois compartilham exatamente o mesmo esqueleto e a mesma lista de clipes.
+**Decidido: a `0008` fica como esta. Asset externo se adapta ao nosso contrato,
+nunca o contrario.**
 
-```
-root, leg-left, leg-right, torso, arm-left, arm-right, head
-```
+Isso virou um criterio objetivo — quantos dos 22 ossos do contrato cada pacote
+consegue preencher pela tabela de renomeacao que a propria `0008` ja previa:
 
-A decisao `0008` manda um rig **Mixamo de 22 ossos**. Os dois sao
-incompativeis. Isso e uma decisao a tomar, nao um detalhe de importacao —
-ver `direcao-visual.md`.
+| Rig | Cobertura do contrato | Falta |
+|---|---|---|
+| **Quaternius Big** (43 ossos) | **17 / 22** | Spine2, maos, dedos do pe |
+| Kenney (7 ossos) | **7 / 22** | antebraco, ombro, joelho, pe, pescoco... |
+
+**Os personagens da Kenney sairam da biblioteca.** Nao por qualidade — por nao
+alcancarem o contrato. Um rig sem antebraco nem pescoco nao consegue tocar uma
+animacao autorada para o esqueleto do projeto, e adaptar ele exigiria re-riggar
+a malha, que e trabalho de Blender — proibido pela Decisao 3.
 
 ### 2. A escala e outra, e o fator e limpo
 

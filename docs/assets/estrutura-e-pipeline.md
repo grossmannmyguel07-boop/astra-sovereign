@@ -1,6 +1,10 @@
 # Estrutura e pipeline de assets
 
-`[PROPOSTA]` — nada aqui foi implementado. Precisa de aprovacao.
+`[DEFINIDO]` — aprovado. Ainda nao implementado.
+
+**Exigencia adicional: automacao total.** Nenhuma etapa manual, nenhum Blender,
+nenhum editor de imagem. Importar um pacote novo no futuro tem que ser rodar um
+comando.
 
 ## O problema a resolver
 
@@ -26,11 +30,25 @@ bruto (OBJ + MTL)
    |  1. le geometria e nomes de material
    |  2. troca a cor pelo mapa do projeto        <- paleta-mundo-01.md
    |  3. baixa o pivo para a base do modelo      <- resolve o 67/150
-   |  4. aplica o fator de escala do pacote      <- 2.5 na Kenney, 0.5 na Quaternius
-   |  5. remove textura, mantem cor por material
+   |  4. aplica o fator de escala do pacote
+   |  5. renomeia osso pela tabela do contrato   <- decisions/0008
+   |  6. remove textura, mantem cor por material
    v
 produzido (GLB)
 ```
+
+### O que a automacao total obriga
+
+Duas etapas que eu tinha deixado como trabalho manual **viram codigo**:
+
+| Era manual | Vira |
+|---|---|
+| Autorar os atlas da Kenney num editor de imagem | Ler o PNG, mapear cada amostra para a paleta por regra, escrever o novo. Node tem `zlib`, e PNG de blocos chapados e trivial de codificar |
+| Corrigir pivo e re-riggar em Blender | Correcao de pivo e renomeacao de osso na conversao. **Re-riggar deixa de ser opcao** — e por isso que o rig da Kenney foi recusado |
+
+A segunda consequencia e a mais importante e vale dita em voz alta: **a
+automacao total foi o que decidiu a Decisao 1 na pratica.** Um rig que nao
+alcanca o contrato so entraria com trabalho de Blender, e Blender esta fora.
 
 ### Por que um conversor proprio e nao `obj2gltf`
 
@@ -49,24 +67,50 @@ Custo real: uma dependencia a menos e um script a mais.
 
 - **Nao toca nos GLB da Kenney.** Eles ja estao prontos; a recolorizacao deles e
   a troca do PNG do atlas, que e outro trabalho.
-- **Nao converte personagem riggado.** Nenhum dos dois pacotes Quaternius tem
-  esqueleto. Se o Ultimate Monsters trouxer, o conversor precisa crescer — e ai
-  vale reavaliar contra `obj2gltf` ou FBX2glTF.
+- **Nao converte OBJ riggado**, porque OBJ nao suporta esqueleto.
+
+**O Ultimate Monsters muda o escopo:** ele vem em **glTF com esqueleto e
+animacao**, entao o conversor precisa de um segundo caminho — glTF para GLB, com
+renomeacao de osso pela tabela do contrato e embutimento do atlas. E menos
+trabalho que o caminho OBJ (a geometria ja esta em binario), mas e outro caminho.
+
+Dois caminhos, um so alvo:
+
+```
+OBJ + MTL   (Nature, RPG)      -->  |
+                                    |--> GLB do projeto
+glTF + PNG  (Monsters)         -->  |
+```
 
 ## Estrutura de pastas
 
 ```
 public/assets/            <- servido estatico pelo Vite, carregado por URL
-  characters/             character-human.glb, character-orc.glb
-  world/                  ruinas, rochas, arvores, props
-  items/                  moeda, arma, bau
+  characters/
+    player.glb              Big/Ninja, ossos renomeados para o contrato
+    boss.glb                Big/Orc_Skull
+    mob-errante.glb         Blob/PinkBlob
+    mob-sentinela.glb       Blob/Mushnub
+    mob-espreita.glb        Blob/Dog
+  world/
+    ruins/                  muro, coluna, pilar, escada
+    nature/                 arvores secas, rochas, tronco
+    props/                  estandarte, lanterna, barril, viga
+  items/
+    coin.glb  sword.glb  chest.glb
 
-tools/asset/              <- o conversor. Nao entra no bundle
-  convert.mjs
-  palette.json            <- mapa nome-de-material -> cor do projeto
+tools/asset/              <- o pipeline. Nao entra no bundle
+  convert.mjs               OBJ/glTF -> GLB
+  palette.json              nome de material -> cor do projeto
+  rigmap.json               nome de osso externo -> contrato da 0008
+  recolor.mjs               reescreve os atlas da Kenney por regra
 
 docs/assets/              <- esta biblioteca. So texto, nenhum binario
 ```
+
+**Nome de arquivo por papel, nao por origem.** `mob-errante.glb` e nao
+`PinkBlob.glb`: trocar o modelo de um mob passa a ser trocar um arquivo, sem
+tocar em `src/data/mobs.ts`.
 
 **`public/` e nao `src/assets/`** porque o `GLTFLoader` carrega por URL em
 runtime. Com `base: './'` do `vite.config.ts`, os caminhos saem relativos e
@@ -77,7 +121,10 @@ continuam funcionando publicados em subdiretorio.
 Os `.zip` originais tem 21 MB e 476 modelos, dos quais o MVP usa algumas
 dezenas. Versionar tudo custaria clone lento para sempre, em troca de nada.
 
-`[PENDENTE]` **Onde o bruto fica guardado.** Precisa de um lugar — sem ele,
+`[DEFINIDO]` **O bruto fica fora do Git.** Versionamos apenas o processado —
+os `.glb` de saida. Revisitar quando o pipeline estiver consolidado.
+
+`[PENDENTE]` **Onde exatamente o bruto mora.** Precisa de um lugar — sem ele,
 mudar a paleta exige baixar tudo de novo. Nao ha resposta obvia: o repositorio e
 publico, o Drive nao e acessivel deste ambiente, e o desenvolvedor nao tem
 computador.
@@ -112,16 +159,21 @@ Paleta se unifica — os dois usam cor chapada sem textura de superficie.
 Quaternius e facetado, 1 223. Uma arvore-cone da Kenney ao lado de uma bétula
 facetada da Quaternius, no mesmo enquadramento, le como dois jogos.
 
-Atribuicao proposta:
+Atribuicao final:
 
 | Familia | Autor | Por que |
 |---|---|---|
-| Personagens, mobs, boss | **Kenney** | Sao os unicos riggados. Ate o Monsters chegar, nao ha escolha |
-| Estrutura e ruinas | **Kenney** | Grade modular, e o M2 ja esta calibrado nessa altura |
-| Rochas | **Quaternius** | 107 tris contra 128–200 da Kenney, e 21 variacoes contra 4 |
-| Arvores | **Quaternius**, so as secas | Sem folha, nao brigam com a paleta. Ver `direcao-visual.md` |
-| Itens | **Quaternius** | A Kenney quase nao tem itens |
+| Player, mobs, boss | **Quaternius Monsters** | Unico rig que alcanca o contrato da `0008` — 17/22 contra 7/22 da Kenney |
+| Estrutura e ruinas | **Kenney** | Grade modular, e o M2 ja esta calibrado em 2.5 de altura |
+| Rochas | **Quaternius Nature** | 107 tris contra 128–200, e 21 variacoes contra 4 |
+| Arvores | **Quaternius Nature**, so as secas | Sem folha para brigar com a paleta |
+| Itens | **Kenney** | 252 contra 396 na moeda, 80 contra 872 na espada |
 
-As rochas sao a excecao que confirma a regra: sao o unico caso em que a
-Quaternius e **mais barata** que a Kenney, e a forma de pedra e abstrata o
-bastante para nao denunciar autor.
+**Personagem e cenario vem de autores diferentes, e tudo bem.** A regra do autor
+unico vale dentro de uma familia visual; personagem e mundo sao familias
+distintas, e nenhum jogo espera que o heroi seja feito do mesmo poligono que a
+parede.
+
+As rochas sao a excecao dentro da natureza: sao o unico caso em que a Quaternius
+e **mais barata** que a Kenney, e forma de pedra e abstrata o bastante para nao
+denunciar autor.
