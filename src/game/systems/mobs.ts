@@ -1,4 +1,4 @@
-import { MOB_PLACEMENTS, MOB_SEED, type MobPlacement } from '@/data/mobs';
+import { MOB_PLACEMENTS, MOB_SEED, MOB_TYPES, type MobPlacement } from '@/data/mobs';
 import { REGIONS } from '@/data/world-01';
 import {
   MOB_DETECT_RADIUS,
@@ -80,6 +80,11 @@ export class MobSystem {
           prevFacing: spot.away,
           restFacing: spot.away,
           state: 'idle',
+          hp: MOB_TYPES[placement.type].hp,
+          maxHp: MOB_TYPES[placement.type].hp,
+          attackCooldown: 0,
+          dead: false,
+          respawnTimer: 0,
           animationOffset: random() * 4,
         });
       }
@@ -141,6 +146,8 @@ export class MobSystem {
 
     for (const mob of state.mobs) {
       mob.prevFacing = mob.facing;
+      // Morto nao percebe nem encara. O respawn e do sistema de combate.
+      if (mob.dead) continue;
 
       const dx = px - mob.x;
       const dz = pz - mob.z;

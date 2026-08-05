@@ -27,15 +27,68 @@ export interface MobType {
   emissive: number;
   /** Multiplicador de altura sobre o humanoide padrao de ~1.9 unidades. */
   scale: number;
+
+  // --- Atributos de combate (M4) ---
+  //
+  // Nao ha "tempo de abate" aqui, e nao deve haver: ele sai de
+  // teto(vida / dano do jogador) * intervalo do jogador. Um jogador com dano
+  // maior que `hp` mata em um golpe, e isso e o comportamento correto.
+  // Ver `docs/design/combat.md`.
+
+  hp: number;
+  /** Dano por golpe no jogador. */
+  damage: number;
+  /** Segundos entre os golpes deste mob. */
+  attackInterval: number;
+  /**
+   * Alcance do golpe, em unidades. Bem menor que os 11 da deteccao: o alerta e
+   * o aviso, nao a ameaca.
+   */
+  attackRange: number;
+  /** Moeda concedida ao morrer. */
+  reward: number;
 }
 
 export const MOB_TYPES: Record<MobTypeId, MobType> = {
   // Campos: aberto e claro. O mob mais neutro do mundo, e o primeiro que se ve.
-  errante: { id: 'errante', color: 0x44507f, emissive: 0x10142e, scale: 1 },
-  // Ruinas: entre muros. Maior, para ser visto por cima da geometria quebrada.
-  sentinela: { id: 'sentinela', color: 0x6a5596, emissive: 0x1d1440, scale: 1.18 },
-  // Floresta: pouca visibilidade. Menor e mais frio -- aparece de perto.
-  espreita: { id: 'espreita', color: 0x35697a, emissive: 0x0c2830, scale: 0.88 },
+  // E o unico calibrado de proposito para nao matar sozinho: e onde se aprende.
+  errante: {
+    id: 'errante',
+    color: 0x44507f,
+    emissive: 0x10142e,
+    scale: 1,
+    hp: 52,
+    damage: 4,
+    attackInterval: 1.6,
+    attackRange: 4,
+    reward: 3,
+  },
+  // Ruinas: entre muros. Maior, para ser visto por cima da geometria quebrada,
+  // e mais duro -- e a segunda regiao do percurso.
+  sentinela: {
+    id: 'sentinela',
+    color: 0x6a5596,
+    emissive: 0x1d1440,
+    scale: 1.18,
+    hp: 84,
+    damage: 7,
+    attackInterval: 1.5,
+    attackRange: 4,
+    reward: 6,
+  },
+  // Floresta: pouca visibilidade. Menor e mais frio, bate rapido e fraco --
+  // combina com a regiao onde o perigo aparece de perto.
+  espreita: {
+    id: 'espreita',
+    color: 0x35697a,
+    emissive: 0x0c2830,
+    scale: 0.88,
+    hp: 66,
+    damage: 5,
+    attackInterval: 1.05,
+    attackRange: 4,
+    reward: 5,
+  },
 };
 
 /**

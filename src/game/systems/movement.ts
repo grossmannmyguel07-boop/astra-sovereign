@@ -56,7 +56,9 @@ export class MovementSystem {
     p.prevY = p.y;
     p.prevFacing = p.facing;
 
-    const magnitude = Math.hypot(intent.x, intent.z);
+    // Morto nao anda. Ler o campo do estado compartilhado nao viola a regra 2:
+    // o que e proibido e importar outro sistema, nao ler o estado do jogo.
+    const magnitude = p.dead ? 0 : Math.hypot(intent.x, intent.z);
 
     if (magnitude > JOYSTICK_DEADZONE) {
       // Direcao analogica em 360 graus: normaliza o vetor e usa o angulo exato

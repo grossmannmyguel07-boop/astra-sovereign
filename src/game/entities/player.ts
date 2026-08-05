@@ -8,6 +8,8 @@
  * de `src/render/views/player-view.ts`.
  */
 
+import { PLAYER_MAX_HP } from '@/config/balance';
+
 export interface PlayerState {
   /** Posicao no plano do mundo. */
   x: number;
@@ -37,6 +39,28 @@ export interface PlayerState {
   /** Angulo do corpo (yaw, em radianos), e o valor do passo anterior. */
   facing: number;
   prevFacing: number;
+
+  // --- Combate (M4) ---
+
+  hp: number;
+  maxHp: number;
+
+  /**
+   * Segundos restantes ate o proximo golpe. O ataque e automatico: sai sozinho
+   * quando zera e ha alvo no alcance.
+   */
+  attackCooldown: number;
+
+  /**
+   * Morto. Enquanto verdadeiro o movimento e o ataque ficam parados e
+   * `respawnTimer` corre.
+   *
+   * **Nao existe piso de sobrevivencia.** Um mob cujo dano alcance `maxHp` mata
+   * em um golpe, do mesmo jeito que o jogador mata em um golpe quando o dano
+   * dele alcanca a vida do mob. Ver `docs/design/combat.md`.
+   */
+  dead: boolean;
+  respawnTimer: number;
 }
 
 export function createPlayer(): PlayerState {
@@ -51,6 +75,11 @@ export function createPlayer(): PlayerState {
     vz: 0,
     facing: 0,
     prevFacing: 0,
+    hp: PLAYER_MAX_HP,
+    maxHp: PLAYER_MAX_HP,
+    attackCooldown: 0,
+    dead: false,
+    respawnTimer: 0,
   };
 }
 

@@ -212,3 +212,66 @@ export const CAMERA_ZOOM_LAMBDA = 18;
  * personagem sairia correndo por um encostar de dedo.
  */
 export const JOYSTICK_ZONE_REACH = 1.6;
+
+// ---------------------------------------------------------------------------
+// Combate (M4)
+// ---------------------------------------------------------------------------
+
+/**
+ * **Nao existe constante de tempo de abate, e nunca deve existir.**
+ *
+ * O tempo para matar e consequencia de `teto(vida / dano) * intervalo`, nao
+ * regra. Se o dano alcancar a vida, o alvo morre em um golpe. Ver a secao
+ * "O tempo para matar e consequencia" em `docs/design/combat.md`.
+ *
+ * Os valores abaixo foram escolhidos para o primeiro mob cair em torno de dois
+ * segundos. Isso e **ponto de partida de balanceamento**, nao comportamento:
+ * dobrar `PLAYER_ATTACK_DAMAGE` precisa matar na metade dos golpes, e nada no
+ * codigo pode impedir.
+ */
+export const PLAYER_MAX_HP = 120;
+export const PLAYER_ATTACK_DAMAGE = 14;
+
+/** Segundos entre golpes. Atributo, nao limite de sistema. */
+export const PLAYER_ATTACK_INTERVAL = 0.55;
+
+/**
+ * Alcance do auto attack, em unidades.
+ *
+ * Menor que os 11 da deteccao do mob de proposito: ele te ve e levanta a guarda
+ * bem antes de qualquer um poder acertar o outro. Essa faixa entre 11 e 5 e o
+ * aviso -- da tempo de decidir se entra ou passa reto.
+ */
+export const PLAYER_ATTACK_RANGE = 5;
+
+/**
+ * Folga que o alvo atual ganha antes de ser trocado, em unidades.
+ *
+ * Sem aderencia, dois mobs praticamente a mesma distancia fazem o alvo alternar
+ * a cada tick, e o combate vira dano espalhado em vez de foco.
+ */
+export const TARGET_STICKINESS = 1.5;
+
+/** Segundos de espera antes de o jogador voltar a jogar, e onde ele volta. */
+export const PLAYER_RESPAWN_DELAY = 2;
+
+/** Segundos ate um mob morto voltar. Ele renasce exatamente onde estava. */
+export const MOB_RESPAWN_DELAY = 6;
+
+/**
+ * Duracao do flash de impacto e do numero de dano, em segundos.
+ *
+ * O `docs/design/combat.md` chama o quadro do impacto de o mais importante do
+ * combate: sem ele, combate automatico vira numeros mudando sozinhos.
+ */
+export const IMPACT_FLASH_DURATION = 0.12;
+export const DAMAGE_NUMBER_DURATION = 0.85;
+
+/**
+ * Teto de numeros de dano simultaneos na tela.
+ *
+ * O pool tem tamanho fixo por exigencia do `CLAUDE.md`. Ao encher, o mais
+ * antigo e reaproveitado: perder o numero mais velho e melhor que alocar no
+ * meio de uma luta, e ninguem esta lendo o que ja esta sumindo.
+ */
+export const DAMAGE_NUMBER_POOL = 24;

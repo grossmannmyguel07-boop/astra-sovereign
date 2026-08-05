@@ -34,6 +34,19 @@ export interface Mob {
 
   state: MobState;
 
+  // --- Combate (M4) ---
+
+  hp: number;
+  maxHp: number;
+  /** Segundos ate o proximo golpe deste mob. */
+  attackCooldown: number;
+  /**
+   * Morto. Fica invisivel e inerte ate `respawnTimer` zerar, e entao volta
+   * **no mesmo lugar** com a vida cheia -- mob comum nunca sai do spawn.
+   */
+  dead: boolean;
+  respawnTimer: number;
+
   /**
    * Deslocamento de fase da animacao, em segundos.
    *

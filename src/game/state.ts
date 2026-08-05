@@ -24,11 +24,21 @@ export interface GameState {
    * precisar.
    */
   mobs: Mob[];
+
+  /**
+   * Moeda acumulada. Sem dreno ate o M9 -- ver `docs/design/economy.md`.
+   *
+   * Entra agora porque abate sem recompensa nenhuma quebra o Pilar 1. Ela e
+   * consequencia real: persiste no M5, aparece na HUD no M7 e e gasta no M9.
+   * Ate la mora no overlay de debug.
+   */
+  currency: number;
 }
 
 export function createInitialState(): GameState {
   return {
     player: createPlayer(),
     mobs: [],
+    currency: 0,
   };
 }
