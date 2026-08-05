@@ -3,7 +3,7 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 3 concluido e publicado.
+**Ultima atualizacao:** Milestone 4 concluido — combate ligado e jogavel.
 
 ## O que existe e funciona
 
@@ -33,6 +33,13 @@
 - **Sistema de mobs** (`src/game/systems/mobs.ts`): 40 mobs **estacionarios**
   em tres regioes, com deteccao por distancia e histerese, e giro para encarar.
   Nao perseguem e nao voltam ao spawn -- nunca saem dele. Ver `systems/mobs.md`.
+- **Barramento de eventos** (`src/game/events.ts`): sete eventos tipados, entrega
+  sincrona, payload reaproveitado por tipo. Existe porque a regra 2 proibe um
+  sistema importar outro, e o combate foi o primeiro a precisar falar.
+- **Sistema de combate** (`src/game/systems/combat.ts`): auto attack com alvo
+  mais proximo e aderencia, dano, morte, respawn de mob e do jogador, e moeda.
+  **O tempo de abate e consequencia de vida/dano/intervalo, nunca regra** -- se o
+  dano alcanca a vida, o alvo cai no primeiro golpe. Ver `systems/combat.md`.
 
 **Conteudo**
 - `src/data/world-01.ts`: as seis regioes do Mundo 1, os cinco corredores e a
@@ -68,6 +75,21 @@
   compartilhada por todos; so o esqueleto e proprio.
 - O player **deixou de ser capsula**. O clipe sai da velocidade que a simulacao
   ja calculou — `src/game/` nao sabe que animacao existe.
+- **Clipes de acao** (`attack`, `hit`, `die`): tocam uma vez, ao contrario dos de
+  ciclo. O `Animator` ganhou `playOnce`, e enquanto uma acao corre o pedido de
+  ciclo fica anotado em vez de apagar o golpe no frame seguinte. A morte segura
+  a pose ate o corpo voltar a viver.
+- **Feedback de impacto**: flash por troca de material, recuo curto da malha e
+  numero de dano. O recuo e **so visual** — a posicao simulada do mob nao muda.
+- **Numeros de dano em DOM** (`src/render/damage-numbers.ts`), pool fixo de 24,
+  projetados a mao para a tela. Zero draw calls; em sprite seriam 24 a mais numa
+  cena que tem 16 a 26.
+
+**Cores do feedback**
+- Dano do jogador `#e8ecff`, dano levado `#ff7b8a`, moeda `#ffca6b`.
+- O flash no jogador usa a cor de perigo em vez da cor do atacante. Desvio
+  consciente e registrado em `design/combat.md`: mob azul escuro sobre corpo
+  claro nao produz evento visivel a 48px.
 
 **Orientacao**
 - Exclusivamente paisagem. Em retrato o portao cobre a tela e pausa a
@@ -92,6 +114,53 @@
 **Organizacao**
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
+
+## Verificado no M4
+
+Playwright emulando iPhone em paisagem (844x390, DPR 3, toque), sobre a build de
+producao. O jogo foi jogado de verdade: teleporte para Campos, andar ate encostar
+num mob, e deixar o auto attack trabalhar.
+
+| Caso | Medido |
+|---|---|
+| Abate parado, ciclo completo | moeda **3 → 6 → 9**, um mob por vez |
+| Tempo do contato ate o abate | **~2s** (52 de vida / 14 por golpe = 4 golpes) |
+| Respawn do mob | volta em **6s**, no mesmo lugar, vida cheia |
+| Dano recebido parado | 120 → **100** em 16s |
+| 24s parado dentro da faixa de alerta (11), fora do golpe (5 e 4) | **zero dano dos dois lados** |
+| Numeros de dano na tela | `14` em `#e8ecff` e `5` em `#ff7b8a`, simultaneos |
+| Flash no mob e no jogador | **os dois**, legiveis contra o mundo escuro |
+| Corpo caido | tomba e desce ao chao; ninguem fica deitado no ar |
+| Draw calls durante o combate | 13 a **47** |
+| Triangulos | 26 mil a **47 mil** |
+| Erros de console, pagina e requisicao | **nenhum**, fora o 404 de favicon |
+
+Caminhos extremos, verificados com builds descartaveis de balanceamento — os
+valores voltaram ao normal antes do commit:
+
+| Caso | Como | Medido |
+|---|---|---|
+| **Abate em um golpe** | dano do jogador em 90 | mob cai com o jogador em vida cheia; numero, moeda e respawn rodam inteiros |
+| **Morte do jogador** | dano do mob em 70 | vida a **0**, renasce na Inicial em 2s com **120/120** |
+| **Flash de impacto** | duracao em 1.5s | mob em `#e8ecff` e jogador em `#ff7b8a`, na mesma cena |
+
+Duas anomalias investigadas e descartadas como bug: uma emenda vertical na
+imagem (artefato de captura do SwiftShader, nao reproduz entre quadros) e o
+jogador aparentemente fora do centro (estava atras de um tronco; parado e
+correndo em area aberta ele fica centrado).
+
+### Encontrado durante o QA, **nao corrigido** — fora do escopo do M4
+
+1. **Os troncos da Floresta escondem o jogador por completo.** Lutando entre
+   eles, ha quadros em que o corpo do jogador nao aparece. E o mesmo `Risco 1` de
+   `worlds/world-01.md` que os muros das Ruinas tiveram no M2, agora na Floresta.
+   Custa mais caro aqui: no M2 era navegacao, no M4 e nao ver a propria luta.
+2. **O `index.html` nao declara icone**, entao o navegador pede `/favicon.ico` e
+   leva 404 em toda sessao. E anterior ao M4 e aparece no console de todos os
+   milestones.
+3. **A cor dos mobs contradiz a direcao de arte.** `art-direction.md` manda
+   inimigo na faixa quente (ambar/vermelho); o codigo tem azuis e roxos. E uma
+   das decisoes de asset que continuam em aberto.
 
 ## Verificado no M3
 
@@ -218,8 +287,11 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 
 ## O que NAO existe ainda
 
-Save, combate, XP, HUD, units, gacha, quests, boss. Tambem nao existem:
-barramento de eventos (M4), painel de tuning (M5), transicao entre mundos (M12).
+Save, XP, HUD, units, gacha, quests, boss. Tambem nao existem: painel de tuning
+(M6) e transicao entre mundos (M12).
+
+A moeda acumula mas **nao tem dreno nenhum** ate o M9. Vida e moeda so aparecem
+no overlay de debug — a HUD e do M7.
 
 O portal existe como marco visual nos dois estados, mas **nao leva a lugar
 nenhum** — atravessa-lo nao faz nada. O despertar de verdade e do M10; a
@@ -227,17 +299,20 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 4 — Combate.** Auto attack, dano, morte, respawn, numeros de dano e
-drop. Chega o **barramento de eventos**, que a `decisions/0008` pressupoe para o
-gameplay pedir animacao sem conhecer animacao.
+**Milestone 5 — Save.** Persistencia local, versionamento, migrations e
+exportar/importar. Agora ha estado de verdade para guardar: posicao, vida, moeda
+e quais mobs estao mortos com quanto tempo de respawn.
 
-O respawn migrou do M3 para ca: respawn exige morte, que exige dano.
+Antes dele, duas coisas pedem decisao do desenvolvedor:
 
-A animacao de ataque tambem so entra aqui, junto do dano. Acao sem consequencia
-na tela e mentira que o QA aprende a ignorar.
+1. **O ritmo do combate agrada?** Os valores atuais sao ponto de partida
+   declarado, nao medicao. So jogando no aparelho da para dizer.
+2. **Benchmark v2 e a troca dos placeholders.** Os modelos escolhidos passam do
+   teto de ~900 triangulos e 22 ossos que a medicao v1 assumiu, entao o
+   protocolo precisa subir antes de qualquer importacao. Ver `06-benchmark.md` e
+   `assets/README.md`.
 
-Areas: **Combat Agent**, **Rendering Agent** e **Data & Balance**, com o Tech
-Lead integrando.
+Area: **Save Agent**, com o Tech Lead integrando.
 
 ## Direcao visual definida
 
@@ -248,6 +323,18 @@ Lead integrando.
   O sistema de animacao so chega no M3.
 - **Referencias** em `docs/references/`: analise escrita apenas, sem midia de
   terceiros.
+
+## Decisoes fechadas no M4
+
+Todas registradas em `design/combat.md`, que deixou de ter pendencia de ritmo.
+
+- **O jogador luta andando.** Nada para o movimento. A consequencia medida e
+  desejada: correr pela regiao leva dano sem abater; parar abate em ~2s.
+- **Alcance 5 contra deteccao 11.** A faixa entre os dois e o aviso, e ela e
+  inerte — 24s parado ali sem dano nenhum.
+- **Alvo mais proximo com aderencia de 1.5**, para o dano concentrar.
+- **Sem indicador de alvo, sem critico, sem elemento nem afinidade.**
+- **Morte sem punicao**: 2s e volta na Inicial com vida cheia.
 
 ## Decisoes fechadas no M3
 

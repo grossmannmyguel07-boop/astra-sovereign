@@ -1,6 +1,8 @@
 import { GameLoop } from '@/core/loop';
+import { EventBus } from '@/game/events';
 import { createInitialState, type GameState } from '@/game/state';
 import { playerSpeed } from '@/game/entities/player';
+import { CombatSystem } from '@/game/systems/combat';
 import { MovementSystem, type MoveIntent } from '@/game/systems/movement';
 import { MobSystem } from '@/game/systems/mobs';
 import { WorldSystem } from '@/game/systems/world';
@@ -25,12 +27,23 @@ function alertCount(state: GameState): number {
   return count;
 }
 
+/** Quantos estao abatidos esperando o respawn. */
+function deadCount(state: GameState): number {
+  let count = 0;
+  for (const mob of state.mobs) if (mob.dead) count++;
+  return count;
+}
+
 function boot(): void {
   const container = document.getElementById('app');
   if (!container) throw new Error('Elemento #app nao encontrado no index.html');
 
   const state = createInitialState();
   const world = new WorldSystem();
+
+  // O barramento nasce antes de tudo que fala por ele. Ele e a unica ligacao
+  // entre sistemas: pela regra 2 do `CLAUDE.md`, um sistema nunca importa outro.
+  const events = new EventBus();
 
   // O jogador nasce no centro da regiao inicial, sobre o terreno.
   const spawn = REGIONS[0]!;
@@ -47,12 +60,17 @@ function boot(): void {
   const mobs = new MobSystem();
   mobs.spawn(state, world);
 
-  const scene = new Scene(world, state);
+  const scene = new Scene(world, state, events);
   const renderer = new Renderer(container, scene.camera);
   const joystick = new VirtualJoystick();
   const cameraDrag = new CameraDrag();
   const movement = new MovementSystem();
   const overlay = new DebugOverlay();
+
+  // O jogador volta onde nasceu. A regiao Inicial nao tem mobs de proposito
+  // (`src/data/mobs.ts`), entao renascer nunca cai em cima de quem matou.
+  const combat = new CombatSystem(events);
+  combat.setRespawnPoint(state.player.x, state.player.y, state.player.z);
 
   scene.snapCamera(state);
   installCheats(state, world, scene);
@@ -72,6 +90,10 @@ function boot(): void {
 
       movement.update(dt, state, intent, world);
       mobs.update(dt, state);
+      // Depois dos mobs, para o combate ver o alerta deste tick e nao o do
+      // anterior. Depois do movimento pelo mesmo motivo: o alcance do golpe e
+      // medido de onde o jogador esta agora.
+      combat.update(dt, state);
       world.updateRegionWeights(state.player.x, state.player.z);
     },
     render(alpha, frameDt) {
@@ -95,7 +117,11 @@ function boot(): void {
           `vel    ${playerSpeed(p).toFixed(1)}\n` +
           `regiao ${world.dominantRegion().id}\n` +
           `cam    yaw ${yawDegrees.toFixed(0)}  dist ${scene.rig.currentDistance.toFixed(1)}\n` +
-          `mobs   ${state.mobs.length} (${alertCount(state)} alerta)`
+          `mobs   ${state.mobs.length} (${alertCount(state)} alerta, ${deadCount(state)} caido)\n` +
+          // Vida e moeda so tem onde aparecer aqui: a HUD e do M7. Ate la o
+          // overlay e o unico lugar em que se confere que o combate resolveu.
+          `vida   ${p.hp}/${p.maxHp}${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}\n` +
+          `moeda  ${state.currency}`
       );
     },
   });
@@ -111,7 +137,7 @@ function boot(): void {
   if (!gate.blocked) loop.start();
 
   document.getElementById('boot')?.classList.add('hidden');
-  console.log('[boot] Astra Sovereign iniciado. Milestone 3.');
+  console.log('[boot] Astra Sovereign iniciado. Milestone 4.');
 }
 
 try {
