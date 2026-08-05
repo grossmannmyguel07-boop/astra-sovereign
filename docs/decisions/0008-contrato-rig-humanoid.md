@@ -148,13 +148,18 @@ sobe uma cena de estresse com N personagens esqueletados e mede-se no aparelho:
 - Consumo de memoria
 - Tempo de renderizacao
 
-**Status:** a ferramenta existe (`bench.html`, ver `docs/06-benchmark.md`) e
-ficou permanente no projeto. Duas das quatro metricas acima nao tem API no
-Safari: memoria e tempo de CPU. O benchmark **calcula** a memoria que aloca em
-vez de medi-la, e usa o tempo de JS por frame como substituto de CPU. Isso esta
-documentado na ferramenta, e nao contornado em silencio.
+**Resolvida em `0011`.** Medido no aparelho: 200 personagens esqueletados a
+59fps sem derrubar um unico frame, contra os 49 previstos. `SkinnedMesh` fica,
+sem instanciamento e sem VAT.
 
-Falta a medicao em aparelho real, que e do desenvolvedor.
+As saidas listadas abaixo — esqueleto so para player, units e boss; mobs comuns
+em malha nao esqueletada — **nao serao usadas**. Nao ha problema para elas
+resolverem.
+
+Duas das quatro metricas acima nao tem API no Safari: memoria e tempo de CPU. O
+benchmark calcula a memoria que aloca em vez de medi-la, e usa o tempo de JS por
+frame como substituto de CPU. Documentado em `docs/06-benchmark.md`, nao
+contornado em silencio.
 
 Se o custo for alto, as saidas sao conhecidas: esqueleto apenas para player,
 units e boss; mobs comuns com animacao procedural em malha nao-esqueletada

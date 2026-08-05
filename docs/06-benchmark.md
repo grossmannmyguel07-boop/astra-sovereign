@@ -81,4 +81,9 @@ entra aqui** — renderizacao por software nao diz nada sobre um iPhone.
 
 | Data | Aparelho | GPU | Protocolo | Teto medido | Veredito |
 |---|---|---|---|---|---|
-| _(aguardando a primeira medicao em aparelho)_ | | | | | |
+| 2026-08-05 | iPhone, Safari, 844x390 @ DPR 2 | `Apple GPU` | v1 | **>= 200** | Estagio A atende. Ver `decisions/0011` |
+
+Na primeira medicao **nenhum estagio derrubou um frame**: p95 igual a p50 em
+todos os degraus, pior frame sempre 17–18ms, deriva de 0% no estagio de 60s. A
+escada acabou antes do aparelho — o teto e maior ou igual a 200, nao igual a
+200.

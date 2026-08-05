@@ -3,8 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 2 concluido e publicado. M3 iniciado pelo
-benchmark obrigatorio, que aguarda medicao em aparelho.
+**Ultima atualizacao:** Milestone 2 concluido e publicado. Benchmark do M3
+medido no aparelho: a tecnica de animacao esta congelada em `decisions/0011`.
 
 ## O que existe e funciona
 
@@ -172,17 +172,11 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 3 — Mobs**, bloqueado numa medicao que so o desenvolvedor pode
-fazer.
+**Milestone 3 — Mobs**, desbloqueado.
 
-A ferramenta esta pronta e publicada. Falta abrir `bench.html` no iPhone e
-mandar o print. Enquanto o numero nao vier, nenhuma linha de mob e escrita:
-`SkinnedMesh` nao instancia, e a tecnica de animacao e decisao de arquitetura,
-nao otimizacao tardia.
-
-Se o estagio A atender o orcamento de 49 personagens, a decisao se encerra ali
-e os mobs comecam sem complexidade nenhuma a mais. So se reprovar e que existem
-os estagios B (skinning instanciado) e C (VAT).
+O benchmark mediu **200 personagens esqueletados a 59fps sem derrubar um frame**,
+contra os 49 previstos. `SkinnedMesh` fica como esta, sem instanciamento e sem
+VAT — `decisions/0011`. Os mobs comecam sem nenhuma camada de otimizacao.
 
 Areas: **Combat Agent** e **Rendering Agent**, com o Tech Lead integrando.
 
@@ -198,10 +192,9 @@ Areas: **Combat Agent** e **Rendering Agent**, com o Tech Lead integrando.
 
 ## Decisoes em aberto
 
-- **Tecnica de animacao.** Bloqueada na primeira medicao em aparelho. Ver
-  `06-benchmark.md`.
 - **FOV horizontal.** Hoje 75 graus contra ~113 da referencia, que mostra bem
   mais mundo. Julgar no M3, com mundo de verdade na tela.
 - **Orcamento do personagem.** ~900 triangulos e 22 ossos, congelado
-  **provisoriamente** para o benchmark. Vira definitivo quando o primeiro
-  modelo real existir.
+  **provisoriamente**. Vira definitivo quando o primeiro modelo real existir.
+  Com 4x de folga medida, ha espaco para subir se a arte pedir — mas subir
+  invalida a medicao e exige nova versao de protocolo.
