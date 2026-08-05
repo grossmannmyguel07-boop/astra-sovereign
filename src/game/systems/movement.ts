@@ -3,12 +3,13 @@ import {
   JOYSTICK_FULL_TILT,
   PLAYER_ACCEL,
   PLAYER_FRICTION,
+  PLAYER_RADIUS,
   PLAYER_SPEED,
   PLAYER_TURN_LAMBDA,
-  WORLD_RADIUS,
 } from '@/config/balance';
 import { approach, dampAngle } from '@/core/math';
 import type { GameState } from '@/game/state';
+import type { TerrainQuery } from '@/game/systems/world';
 
 /**
  * Intencao de movimento vinda do jogador.
@@ -45,13 +46,14 @@ export class MovementSystem {
    * @param intent Direcao desejada, ja em coordenadas de tela. O modulo do
    *               vetor controla a velocidade; a direcao e discretizada.
    */
-  update(dt: number, state: GameState, intent: MoveIntent): void {
+  update(dt: number, state: GameState, intent: MoveIntent, terrain: TerrainQuery): void {
     const p = state.player;
 
     // Guardado antes de qualquer alteracao: o renderizador interpola entre o
     // passo anterior e o atual para nao tremer entre ticks da simulacao.
     p.prevX = p.x;
     p.prevZ = p.z;
+    p.prevY = p.y;
     p.prevFacing = p.facing;
 
     const magnitude = Math.hypot(intent.x, intent.z);
@@ -97,29 +99,38 @@ export class MovementSystem {
     p.x += p.vx * dt;
     p.z += p.vz * dt;
 
-    this.clampToWorld(state);
+    this.collide(state, terrain);
+
+    // A altura nao e simulada: e consultada. O player acompanha o chao.
+    p.y = terrain.heightAt(p.x, p.z);
   }
 
   /**
-   * Mantem o player dentro do mundo. Ao encostar na borda, zera a componente
-   * de velocidade que aponta para fora -- assim ele desliza pela borda em vez
-   * de travar de vez.
+   * Aplica a resolucao do mundo e faz o player deslizar em vez de travar.
+   *
+   * O empurrao devolvido pelo mundo aponta para fora do obstaculo. Removendo
+   * apenas a componente da velocidade que aponta contra ele, o que sobra e o
+   * movimento paralelo a parede -- que e exatamente deslizar.
    */
-  private clampToWorld(state: GameState): void {
+  private collide(state: GameState, terrain: TerrainQuery): void {
     const p = state.player;
-    const distance = Math.hypot(p.x, p.z);
-    if (distance <= WORLD_RADIUS) return;
+    const resolved = terrain.resolve(p.x, p.z, PLAYER_RADIUS);
 
-    const nx = p.x / distance;
-    const nz = p.z / distance;
+    const pushX = resolved.x - p.x;
+    const pushZ = resolved.z - p.z;
+    if (pushX === 0 && pushZ === 0) return;
 
-    p.x = nx * WORLD_RADIUS;
-    p.z = nz * WORLD_RADIUS;
+    p.x = resolved.x;
+    p.z = resolved.z;
 
-    const outward = p.vx * nx + p.vz * nz;
-    if (outward > 0) {
-      p.vx -= outward * nx;
-      p.vz -= outward * nz;
+    const length = Math.hypot(pushX, pushZ);
+    const nx = pushX / length;
+    const nz = pushZ / length;
+
+    const into = p.vx * nx + p.vz * nz;
+    if (into < 0) {
+      p.vx -= into * nx;
+      p.vz -= into * nz;
     }
   }
 }

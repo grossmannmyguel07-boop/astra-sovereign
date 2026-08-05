@@ -9,9 +9,15 @@
  */
 
 export interface PlayerState {
-  /** Posicao no plano do mundo. Y nao existe: o mundo do MVP e plano. */
+  /** Posicao no plano do mundo. */
   x: number;
   z: number;
+
+  /**
+   * Altura, vinda do terreno. Nao e simulada: e consultada.
+   * O jogador nao pula e nao cai -- acompanha o chao.
+   */
+  y: number;
 
   /**
    * Posicao no passo de simulacao anterior.
@@ -22,6 +28,7 @@ export interface PlayerState {
    */
   prevX: number;
   prevZ: number;
+  prevY: number;
 
   /** Velocidade atual, em unidades por segundo. */
   vx: number;
@@ -36,8 +43,10 @@ export function createPlayer(): PlayerState {
   return {
     x: 0,
     z: 0,
+    y: 0,
     prevX: 0,
     prevZ: 0,
+    prevY: 0,
     vx: 0,
     vz: 0,
     facing: 0,

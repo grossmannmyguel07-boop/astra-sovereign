@@ -33,8 +33,13 @@ export const PLAYER_FRICTION = 95;
  */
 export const PLAYER_TURN_LAMBDA = 20;
 
-/** Raio do mundo jogavel. O player e mantido dentro dele. */
-export const WORLD_RADIUS = 38;
+/**
+ * Raio de colisao do player, em unidades.
+ *
+ * O limite do mundo deixou de ser um raio: agora acompanha a forma das regioes
+ * e dos corredores. Ver `src/game/systems/world.ts`.
+ */
+export const PLAYER_RADIUS = 0.55;
 
 // --- Joystick ---------------------------------------------------------------
 

@@ -44,6 +44,7 @@ export class PlayerView {
   /** @param alpha Fracao entre o passo de simulacao anterior e o atual. */
   sync(player: PlayerState, alpha: number): void {
     this.object.position.x = lerp(player.prevX, player.x, alpha);
+    this.object.position.y = lerp(player.prevY, player.y, alpha);
     this.object.position.z = lerp(player.prevZ, player.z, alpha);
     this.object.rotation.y = lerpAngle(player.prevFacing, player.facing, alpha);
   }

@@ -28,6 +28,7 @@ export class CameraRig {
   readonly camera: THREE.PerspectiveCamera;
 
   private focusX = 0;
+  private focusY = 0;
   private focusZ = 0;
 
   // Alvo (o que o dedo pediu) e valor atual (o que aparece). A separacao e o
@@ -72,6 +73,7 @@ export class CameraRig {
    */
   sync(player: PlayerState, alpha: number, frameDt: number): void {
     const px = lerp(player.prevX, player.x, alpha);
+    const py = lerp(player.prevY, player.y, alpha);
     const pz = lerp(player.prevZ, player.z, alpha);
 
     // A camera se adianta na direcao do movimento. Da visao do que vem pela
@@ -81,6 +83,9 @@ export class CameraRig {
 
     this.focusX = damp(this.focusX, targetX, CAMERA_LAMBDA, frameDt);
     this.focusZ = damp(this.focusZ, targetZ, CAMERA_LAMBDA, frameDt);
+    // A altura segue mais devagar que o plano: subir uma ladeira nao deve
+    // sacudir a camera a cada ondulacao do terreno.
+    this.focusY = damp(this.focusY, py, CAMERA_LAMBDA * 0.55, frameDt);
 
     this.yaw = damp(this.yaw, this.targetYaw, CAMERA_ROTATE_LAMBDA, frameDt);
     this.pitch = damp(this.pitch, this.targetPitch, CAMERA_ROTATE_LAMBDA, frameDt);
@@ -91,6 +96,7 @@ export class CameraRig {
   /** Posiciona sem suavizacao. Usado ao iniciar e ao trocar de mundo. */
   snapTo(player: PlayerState): void {
     this.focusX = player.x;
+    this.focusY = player.y;
     this.focusZ = player.z;
     this.yaw = this.targetYaw;
     this.pitch = this.targetPitch;
@@ -105,10 +111,10 @@ export class CameraRig {
     // que existia antes da rotacao entrar.
     this.camera.position.set(
       this.focusX + CAMERA_DISTANCE * cosPitch * Math.sin(this.yaw),
-      CAMERA_LOOK_HEIGHT + CAMERA_DISTANCE * sinPitch,
+      this.focusY + CAMERA_LOOK_HEIGHT + CAMERA_DISTANCE * sinPitch,
       this.focusZ + CAMERA_DISTANCE * cosPitch * Math.cos(this.yaw)
     );
 
-    this.camera.lookAt(this.focusX, CAMERA_LOOK_HEIGHT, this.focusZ);
+    this.camera.lookAt(this.focusX, this.focusY + CAMERA_LOOK_HEIGHT, this.focusZ);
   }
 }

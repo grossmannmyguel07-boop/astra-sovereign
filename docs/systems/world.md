@@ -1,50 +1,118 @@
 # Mundo
 
-Dono: **World Agent** (`src/render/world/`, e `src/game/systems/world.ts` quando
-existir). Criado pelo Tech Lead como semente da area no M1.
+Dono: **World Agent** (`src/game/systems/world.ts`, `src/render/world/`).
+Criado pelo Tech Lead como semente da area no M2.
+
+O **o que existe e onde** do Mundo 1 esta em `docs/worlds/world-01.md`. Este
+arquivo descreve **como o sistema funciona**.
 
 ## Estado atual
 
-Apenas o mundo plano temporario do M1 (`src/render/world/ground.ts`).
-Substituido pelo Mundo 1 de verdade no M3.
+Mundo 1 completo em estrutura: terreno com relevo, colisao, seis regioes com
+identidade propria, iluminacao interpolada e o portal nos dois estados.
 
-Ainda **nao existe** `src/game/systems/world.ts`: nao ha colisao, regiao ativa
-nem carregamento por area. Chega no M3.
+Nao existe ainda: transicao entre mundos (M12), mobs (M3), carregamento por
+area (nao previsto — o mundo inteiro cabe na memoria).
 
-## Mundo plano (M1)
+## A regra que estrutura tudo: uma funcao de altura, dois consumidores
 
-Existe para uma coisa so: dar referencia visual de movimento. Um chao liso e
-vazio faz o player parecer parado mesmo andando a toda velocidade.
+`WorldSystem.heightAt(x, z)` e a **unica** fonte de altura do mundo. Dela saem:
 
-| Elemento | Papel | Custo |
-|---|---|---|
-| Chao 120x120 | Base | 1 draw call |
-| Grid 40 divisoes | Sensacao de velocidade | 1 draw call |
-| 56 marcas espalhadas | Parallax e referencia lateral | 1 draw call (InstancedMesh) |
-| Circulo do limite | Mostra a borda jogavel | 1 draw call |
+- os vertices da malha do terreno (`src/render/world/terrain.ts`)
+- a altura do player a cada tick (`src/game/systems/movement.ts`)
+- a base de cada prop, mote e do portal
 
-### Por que as marcas ficam rentes ao chao
+O bug classico de mundo — o visual e a colisao discordarem — nao e evitado por
+disciplina aqui. Ele e **impossivel por construcao**: nao existe segunda fonte
+para discordar.
 
-Nao ha colisao ainda. Um objeto alto e solido que o player atravessa pareceria
-bug; marcas rentes ao solo dao a mesma referencia de movimento sem prometer
-solidez.
+O preco e que a altura precisa ser barata, porque e chamada por vertice na
+construcao e por tick no jogo. Por isso e analitica (senos), nao um heightmap.
 
-### Por que o grid tem celulas grandes e alto contraste
+## `openness` — a forma do mundo numa funcao
 
-Na primeira versao ele era fino e escuro. Na pratica so as linhas
-perpendiculares a camera apareciam: o chao lia como listras, nao como grade, e
-andar de lado quase nao dava retorno visual.
+```
+openness(x, z) = menor distancia normalizada ate qualquer regiao ou corredor
+```
 
-### Limite do mundo
+Menor que 1 significa dentro de uma regiao ou corredor. Cresce ao se afastar de
+tudo. Dela saem tres coisas diferentes:
 
-Circulo em `WORLD_RADIUS`. A regra que segura o player e do sistema de
-movimento — aqui e apenas a representacao visual. Sem ela o jogador esbarra
-numa parede invisivel e acha que travou.
+| Consumidor | Como usa |
+|---|---|
+| Terreno | Acima de 1, o chao sobe ate `BORDER_HEIGHT` (6.5). Sao as elevacoes de fronteira |
+| Limite do mundo | Acima de `MAX_OPEN` (1.9) o jogador nao passa |
+| Colisao | O empurrao de volta e **descida de gradiente** sobre `openness` |
+
+E isso que faz o limite do mundo ter a forma do mundo em vez de ser um circulo.
+Duas iteracoes de gradiente bastam porque o deslocamento por tick e pequeno.
+
+## Colisao
+
+Duas coisas distintas, resolvidas separadamente:
+
+| Tipo | Como |
+|---|---|
+| Chao | `heightAt` a cada tick. O player acompanha o terreno, sem pulo e sem queda |
+| Bloqueador | Circulos. Empurrao para fora, depois gradiente do `openness` |
+
+O movimento **nao importa o sistema de mundo**. Recebe uma `TerrainQuery`
+somente-leitura do integrador (`src/main.ts`), mesmo padrao ja usado para o yaw
+da camera. A regra de sistemas nao se importarem continua intacta.
+
+### Deslizar, nao grudar
+
+Ao ser empurrado, so a componente da velocidade **contraria ao empurrao** e
+removida. A componente paralela sobrevive, entao encostar num muro em diagonal
+faz deslizar por ele. Zerar a velocidade inteira faria o player grudar em toda
+parede, que e o pior tato possivel num jogo de toque.
+
+### Bloqueadores: circulos, e por que basta
+
+Nada no M2 precisa de forma exata, e circulo resolve em quatro operacoes. O
+custo e nos cantos de um muro, onde o jogador para ~0.8 antes de encostar. E
+visivel se procurado, e irrelevante andando.
+
+Onde importava, os numeros foram casados: `WALL_RADIUS` (1.5) e metade da
+profundidade do bloco desenhado (3.0), entao na face plana o jogador para
+exatamente encostado.
+
+## Regioes e iluminacao
+
+`regionWeightsAt(x, z)` da o peso de cada regiao num ponto, com queda suave
+(`1 / (0.3 + d³)`). Uma unica chamada por frame alimenta **dois** consumidores:
+
+- `Scene.applyAmbience` — cor da hemisferica, cor do chao, nevoa perto e longe
+- `terrain.ts` — cor por vertice do chao
+
+Duas luzes na cena inteira, sempre. A identidade de cada regiao vem de
+interpolar propriedades dessas duas, nunca de acrescentar uma terceira. Custo:
+zero draw calls, so atualizacao de uniforme.
+
+A transicao e suavizada no tempo (`AMBIENCE_LAMBDA`); sem isso, atravessar uma
+fronteira produz um salto de cor perceptivel.
+
+## Draw calls: um lote por tipo de prop **por regiao**
+
+O descarte por frustum e por objeto. Agrupar props por regiao — em vez de um
+`InstancedMesh` global por tipo — permite eliminar regioes inteiras de uma vez
+quando estao fora da vista.
+
+Medido no M2: 8 draw calls na Arena, 26 nas Ruinas. A variacao **e** o descarte
+funcionando.
 
 ## Notas para quem for mexer
 
-- Definicao dos mundos vai para `src/data/worlds.ts` no M4. Nao inventar
-  conteudo em codigo depois disso.
+- Tudo que bloqueia vem de `world.blockerList`. Nunca desenhar um muro a partir
+  de uma segunda lista: muro desenhado num lugar e colidido em outro e o pior
+  bug de mundo que existe, e a unica defesa real e nao ter duas listas.
+- **Altura de prop e geometria de camera, nao estetica.** A camera fica 5.90
+  acima dos pes do player e 16.92 atras: a linha de visao passa a
+  `1.4 + 0.266 * d`. Um prop de topo `h` esconde o player ate `(h - 1.4) / 0.266`
+  unidades atras dele. Ver `docs/worlds/world-01.md`, Risco 1.
+- Quads deitados sobre relevo precisam acompanhar a normal do terreno
+  (`Props.alignToGround`). Um plano horizontal numa encosta atravessa o chao de
+  um lado e flutua do outro, e le como placa solta.
+- Props repetidos sempre em `InstancedMesh`.
 - Descarregar mundo precisa liberar memoria de verdade: `dispose()` em
   geometria, material e textura. Vazamento aqui derruba a aba no Safari.
-- Props repetidos sempre em `InstancedMesh`.
