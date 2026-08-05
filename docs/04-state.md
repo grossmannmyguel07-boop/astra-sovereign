@@ -3,7 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 3 concluido e publicado.
+**Ultima atualizacao:** Milestone 3 concluido e publicado. **M4 pela metade** e
+biblioteca de assets fechada — ver "Proximo passo".
 
 ## O que existe e funciona
 
@@ -92,6 +93,17 @@
 **Organizacao**
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
+
+**Metade do M4, ja no repositorio mas NAO ligada**
+- `src/game/events.ts` — barramento tipado, entrega sincrona, payload
+  reaproveitado por tipo.
+- `src/game/systems/combat.ts` — alvo com aderencia, golpes nos dois sentidos,
+  morte, respawn e recompensa.
+- Atributos de combate em `state.ts`, nas entidades, em `data/mobs.ts` e em
+  `balance.ts`. Moeda como contador no estado.
+
+**Nao esta instanciado no `main.ts`**, entao o jogo publicado se comporta
+exatamente como no fim do M3. `npm run check` e `npm run build` passam.
 
 ## Verificado no M3
 
@@ -218,8 +230,12 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 
 ## O que NAO existe ainda
 
-Save, combate, XP, HUD, units, gacha, quests, boss. Tambem nao existem:
-barramento de eventos (M4), painel de tuning (M5), transicao entre mundos (M12).
+Save, XP, HUD, units, gacha, quests, boss. Tambem nao existem: painel de tuning
+(M5), transicao entre mundos (M12).
+
+Do M4 falta a **metade visual**: clipes de `attack`, `hit` e `die`, flash de
+impacto no alvo e numeros de dano em DOM projetado com pool de tamanho fixo —
+mais a ligacao de tudo no `main.ts`.
 
 O portal existe como marco visual nos dois estados, mas **nao leva a lugar
 nenhum** — atravessa-lo nao faz nada. O despertar de verdade e do M10; a
@@ -227,27 +243,62 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 4 — Combate.** Auto attack, dano, morte, respawn, numeros de dano e
-drop. Chega o **barramento de eventos**, que a `decisions/0008` pressupoe para o
-gameplay pedir animacao sem conhecer animacao.
+**Terminar o M4 — o quadro de impacto.** A simulacao esta pronta; falta o que
+aparece na tela:
 
-O respawn migrou do M3 para ca: respawn exige morte, que exige dano.
+1. Clipes `attack`, `hit` e `die` em `src/render/characters/clips.ts`.
+2. Flash de impacto no alvo, ouvindo `mob:damaged`.
+3. Numeros de dano em DOM projetado do mundo, com pool de tamanho fixo
+   (`DAMAGE_NUMBER_POOL = 24`).
+4. Ligar `CombatSystem` no `main.ts` e mostrar vida e moeda no overlay.
 
-A animacao de ataque tambem so entra aqui, junto do dano. Acao sem consequencia
-na tela e mentira que o QA aprende a ignorar.
+Areas: **Rendering Agent**, com o Tech Lead integrando.
 
-Areas: **Combat Agent**, **Rendering Agent** e **Data & Balance**, com o Tech
-Lead integrando.
+### Regra de design que vale para todo o combate
+
+**O tempo para matar e consequencia, nunca regra.** Ele sai de
+`teto(vida / dano) * intervalo`. Se o dano alcancar a vida, o alvo morre em um
+golpe — e nao ha caminho de codigo separado para isso. Proibido: constante de
+tempo de abate, piso de golpes, limite de dano para o alvo sobreviver.
+
+Vale para o jogador tambem: nao ha piso de sobrevivencia.
+
+### Depois do M4
+
+O **M5 e Save**, mas ha um trabalho de asset que nao esta no roadmap e precisa
+acontecer antes de qualquer troca de placeholder:
+
+- Escrever o pipeline de asset (`docs/assets/estrutura-e-pipeline.md`).
+- Subir o benchmark para **protocolo v2** e medir os modelos reais no aparelho.
+  Os modelos escolhidos passam do teto de ~900 triangulos congelado no M3, o que
+  invalida o protocolo v1.
+- Corrigir a cor dos mobs do M3 para a faixa quente.
 
 ## Direcao visual definida
 
 - **Direcao de arte** em `design/art-direction.md`: low-poly cosmico, cor chapada,
   luz emissiva, paleta fechada, duas luzes, sem sombras projetadas, sem PBR.
 - **Personagens em 3D**, revertendo os sprites 2.5D — `decisions/0009`.
-- **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`.
-  O sistema de animacao so chega no M3.
+- **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`,
+  emendada no M4 com os contratos `blob` e `flying`.
 - **Referencias** em `docs/references/`: analise escrita apenas, sem midia de
   terceiros.
+
+## Biblioteca de assets — fechada
+
+`docs/assets/`. Seis pacotes CC0 levantados, 526 modelos medidos, **34
+escolhidos**. Nenhum binario no repositorio ainda.
+
+| Decisao | Resultado |
+|---|---|
+| **Rig** | A `0008` fica. Asset externo se adapta pela tabela de renomeacao. O criterio elegeu Quaternius (17/22 do contrato) e **recusou Kenney** (7/22) |
+| **Cor dos inimigos** | Passam a ser **quentes**. O mundo continua frio. O M3 sera corrigido |
+| **Pipeline** | Conversor proprio, **automacao total, sem Blender e sem editor de imagem** |
+| **`#ffca6b`** | Cor da recompensa, exclusiva. Parte da identidade do projeto |
+| **Bruto** | Fica **fora do Git**. Versiona-se so o processado |
+
+Player e boss saem do corpo **Big**; mobs comuns do corpo **Blob**; ruinas e
+itens da **Kenney**; arvores secas e rochas da **Quaternius Nature**.
 
 ## Decisoes fechadas no M3
 
