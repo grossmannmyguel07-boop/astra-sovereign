@@ -249,6 +249,14 @@ Lead integrando.
 - **Referencias** em `docs/references/`: analise escrita apenas, sem midia de
   terceiros.
 
+## Decisoes fechadas no M3
+
+- **Densidade de mobs.** 14 em Campos, 12 nas Ruinas, 14 na Floresta. Aceita
+  provisoriamente depois de jogar no aparelho. Os numeros sao uma linha cada em
+  `src/data/mobs.ts` -- reabrir custa minutos.
+- **Tamanho do personagem na tela.** Deixou de ser decisao do desenvolvedor: o
+  jogador ajusta por pinca. Ver `decisions/0006`.
+
 ## Decisoes em aberto
 
 - **FOV horizontal.** Hoje 75 graus contra ~113 da referencia, que mostra bem
