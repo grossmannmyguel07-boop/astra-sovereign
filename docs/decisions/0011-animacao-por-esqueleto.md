@@ -65,10 +65,13 @@ so que na direcao oposta.
    a 59fps sem derrubar frame. O teto real e **maior ou igual a 200**, nao igual
    a 200. Ha pelo menos 4x de folga sobre o orcamento — quanto mais, nao
    sabemos.
-2. **A cena era so personagens.** Sem terreno, sem props, sem nevoa. O mundo
-   custa hoje 8 a 26 draw calls e ~25 mil triangulos; somado a 49 personagens da
-   ~75 draw calls e ~68 mil triangulos, bem abaixo dos 200 e 176 mil que o
-   aparelho acabou de segurar. A folga e grande, mas a **soma** nao foi medida.
+2. **A cena era so personagens.** Sem terreno, sem props, sem nevoa.
+
+   *Parcialmente fechado no M3:* o jogo completo roda a **60fps travados** no
+   iPhone 14 na regiao Inicial, com 25 draw calls e 29 mil triangulos. Mas a
+   Inicial e a unica regiao **sem mobs**, entao isso mede mundo mais player, nao
+   a soma cheia. A regiao pesada e Ruinas, com 44 draw calls e ~18 mobs
+   visiveis. Falta esse numero.
 3. **Termica so foi testada no orcamento.** O estagio de 60 segundos rodou com
    49 personagens, nao com 200.
 4. **Um aparelho, uma vez.** iPhone 14, A15 — nem topo de linha nem antigo,
