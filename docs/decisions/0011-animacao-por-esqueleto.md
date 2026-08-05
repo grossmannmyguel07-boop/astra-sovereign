@@ -29,8 +29,8 @@ Ferramenta em `bench.html`, protocolo **v1**. Metodo e limitacoes em
 `docs/06-benchmark.md`.
 
 Personagem de teste: 22 ossos, 880 triangulos, 528 vertices, tres clipes com
-transicao a cada ~2.5s. Aparelho: iPhone, Safari, paisagem, 844x390 com DPR
-limitado a 2, GPU reportada como `Apple GPU`.
+transicao a cada ~2.5s. Aparelho: **iPhone 14** (A15), Safari, paisagem,
+844x390 com DPR limitado a 2, GPU reportada como `Apple GPU`.
 
 | N | Tecnica | fps | p50 | p95 | pior | js | draws | tris |
 |---|---|---|---|---|---|---|---|---|
@@ -71,8 +71,9 @@ so que na direcao oposta.
    aparelho acabou de segurar. A folga e grande, mas a **soma** nao foi medida.
 3. **Termica so foi testada no orcamento.** O estagio de 60 segundos rodou com
    49 personagens, nao com 200.
-4. **Um aparelho, uma vez.** O Safari mascara o modelo do chip como `Apple GPU`.
-   Um iPhone mais antigo pode nao ter a mesma folga.
+4. **Um aparelho, uma vez.** iPhone 14, A15 — nem topo de linha nem antigo,
+   entao serve de piso razoavel. Um iPhone mais velho pode nao ter a mesma
+   folga, e isso so se sabe medindo.
 
 Nenhum destes justifica construir B ou C agora — pela regra 5, solucao para
 problema imaginado nao entra. Todos justificam **rodar o benchmark de novo** se
