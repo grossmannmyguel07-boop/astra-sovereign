@@ -3,7 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 4 concluido — combate ligado e jogavel.
+**Ultima atualizacao:** Milestone 3 concluido e publicado. **M4 pela metade** e
+biblioteca de assets fechada — ver "Proximo passo".
 
 ## O que existe e funciona
 
@@ -115,52 +116,16 @@
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
 
-## Verificado no M4
+**Metade do M4, ja no repositorio mas NAO ligada**
+- `src/game/events.ts` — barramento tipado, entrega sincrona, payload
+  reaproveitado por tipo.
+- `src/game/systems/combat.ts` — alvo com aderencia, golpes nos dois sentidos,
+  morte, respawn e recompensa.
+- Atributos de combate em `state.ts`, nas entidades, em `data/mobs.ts` e em
+  `balance.ts`. Moeda como contador no estado.
 
-Playwright emulando iPhone em paisagem (844x390, DPR 3, toque), sobre a build de
-producao. O jogo foi jogado de verdade: teleporte para Campos, andar ate encostar
-num mob, e deixar o auto attack trabalhar.
-
-| Caso | Medido |
-|---|---|
-| Abate parado, ciclo completo | moeda **3 → 6 → 9**, um mob por vez |
-| Tempo do contato ate o abate | **~2s** (52 de vida / 14 por golpe = 4 golpes) |
-| Respawn do mob | volta em **6s**, no mesmo lugar, vida cheia |
-| Dano recebido parado | 120 → **100** em 16s |
-| 24s parado dentro da faixa de alerta (11), fora do golpe (5 e 4) | **zero dano dos dois lados** |
-| Numeros de dano na tela | `14` em `#e8ecff` e `5` em `#ff7b8a`, simultaneos |
-| Flash no mob e no jogador | **os dois**, legiveis contra o mundo escuro |
-| Corpo caido | tomba e desce ao chao; ninguem fica deitado no ar |
-| Draw calls durante o combate | 13 a **47** |
-| Triangulos | 26 mil a **47 mil** |
-| Erros de console, pagina e requisicao | **nenhum**, fora o 404 de favicon |
-
-Caminhos extremos, verificados com builds descartaveis de balanceamento — os
-valores voltaram ao normal antes do commit:
-
-| Caso | Como | Medido |
-|---|---|---|
-| **Abate em um golpe** | dano do jogador em 90 | mob cai com o jogador em vida cheia; numero, moeda e respawn rodam inteiros |
-| **Morte do jogador** | dano do mob em 70 | vida a **0**, renasce na Inicial em 2s com **120/120** |
-| **Flash de impacto** | duracao em 1.5s | mob em `#e8ecff` e jogador em `#ff7b8a`, na mesma cena |
-
-Duas anomalias investigadas e descartadas como bug: uma emenda vertical na
-imagem (artefato de captura do SwiftShader, nao reproduz entre quadros) e o
-jogador aparentemente fora do centro (estava atras de um tronco; parado e
-correndo em area aberta ele fica centrado).
-
-### Encontrado durante o QA, **nao corrigido** — fora do escopo do M4
-
-1. **Os troncos da Floresta escondem o jogador por completo.** Lutando entre
-   eles, ha quadros em que o corpo do jogador nao aparece. E o mesmo `Risco 1` de
-   `worlds/world-01.md` que os muros das Ruinas tiveram no M2, agora na Floresta.
-   Custa mais caro aqui: no M2 era navegacao, no M4 e nao ver a propria luta.
-2. **O `index.html` nao declara icone**, entao o navegador pede `/favicon.ico` e
-   leva 404 em toda sessao. E anterior ao M4 e aparece no console de todos os
-   milestones.
-3. **A cor dos mobs contradiz a direcao de arte.** `art-direction.md` manda
-   inimigo na faixa quente (ambar/vermelho); o codigo tem azuis e roxos. E uma
-   das decisoes de asset que continuam em aberto.
+**Nao esta instanciado no `main.ts`**, entao o jogo publicado se comporta
+exatamente como no fim do M3. `npm run check` e `npm run build` passam.
 
 ## Verificado no M3
 
@@ -288,10 +253,11 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 ## O que NAO existe ainda
 
 Save, XP, HUD, units, gacha, quests, boss. Tambem nao existem: painel de tuning
-(M6) e transicao entre mundos (M12).
+(M5), transicao entre mundos (M12).
 
-A moeda acumula mas **nao tem dreno nenhum** ate o M9. Vida e moeda so aparecem
-no overlay de debug — a HUD e do M7.
+Do M4 falta a **metade visual**: clipes de `attack`, `hit` e `die`, flash de
+impacto no alvo e numeros de dano em DOM projetado com pool de tamanho fixo —
+mais a ligacao de tudo no `main.ts`.
 
 O portal existe como marco visual nos dois estados, mas **nao leva a lugar
 nenhum** — atravessa-lo nao faz nada. O despertar de verdade e do M10; a
@@ -299,42 +265,62 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 5 — Save.** Persistencia local, versionamento, migrations e
-exportar/importar. Agora ha estado de verdade para guardar: posicao, vida, moeda
-e quais mobs estao mortos com quanto tempo de respawn.
+**Terminar o M4 — o quadro de impacto.** A simulacao esta pronta; falta o que
+aparece na tela:
 
-Antes dele, duas coisas pedem decisao do desenvolvedor:
+1. Clipes `attack`, `hit` e `die` em `src/render/characters/clips.ts`.
+2. Flash de impacto no alvo, ouvindo `mob:damaged`.
+3. Numeros de dano em DOM projetado do mundo, com pool de tamanho fixo
+   (`DAMAGE_NUMBER_POOL = 24`).
+4. Ligar `CombatSystem` no `main.ts` e mostrar vida e moeda no overlay.
 
-1. **O ritmo do combate agrada?** Os valores atuais sao ponto de partida
-   declarado, nao medicao. So jogando no aparelho da para dizer.
-2. **Benchmark v2 e a troca dos placeholders.** Os modelos escolhidos passam do
-   teto de ~900 triangulos e 22 ossos que a medicao v1 assumiu, entao o
-   protocolo precisa subir antes de qualquer importacao. Ver `06-benchmark.md` e
-   `assets/README.md`.
+Areas: **Rendering Agent**, com o Tech Lead integrando.
 
-Area: **Save Agent**, com o Tech Lead integrando.
+### Regra de design que vale para todo o combate
+
+**O tempo para matar e consequencia, nunca regra.** Ele sai de
+`teto(vida / dano) * intervalo`. Se o dano alcancar a vida, o alvo morre em um
+golpe — e nao ha caminho de codigo separado para isso. Proibido: constante de
+tempo de abate, piso de golpes, limite de dano para o alvo sobreviver.
+
+Vale para o jogador tambem: nao ha piso de sobrevivencia.
+
+### Depois do M4
+
+O **M5 e Save**, mas ha um trabalho de asset que nao esta no roadmap e precisa
+acontecer antes de qualquer troca de placeholder:
+
+- Escrever o pipeline de asset (`docs/assets/estrutura-e-pipeline.md`).
+- Subir o benchmark para **protocolo v2** e medir os modelos reais no aparelho.
+  Os modelos escolhidos passam do teto de ~900 triangulos congelado no M3, o que
+  invalida o protocolo v1.
+- Corrigir a cor dos mobs do M3 para a faixa quente.
 
 ## Direcao visual definida
 
 - **Direcao de arte** em `design/art-direction.md`: low-poly cosmico, cor chapada,
   luz emissiva, paleta fechada, duas luzes, sem sombras projetadas, sem PBR.
 - **Personagens em 3D**, revertendo os sprites 2.5D — `decisions/0009`.
-- **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`.
-  O sistema de animacao so chega no M3.
+- **Contrato de rig humanoid** com nomenclatura Mixamo — `decisions/0008`,
+  emendada no M4 com os contratos `blob` e `flying`.
 - **Referencias** em `docs/references/`: analise escrita apenas, sem midia de
   terceiros.
 
-## Decisoes fechadas no M4
+## Biblioteca de assets — fechada
 
-Todas registradas em `design/combat.md`, que deixou de ter pendencia de ritmo.
+`docs/assets/`. Seis pacotes CC0 levantados, 526 modelos medidos, **34
+escolhidos**. Nenhum binario no repositorio ainda.
 
-- **O jogador luta andando.** Nada para o movimento. A consequencia medida e
-  desejada: correr pela regiao leva dano sem abater; parar abate em ~2s.
-- **Alcance 5 contra deteccao 11.** A faixa entre os dois e o aviso, e ela e
-  inerte — 24s parado ali sem dano nenhum.
-- **Alvo mais proximo com aderencia de 1.5**, para o dano concentrar.
-- **Sem indicador de alvo, sem critico, sem elemento nem afinidade.**
-- **Morte sem punicao**: 2s e volta na Inicial com vida cheia.
+| Decisao | Resultado |
+|---|---|
+| **Rig** | A `0008` fica. Asset externo se adapta pela tabela de renomeacao. O criterio elegeu Quaternius (17/22 do contrato) e **recusou Kenney** (7/22) |
+| **Cor dos inimigos** | Passam a ser **quentes**. O mundo continua frio. O M3 sera corrigido |
+| **Pipeline** | Conversor proprio, **automacao total, sem Blender e sem editor de imagem** |
+| **`#ffca6b`** | Cor da recompensa, exclusiva. Parte da identidade do projeto |
+| **Bruto** | Fica **fora do Git**. Versiona-se so o processado |
+
+Player e boss saem do corpo **Big**; mobs comuns do corpo **Blob**; ruinas e
+itens da **Kenney**; arvores secas e rochas da **Quaternius Nature**.
 
 ## Decisoes fechadas no M3
 
