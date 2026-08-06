@@ -275,3 +275,24 @@ export const DAMAGE_NUMBER_DURATION = 0.85;
  * meio de uma luta, e ninguem esta lendo o que ja esta sumindo.
  */
 export const DAMAGE_NUMBER_POOL = 24;
+
+/**
+ * Quanto o numero sobe ao longo da vida, em unidades de mundo.
+ *
+ * Subir e o que separa um numero novo de um que ja estava ali: dois acertos
+ * seguidos no mesmo alvo produzem numeros na mesma posicao, e sem deslocamento
+ * o segundo parece o primeiro piscando.
+ */
+export const DAMAGE_NUMBER_RISE = 1.6;
+
+/**
+ * Recuo do alvo ao ser atingido, em unidades.
+ *
+ * **Puramente visual.** A posicao simulada do mob nao muda -- ele e estacionario
+ * por decisao de design, e `x`/`z` sao constantes depois do spawn. O que recua e
+ * a malha dentro do proprio grupo, e ela volta sozinha.
+ *
+ * Pequeno de proposito: o suficiente para o corpo reagir, nao para parecer que
+ * saiu do lugar.
+ */
+export const IMPACT_RECOIL = 0.28;

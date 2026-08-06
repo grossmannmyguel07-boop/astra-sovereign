@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { REGIONS } from '@/data/world-01';
+import type { EventBus } from '@/game/events';
 import type { GameState } from '@/game/state';
 import type { WorldSystem } from '@/game/systems/world';
 import { CameraRig } from '@/render/camera';
+import { DamageNumbers } from '@/render/damage-numbers';
 import { PlayerView } from '@/render/views/player-view';
 import { MobView } from '@/render/views/mob-view';
 import { WorldView } from '@/render/world/world-view';
@@ -17,10 +19,50 @@ import { damp } from '@/core/math';
  *
  * Le o estado e desenha. Nunca decide regra: se o player esta em determinada
  * posicao, quem decidiu foi o sistema de movimento.
+ *
+ * ## E o unico ouvinte do combate
+ *
+ * O barramento entrega evento **semantico** -- "levou 14 de dano" -- e e aqui
+ * que ele vira imagem. O `CombatSystem` nao sabe que existem clipes, materiais
+ * ou numeros na tela, e nao pode saber: e a `decisions/0008`.
+ *
+ * Os ouvintes leem o payload na hora e nao guardam a referencia. O barramento
+ * reaproveita um objeto por tipo de evento -- guardar significaria ler o
+ * proximo acerto sem perceber. Ver o topo de `src/game/events.ts`.
  */
 
 /** Suavizacao da mudanca de ambiencia entre regioes, por segundo. */
 const AMBIENCE_LAMBDA = 1.6;
+
+/**
+ * Altura em que o numero nasce, acima dos pes do alvo.
+ *
+ * O humanoide tem ~1.9 de altura, entao isto poe o numero logo acima da cabeca:
+ * alto o bastante para nao ser tapado pelo corpo, baixo o bastante para ainda
+ * pertencer a ele quando ha varios em cena.
+ */
+const NUMBER_HEIGHT = 2.1;
+
+/**
+ * A recompensa nasce mais alta que o dano.
+ *
+ * O golpe que mata emite dano e moeda no mesmo tick, no mesmo ponto. Sem
+ * separar, os dois numeros nascem um sobre o outro e nenhum dos dois se le --
+ * justamente no quadro mais importante, que e o do abate.
+ */
+const REWARD_HEIGHT = 3;
+
+/**
+ * Cores do feedback, da tabela de `docs/design/art-direction.md`.
+ *
+ * O `combat.md` manda o numero sair **na cor de quem causou**, porque com units
+ * atacando junto e a cor que deixa o jogador distinguir o proprio dano do delas
+ * sem ler nada. Ate as units existirem, o que a cor separa e dano dado de dano
+ * levado -- que e a distincao que importa agora.
+ */
+const COLOR_PLAYER_DAMAGE = '#e8ecff';
+const COLOR_PLAYER_HURT = '#ff7b8a';
+const COLOR_REWARD = '#ffca6b';
 
 export class Scene {
   readonly three: THREE.Scene;
@@ -29,6 +71,7 @@ export class Scene {
 
   private playerView: PlayerView;
   private mobView: MobView;
+  private damageNumbers: DamageNumbers;
   /** Uma geometria para todos os personagens do jogo, player incluso. */
   private characterGeometry: THREE.BufferGeometry;
   private hemisphere: THREE.HemisphereLight;
@@ -42,7 +85,7 @@ export class Scene {
   private fogNear = 30;
   private fogFar = 130;
 
-  constructor(worldSystem: WorldSystem, state: GameState) {
+  constructor(worldSystem: WorldSystem, state: GameState, events: EventBus) {
     this.three = new THREE.Scene();
     this.three.background = new THREE.Color(0x05060f);
 
@@ -76,7 +119,59 @@ export class Scene {
     this.mobView = new MobView(state.mobs, this.characterGeometry, clips);
     this.three.add(this.mobView.group);
 
+    this.damageNumbers = new DamageNumbers();
     this.rig = new CameraRig();
+
+    this.listen(events, state);
+  }
+
+  /**
+   * Liga o combate a tela.
+   *
+   * Cada assinatura aqui e uma das quatro conversas que justificaram o
+   * barramento existir, listadas no topo de `src/game/events.ts`. Morte e
+   * respawn nao aparecem: sao estado, e os views leem direto de `dead`.
+   */
+  private listen(events: EventBus, state: GameState): void {
+    events.on('player:attacked', () => {
+      this.playerView.attack();
+    });
+
+    events.on('mob:damaged', (payload) => {
+      this.mobView.hit(payload.mobId);
+      this.damageNumbers.spawn(
+        payload.x,
+        payload.y + NUMBER_HEIGHT,
+        payload.z,
+        String(payload.amount),
+        COLOR_PLAYER_DAMAGE
+      );
+    });
+
+    events.on('player:damaged', (payload) => {
+      this.playerView.hurt();
+      // Quem bateu tambem se mexe: sem o clipe de golpe no mob, o dano no
+      // jogador apareceria sem nada em cena tendo causado.
+      this.mobView.attack(payload.sourceId);
+      const player = state.player;
+      this.damageNumbers.spawn(
+        player.x,
+        player.y + NUMBER_HEIGHT,
+        player.z,
+        String(payload.amount),
+        COLOR_PLAYER_HURT
+      );
+    });
+
+    events.on('currency:gained', (payload) => {
+      this.damageNumbers.spawn(
+        payload.x,
+        payload.y + REWARD_HEIGHT,
+        payload.z,
+        `+${payload.amount}`,
+        COLOR_REWARD
+      );
+    });
   }
 
   get camera(): THREE.PerspectiveCamera {
@@ -99,6 +194,13 @@ export class Scene {
     );
     this.world.update(frameDt);
     this.applyAmbience(worldSystem, frameDt);
+
+    // Depois do rig, e com a matriz recalculada a mao: os numeros sao
+    // projetados por conta propria, e o renderizador so atualiza as matrizes
+    // quando desenha -- ou seja, depois daqui. Sem esta linha eles usariam a
+    // camera do frame anterior e escorregariam atras dela ao girar.
+    this.camera.updateMatrixWorld();
+    this.damageNumbers.update(this.camera, frameDt);
   }
 
   /**
@@ -159,6 +261,7 @@ export class Scene {
     this.world.dispose();
     this.playerView.dispose();
     this.mobView.dispose();
+    this.damageNumbers.dispose();
     this.characterGeometry.dispose();
   }
 }

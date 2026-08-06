@@ -34,6 +34,13 @@ biblioteca de assets fechada — ver "Proximo passo".
 - **Sistema de mobs** (`src/game/systems/mobs.ts`): 40 mobs **estacionarios**
   em tres regioes, com deteccao por distancia e histerese, e giro para encarar.
   Nao perseguem e nao voltam ao spawn -- nunca saem dele. Ver `systems/mobs.md`.
+- **Barramento de eventos** (`src/game/events.ts`): sete eventos tipados, entrega
+  sincrona, payload reaproveitado por tipo. Existe porque a regra 2 proibe um
+  sistema importar outro, e o combate foi o primeiro a precisar falar.
+- **Sistema de combate** (`src/game/systems/combat.ts`): auto attack com alvo
+  mais proximo e aderencia, dano, morte, respawn de mob e do jogador, e moeda.
+  **O tempo de abate e consequencia de vida/dano/intervalo, nunca regra** -- se o
+  dano alcanca a vida, o alvo cai no primeiro golpe. Ver `systems/combat.md`.
 
 **Conteudo**
 - `src/data/world-01.ts`: as seis regioes do Mundo 1, os cinco corredores e a
@@ -69,6 +76,21 @@ biblioteca de assets fechada — ver "Proximo passo".
   compartilhada por todos; so o esqueleto e proprio.
 - O player **deixou de ser capsula**. O clipe sai da velocidade que a simulacao
   ja calculou — `src/game/` nao sabe que animacao existe.
+- **Clipes de acao** (`attack`, `hit`, `die`): tocam uma vez, ao contrario dos de
+  ciclo. O `Animator` ganhou `playOnce`, e enquanto uma acao corre o pedido de
+  ciclo fica anotado em vez de apagar o golpe no frame seguinte. A morte segura
+  a pose ate o corpo voltar a viver.
+- **Feedback de impacto**: flash por troca de material, recuo curto da malha e
+  numero de dano. O recuo e **so visual** — a posicao simulada do mob nao muda.
+- **Numeros de dano em DOM** (`src/render/damage-numbers.ts`), pool fixo de 24,
+  projetados a mao para a tela. Zero draw calls; em sprite seriam 24 a mais numa
+  cena que tem 16 a 26.
+
+**Cores do feedback**
+- Dano do jogador `#e8ecff`, dano levado `#ff7b8a`, moeda `#ffca6b`.
+- O flash no jogador usa a cor de perigo em vez da cor do atacante. Desvio
+  consciente e registrado em `design/combat.md`: mob azul escuro sobre corpo
+  claro nao produz evento visivel a 48px.
 
 **Orientacao**
 - Exclusivamente paisagem. Em retrato o portao cobre a tela e pausa a
