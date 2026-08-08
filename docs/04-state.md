@@ -86,10 +86,11 @@
   cena que tem 16 a 26.
 
 **Cores do feedback**
-- Dano do jogador `#e8ecff`, dano levado `#ff7b8a`, moeda `#ffca6b`.
-- O flash no jogador usa a cor de perigo em vez da cor do atacante. Desvio
-  consciente e registrado em `design/combat.md`: mob azul escuro sobre corpo
-  claro nao produz evento visivel a 48px.
+- Numeros: dano do jogador `#e8ecff`, dano levado `#ff7b8a`, moeda `#ffca6b`.
+- **Flash na cor de quem bateu, nos dois sentidos.** O mob pisca claro, na faixa
+  do jogador; o jogador pisca na cor do mob que acertou. Funciona porque os
+  inimigos estao na faixa quente e o player e azul claro — a oposicao de matiz e
+  o que faz o quadro se ler a 48px.
 
 **Orientacao**
 - Exclusivamente paisagem. Em retrato o portao cobre a tela e pausa a
@@ -149,7 +150,21 @@ imagem (artefato de captura do SwiftShader, nao reproduz entre quadros) e o
 jogador aparentemente fora do centro (estava atras de um tronco; parado e
 correndo em area aberta ele fica centrado).
 
-### Encontrado durante o QA, **nao corrigido** — fora do escopo do M4
+### Corrigido depois do M4, no polimento
+
+1. **Troncos da Floresta.** Altura 7.5 (ate 9.4 com escala) escondia o jogador
+   inteiro em toda a distancia entre camera e player — luta invisivel. Baixados
+   para 2.6 e afinados; a faixa de ocultacao total caiu para 5.7 unidades. Mesma
+   escolha do muro das Ruinas no M2.
+2. **Cor dos mobs.** Os tres foram para a faixa quente — terracota, tijolo e
+   brasa. Nenhum usa `#ffca6b`, que e exclusiva de recompensa.
+3. **Flash do jogador.** O desvio que usava a cor de perigo saiu: com inimigos
+   quentes a regra "cor de quem bateu" voltou a ser legivel.
+
+Continua aberto: o 404 de `/favicon.ico`, que o `index.html` produz por nao
+declarar icone. E anterior ao M4.
+
+### Encontrado durante o QA do M4, **nao corrigido na epoca**
 
 1. **Os troncos da Floresta escondem o jogador por completo.** Lutando entre
    eles, ha quadros em que o corpo do jogador nao aparece. E o mesmo `Risco 1` de

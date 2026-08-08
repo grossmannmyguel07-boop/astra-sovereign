@@ -46,16 +46,10 @@ export class PlayerView {
   constructor(geometry: THREE.BufferGeometry, clips: THREE.AnimationClip[]) {
     this.material = new THREE.MeshLambertMaterial({ color: 0x9fb6ff, emissive: 0x33478f });
 
-    // **Desvio consciente do `combat.md`, que manda o flash sair na cor de quem
-    // causou.** Quem causa aqui e um mob, e os mobs sao azuis escuros: um flash
-    // escuro sobre o corpo mais claro da cena e invisivel a 48px de altura.
-    // Levar dano precisa ler como perigo, entao usa `#ff7b8a` da direcao de
-    // arte. Quando os inimigos forem para a faixa quente que a
-    // `art-direction.md` prescreve, a regra original passa a valer sozinha.
-    this.flashMaterial = new THREE.MeshLambertMaterial({
-      color: 0xff7b8a,
-      emissive: 0x8c2033,
-    });
+    // Flash na cor de quem bateu, como o `combat.md` manda. A cor chega em
+    // `hurt` e e escrita neste material -- so um golpe pinta o player por vez,
+    // entao um material basta e nada e alocado no meio da luta.
+    this.flashMaterial = new THREE.MeshLambertMaterial({ color: 0xff7b8a });
 
     this.mesh = buildCharacter(geometry, this.material);
     assertClipsBind(this.mesh, clips);
@@ -84,9 +78,15 @@ export class PlayerView {
     this.animator.playOnce('attack');
   }
 
-  /** O jogador levou um golpe: flash, recuo e clipe de dano. */
-  hurt(): void {
+  /**
+   * O jogador levou um golpe: flash, recuo e clipe de dano.
+   *
+   * @param color Cor de quem bateu. Com os inimigos na faixa quente e o player
+   *              azul claro, e a oposicao de matiz que faz o quadro se ler.
+   */
+  hurt(color: number): void {
     if (this.dead) return;
+    this.flashMaterial.color.setHex(color);
     this.flashLeft = IMPACT_FLASH_DURATION;
     this.recoilLeft = IMPACT_FLASH_DURATION;
     this.mesh.material = this.flashMaterial;

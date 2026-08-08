@@ -171,6 +171,17 @@ export class MobView {
     visual.animator.playOnce('hit');
   }
 
+  /**
+   * Cor de repouso de um mob, para quem precisa pintar algo na cor dele.
+   *
+   * Existe para o flash no jogador sair na cor de quem bateu, como o
+   * `combat.md` manda. A `Scene` poderia ler `MOB_TYPES` direto, mas o mapa de
+   * id para visual mora aqui.
+   */
+  colorOf(mobId: number): number {
+    return this.visuals[mobId]?.material.color.getHex() ?? 0xffffff;
+  }
+
   /** Este mob desferiu um golpe. */
   attack(mobId: number): void {
     const visual = this.visuals[mobId];

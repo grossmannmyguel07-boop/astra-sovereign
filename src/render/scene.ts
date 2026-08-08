@@ -149,7 +149,7 @@ export class Scene {
     });
 
     events.on('player:damaged', (payload) => {
-      this.playerView.hurt();
+      this.playerView.hurt(this.mobView.colorOf(payload.sourceId));
       // Quem bateu tambem se mexe: sem o clipe de golpe no mob, o dano no
       // jogador apareceria sem nada em cena tendo causado.
       this.mobView.attack(payload.sourceId);

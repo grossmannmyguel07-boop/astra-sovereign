@@ -45,8 +45,30 @@ const WALL_LENGTH = 3.4;
 const WALL_HEIGHT = 2.5;
 const WALL_DEPTH = 3.0;
 
-/** Tronco fino e alto: tapa o player por pouco tempo ao passar por ele. */
-const TRUNK_HEIGHT = 7.5;
+/**
+ * Tronco da Floresta.
+ *
+ * A altura anterior era 7.5, com a justificativa de que "tapa o player por
+ * pouco tempo ao passar por ele". **O QA do M4 mediu e a justificativa era
+ * falsa**: com a escala do bloqueador chegando a 1.25, o tronco alcancava 9.4.
+ *
+ * Pela mesma geometria de camera que dimensionou o muro, o topo do player
+ * (1.9) so aparece acima de um prop quando `altura < 1.9 + 0.236 * d`, com `d`
+ * atras do player. A 9.4 isso dava 31 unidades -- quase o dobro dos 16.92 que
+ * separam camera e player. Traduzindo: **todo tronco entre os dois escondia o
+ * jogador inteiro**, e lutando parado entre eles havia luta invisivel.
+ *
+ * Com 2.6 o maximo efetivo cai para 3.25, e a faixa em que o corpo some inteiro
+ * encolhe para 5.7 unidades. Nao e zero, e nao pode ser: zerar exigiria tronco
+ * mais baixo que o proprio player. E a mesma escolha registrada no muro --
+ * perto o bastante para o movimento resolver.
+ *
+ * O raio segue preso a colisao (0.75): afinar a base alem disso produziria
+ * parede invisivel, que a regra 1 deste arquivo proibe.
+ */
+const TRUNK_HEIGHT = 2.6;
+const TRUNK_RADIUS_TOP = 0.34;
+const TRUNK_RADIUS_BASE = 0.78;
 
 /** Quanto a base afunda no chao, para nao flutuar sobre relevo inclinado. */
 const SINK = 0.3;
@@ -92,7 +114,7 @@ export class Props {
       const base = isWall ? WALL_HEIGHT : TRUNK_HEIGHT;
       const geometry = isWall
         ? new THREE.BoxGeometry(WALL_LENGTH, WALL_HEIGHT, WALL_DEPTH)
-        : new THREE.CylinderGeometry(0.5, 0.85, TRUNK_HEIGHT, 6);
+        : new THREE.CylinderGeometry(TRUNK_RADIUS_TOP, TRUNK_RADIUS_BASE, TRUNK_HEIGHT, 6);
       const material = new THREE.MeshLambertMaterial({
         color: isWall ? 0x323d78 : 0x1b2447,
       });

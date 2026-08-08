@@ -95,18 +95,13 @@ Ao acertar, tres coisas simultaneas:
 O terceiro item importa mais do que parece: com units atacando junto, e a cor
 que permite o jogador distinguir o proprio dano do dano delas sem ler nada.
 
-### Uma excecao a "cor do atacante", registrada
+A regra vale nos dois sentidos: o mob pisca claro, na faixa do jogador, e o
+jogador pisca na cor do mob que bateu.
 
-`[DEFINIDO]` **O flash no jogador usa `#ff7b8a` (perigo), nao a cor do mob.**
-
-Quem bate no jogador e um mob, e os mobs hoje sao azuis escuros — um flash
-escuro sobre o corpo mais claro da cena nao e um evento, e um borrao. A 48px de
-altura o unico flash que funciona sobre o player e um que contrasta com ele.
-
-A regra original volta a valer sozinha quando os inimigos forem para a faixa
-quente que a `art-direction.md` prescreve. **Hoje eles nao estao** — o codigo
-tem mobs azuis e a direcao de arte pede ambar/vermelho. Essa divergencia e
-anterior ao M4 e continua aberta.
+Isso so passou a funcionar quando os inimigos foram para a faixa quente. Com
+mobs azuis escuros, um flash escuro sobre o corpo mais claro da cena nao era um
+evento, era um borrao — o M4 chegou a registrar um desvio usando `#ff7b8a` por
+esse motivo. Corrigida a cor dos mobs, o desvio saiu e a regra original voltou.
 
 O deslocamento do alvo e **puramente visual**: mob comum e estacionario por
 decisao de design, e a posicao simulada dele nao muda. O que recua e a malha,

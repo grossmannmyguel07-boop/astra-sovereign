@@ -49,13 +49,28 @@ export interface MobType {
   reward: number;
 }
 
+/**
+ * Os tres tipos.
+ *
+ * **Todos na faixa quente.** `art-direction.md` manda inimigo quente e aliado
+ * frio, para amigo e inimigo se lerem pela cor antes de qualquer forma -- e o
+ * mundo inteiro vive numa faixa escura e azul, entao o que e quente salta.
+ * Ate o M4 eles eram azuis e roxos, competindo com o cenario e com o player.
+ *
+ * Nenhum deles usa `#ffca6b`: essa cor ficou **exclusiva de recompensa** pela
+ * decisao registrada em `docs/assets/`. Os tres sao mais escuros e mais
+ * vermelhos que ela.
+ *
+ * Separados por matiz e por valor, para nao virarem a mesma mancha laranja:
+ * terracota, tijolo e brasa.
+ */
 export const MOB_TYPES: Record<MobTypeId, MobType> = {
   // Campos: aberto e claro. O mob mais neutro do mundo, e o primeiro que se ve.
   // E o unico calibrado de proposito para nao matar sozinho: e onde se aprende.
   errante: {
     id: 'errante',
-    color: 0x44507f,
-    emissive: 0x10142e,
+    color: 0xc0763c,
+    emissive: 0x2e1608,
     scale: 1,
     hp: 52,
     damage: 4,
@@ -67,8 +82,8 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
   // e mais duro -- e a segunda regiao do percurso.
   sentinela: {
     id: 'sentinela',
-    color: 0x6a5596,
-    emissive: 0x1d1440,
+    color: 0xa8443c,
+    emissive: 0x330f0e,
     scale: 1.18,
     hp: 84,
     damage: 7,
@@ -76,12 +91,12 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     attackRange: 4,
     reward: 6,
   },
-  // Floresta: pouca visibilidade. Menor e mais frio, bate rapido e fraco --
+  // Floresta: pouca visibilidade. Menor e mais aceso, bate rapido e fraco --
   // combina com a regiao onde o perigo aparece de perto.
   espreita: {
     id: 'espreita',
-    color: 0x35697a,
-    emissive: 0x0c2830,
+    color: 0xd0562e,
+    emissive: 0x351007,
     scale: 0.88,
     hp: 66,
     damage: 5,
