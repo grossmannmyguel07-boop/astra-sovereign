@@ -33,6 +33,16 @@ O jogador nunca olha para a tela sem ver alguma coisa quase la.
 **Consequencia:** o MVP precisa de no minimo duas trilhas — nivel do personagem
 e uma segunda. Ver `progression.md`.
 
+> **Estado real: este pilar NAO esta atendido.** O M6 entregou uma trilha
+> (nivel por XP) e o Rank ficou deliberadamente fora do MVP — ha apenas dois
+> marcos no jogo inteiro para alimenta-lo, e uma trilha que se move duas vezes
+> nunca esta perto de completar. Moeda nao conta como segunda: sai de abate
+> igual ao XP e anda junto com ele.
+>
+> E decisao de produto registrada em `progression.md`, nao divida escondida.
+> Quests (M11) sao a segunda trilha prevista. **Nao inventar uma trilha so para
+> fechar este item.**
+
 ## 3. O jogador nunca pergunta o que fazer
 
 `[DEFINIDO]` O objetivo atual fica **permanentemente na tela**, com contador

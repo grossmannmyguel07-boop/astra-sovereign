@@ -32,8 +32,15 @@ export class DebugOverlay {
     this.root = document.createElement('div');
     this.root.style.cssText = [
       'position:fixed',
-      'left:calc(8px + var(--safe-left))',
-      'top:calc(8px + var(--safe-top))',
+      // **Lado direito, abaixo dos cheats.** O canto superior esquerdo pertence
+      // a moeda e o inferior esquerdo ao joystick, pelo layout `[DEFINIDO]` de
+      // `docs/design/ui.md` -- ferramenta de dev cede o lugar para os dois.
+      //
+      // Ja esteve a esquerda e o M7 mostrou o preco: com a HUD ocupando o topo,
+      // este painel desceu 34px, cresceu ate y=325 e passou a **cobrir o centro
+      // do joystick**, em y=304. O jogo ficou sem controle e nada acusou.
+      'right:calc(8px + var(--safe-right))',
+      'top:calc(44px + var(--safe-top))',
       'z-index:58',
       'padding:7px 9px',
       'background:rgba(6,9,22,0.78)',

@@ -29,8 +29,8 @@ paralelo e execucao direta. Integracao e QA nunca sao delegados.
 | 4 | Combate | Auto attack, dano, morte, **respawn**, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data | **concluido** |
 | 5 | Save | Persistencia local em `localStorage`, formato versionado, validacao. **Sem migrations e sem exportar/importar** — ver abaixo | Save | **concluido** |
 | 6 | Progressao | XP, level, dano por nivel. **Uma trilha, nao duas** -- ver abaixo. Sem painel de tuning | Progression, Data | **concluido** |
-| 7 | HUD | Vida, XP, nivel, moeda, objetivo visivel. Resolver a disputa entre botoes e area de rotacao | UI | proximo |
-| 8 | Units | Units seguindo e atacando | Progression, Render |
+| 7 | HUD | Vida, XP, nivel, moeda. **Sem objetivo** (M11) e **sem Rank**. A disputa botoes/rotacao nao disparou: nao ha botao | UI | **concluido** |
+| 8 | Units | Units seguindo e atacando | Progression, Render | proximo |
 | 9 | Gacha | Invocacao, raridades, pity | Progression, Data, UI |
 | 10 | Boss | Boss com fases e arena | Combat, Render |
 | 11 | Quests | Objetivos, progresso, recompensas | Progression, Data, UI |
@@ -85,18 +85,24 @@ ancora de orientacao. Faz parte de dar rumo ao espaco.
 memoria, reposicionar player e persistir onde ele estava. Isso e trabalho de
 sistema, nao de cenario, e so tem sentido quando existe um segundo mundo.
 
-### O M6 entregou uma trilha, e isso e uma divida registrada
+### O MVP tem uma trilha de progressao, por decisao
 
-O escopo previa "duas trilhas simultaneas", que e o Pilar 2. Saiu uma: nivel por
-XP de abate. A segunda seria o Rank, e o que o faz subir continua `[PENDENTE]`
-em `design/progression.md` — a regra do projeto proibe transformar pendencia em
-codigo.
+O M6 previa "duas trilhas simultaneas", que e o Pilar 2. Saiu uma: nivel por XP.
 
-Moeda nao conta como segunda trilha: ela sai de abate igual ao XP, entao as duas
-andam juntas e o desalinhamento que o pilar exige nao acontece.
+A segunda seria o Rank, e ele foi **deliberadamente deixado fora do MVP**. O
+motivo e de quantidade: Rank por marcos e coerente, mas o MVP inteiro tem dois
+marcos — o boss do M10 e o Mundo 2 do M12. Uma trilha que se move duas vezes no
+jogo todo nunca esta perto de completar, que e a unica coisa que o pilar pede.
 
-O painel de tuning tambem nao entrou. Ele so se paga quando houver muitos
-numeros para ajustar no aparelho, e hoje sao tres.
+Moeda nao conta: sai de abate igual ao XP, entao as duas andam juntas.
+
+**Nao vamos fabricar uma trilha artificial para marcar o requisito como
+concluido.** Isso e decisao de produto, nao divida tecnica escondida — esta
+registrado em `design/progression.md` e no proprio `gameplay-pillars.md`.
+Quests, no M11, sao a segunda trilha prevista.
+
+O painel de tuning tambem nao entrou. So se paga com muitos numeros para ajustar
+no aparelho, e hoje sao tres.
 
 ### Por que HUD depois de Progressao
 

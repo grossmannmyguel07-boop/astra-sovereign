@@ -1,6 +1,6 @@
 # UI e HUD
 
-**Milestone:** M7 · **Estado:** principios definidos, conteudo por milestone
+**Milestone:** M7 · **Estado:** implementada — ver `systems/ui.md`
 
 Regras derivadas da analise da referencia (`references/hud/README.md`) e da
 direcao de arte. Detalhe de implementacao fica em `systems/ui.md`.
@@ -17,6 +17,17 @@ direcao de arte. Detalhe de implementacao fica em `systems/ui.md`.
 |                                                               |
 | joystick                                       [ acao ]       |
 | navegacao                     vida | XP | nivel               |
++--------------------------------------------------------------+
+
+Entregue no M7 (`acao`, `navegacao` e `objetivo` ainda nao existem):
+
++--------------------------------------------------------------+
+| moeda                                                         |
+|                                                               |
+|                      [ CENTRO LIMPO ]                         |
+|                                                               |
+| joystick     [ NV ] vida ====                                 |
+|                     XP   ==                                   |
 +--------------------------------------------------------------+
 ```
 
@@ -46,7 +57,7 @@ comecar assim e copiar o resultado sem o processo.
 
 | Milestone | Entra na HUD |
 |---|---|
-| M7 | Vida, XP, nivel, moeda, objetivo atual |
+| M7 | Vida, XP, nivel, moeda. **Sem objetivo** — quests sao do M11 |
 | M8 | Indicador de units ativas |
 | M9 | Acesso ao gacha, contador de pity se for visivel |
 | M11 | Lista de objetivos completa |
@@ -54,8 +65,12 @@ comecar assim e copiar o resultado sem o processo.
 
 ## Conflito conhecido
 
-`[PENDENTE — M7]` **Os botoes de acao vao para a metade direita, que hoje e a
-area de rotacao da camera.**
+`[PENDENTE]` **Os botoes de acao vao para a metade direita, que hoje e a area de
+rotacao da camera.**
+
+**Nao disparou no M7 e continua aberto.** A HUD entregue nao tem botao nenhum: a
+camada inteira e `pointer-events: none`, entao nada disputa o arrasto. O
+conflito volta no primeiro botao que existir.
 
 Duas saidas: os botoes ficam fora do caminho do arrasto, ou o arrasto passa a
 ignorar toques iniciados sobre eles. A segunda e mais flexivel e mais

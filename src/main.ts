@@ -12,6 +12,7 @@ import { VirtualJoystick } from '@/input/joystick';
 import { CameraDrag } from '@/input/camera-drag';
 import { Renderer } from '@/render/renderer';
 import { Scene } from '@/render/scene';
+import { Hud } from '@/ui/hud';
 import { OrientationGate } from '@/ui/orientation-gate';
 import { installDebugConsole } from '@/debug/console';
 import { DebugOverlay } from '@/debug/overlay';
@@ -76,6 +77,7 @@ function boot(): void {
   const joystick = new VirtualJoystick();
   const cameraDrag = new CameraDrag();
   const movement = new MovementSystem();
+  const hud = new Hud();
   const overlay = new DebugOverlay();
 
   // Depois do save: o nivel vem do disco e o dano do jogador e derivado dele.
@@ -123,6 +125,9 @@ function boot(): void {
       renderer.render(scene.three);
 
       const p = state.player;
+      const xpNeeded = xpToNext(state.level);
+      hud.update(state, xpNeeded);
+
       const yawDegrees = ((scene.rig.worldYaw * 180) / Math.PI) % 360;
 
       overlay.update(
@@ -134,11 +139,10 @@ function boot(): void {
           `regiao ${world.dominantRegion().id}\n` +
           `cam    yaw ${yawDegrees.toFixed(0)}  dist ${scene.rig.currentDistance.toFixed(1)}\n` +
           `mobs   ${state.mobs.length} (${alertCount(state)} alerta, ${deadCount(state)} caido)\n` +
-          // Vida e moeda so tem onde aparecer aqui: a HUD e do M7. Ate la o
-          // overlay e o unico lugar em que se confere que o combate resolveu.
-          `vida   ${p.hp}/${p.maxHp}${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}\n` +
-          `moeda  ${state.currency}\n` +
-          `nivel  ${state.level}  xp ${state.xp}/${xpToNext(state.level)}  dano ${p.attackDamage}`
+          // Vida, moeda, nivel e XP sairam daqui no M7: a HUD mostra os quatro,
+          // e `references/hud/README.md` lista informacao duplicada em dois
+          // lugares da tela como defeito. Fica so o que a HUD nao mostra.
+          `dano   ${p.attackDamage}${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}`
       );
     },
   });

@@ -44,13 +44,37 @@ que botao apertar.
 Duas trilhas com **fontes diferentes** e o que garante o desalinhamento. Se as
 duas subissem com XP, elas andariam juntas e o pilar 2 se perderia.
 
-`[PENDENTE]` **O rank sobe com o que?** Bosses derrotados, mundos alcancados,
-quests completas, ou um recurso proprio.
+### Decisao tomada: o Rank fica fora do MVP
 
-**Enquanto isso nao for decidido, o Pilar 2 nao esta atendido.** Ele exige duas
-trilhas com curvas desalinhadas; hoje ha nivel e moeda, e as duas saem de abate,
-entao andam juntas. O M6 entregou uma trilha, nao duas — e isso esta registrado
-em vez de disfarcado.
+`[DEFINIDO]` **Rank nao existe e nao sera implementado agora.** Decisao do
+desenvolvedor, tomada apos a analise do contrato — nao e omissao nem atraso.
+
+O motivo e de quantidade, nao de regra: Rank por marcos e um sistema coerente,
+mas o MVP inteiro tem **dois marcos** (o boss do M10 e o Mundo 2 do M12). Uma
+trilha que se move duas vezes no jogo todo nunca esta "perto de completar", que
+e a unica coisa que o Pilar 2 pede dela.
+
+Fica como candidato **pos-MVP**, para prestigio e desbloqueio, quando existirem
+marcos suficientes para ele se mover. Nada dele entra no save.
+
+`[PENDENTE]` **O rank sobe com o que?** Continua aberto, e so precisa de resposta
+quando o Rank voltar a mesa.
+
+### O Pilar 2 nao esta atendido, e isso e escolha registrada
+
+`[DEFINIDO]` **O MVP tem uma trilha de progressao: nivel por XP.**
+
+Moeda nao e a segunda: sai de abate igual ao XP, entao as duas andam juntas e o
+desalinhamento que o pilar exige nao acontece.
+
+**Nao vamos fabricar uma segunda trilha artificial para marcar o requisito como
+concluido.** Isso e decisao de produto, nao divida tecnica escondida: o custo de
+uma trilha inventada e permanente — ela entra no save, na HUD e no balanceamento
+— e o beneficio seria so o requisito parecer verde.
+
+Quando quests existirem (M11), elas sao a segunda trilha natural: contam abates
+por objetivo, que e fonte diferente de XP acumulado, e completam com frequencia.
+Ate la o pilar fica **explicitamente em aberto**.
 
 ## Stats
 

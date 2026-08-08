@@ -3,8 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 6 concluido — XP e nivel. M4, M5 e M6 estao
-na branch de trabalho e **ainda nao publicados**; `main` esta no M4.
+**Ultima atualizacao:** Milestone 7 concluido — HUD na tela. M4 a M7 estao na
+branch de trabalho e **ainda nao publicados**; `main` esta no M4.
 
 ## O que existe e funciona
 
@@ -48,9 +48,23 @@ na branch de trabalho e **ainda nao publicados**; `main` esta no M4.
   escolhido por ser o unico stat legivel sem HUD -- o numero de dano ja esta na
   tela desde o M4, entao `14` virar `17` e feedback completo.
   O dano e derivado do nivel e nao entra no save. Ver `systems/progression.md`.
-- **O Pilar 2 ainda nao esta atendido:** ele pede duas trilhas desalinhadas, e
-  moeda e XP saem os dois de abate. A segunda trilha depende de decidir o que
-  faz o Rank subir.
+- **O Pilar 2 nao esta atendido, e isso e decisao de produto tomada.** Rank
+  ficou **fora do MVP**: ele so teria dois marcos no jogo inteiro (boss e Mundo
+  2), e uma trilha que se move duas vezes nunca esta perto de completar. Moeda
+  nao conta como segunda: sai de abate igual ao XP. Nao havera trilha artificial
+  para fechar o requisito -- quests, no M11, sao a segunda prevista.
+  Ver `design/progression.md` e `design/gameplay-pillars.md`.
+
+**HUD**
+- `src/ui/hud.ts`: moeda no canto superior esquerdo; nivel, vida e XP no rodape,
+  a direita do joystick. DOM e CSS, `pointer-events: none` na camada inteira --
+  a rotacao da camera usa a tela toda e nada pode roubar o arrasto.
+- **So escreve no DOM quando o valor muda.** Vida abaixo de 30% vira `#ff7b8a`.
+- Sem objetivo (quests sao do M11), sem Rank, sem botao. O conflito
+  `[PENDENTE]` entre botao e area de rotacao **nao disparou** e continua aberto.
+- O overlay de debug saiu do canto superior esquerdo para o direito: ele passou
+  a cobrir o centro do joystick quando a moeda ocupou aquele canto.
+  Ver `systems/ui.md`.
 
 **Save**
 - `localStorage`, chave `astra-sovereign/save`, JSON versionado (`v: 2`).
@@ -134,6 +148,28 @@ na branch de trabalho e **ainda nao publicados**; `main` esta no M4.
 **Organizacao**
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
+
+## Verificado no M7
+
+Playwright em iPhone paisagem sobre a build de producao.
+
+| Caso | Medido |
+|---|---|
+| HUD parado | `◆ 0`, `NV 1`, vida `120/120` (barra 100%), xp `0/30` |
+| Andando | identica, sem tremor ou reflow visivel |
+| Em combate | vida `120 → 116 → 100` (barra **83.3%**), moeda `0 → 3 → 9`, xp `0/30 → 10/30`, `NV 1 → NV 2` com xp voltando a `0/85` |
+| Vida abaixo de 30% | barra vira **`#ff7b8a`**, verificado com save plantado em 30/120 |
+| Toque no rodape da HUD | vai para a camera (z40), **nao** para a HUD |
+| Toque no joystick | vai para o joystick (z43) |
+| Numero de dano durante combate | visivel no centro, sem sobreposicao da HUD |
+| Erros de console | **nenhum** |
+
+**Regressao encontrada e corrigida durante o QA.** Ao ceder o canto superior
+esquerdo para a moeda, o overlay de debug desceu 34px, cresceu ate `y=325` e
+passou a cobrir o centro do joystick, em `y=304`: o jogo ficou **sem controle**.
+Nao houve erro de tipo nem de console, e um `elementFromPoint` sobre o elemento
+folha ainda apontava para o joystick — so medir as caixas revelou. O overlay foi
+para o lado direito, abaixo dos cheats.
 
 ## Verificado no M6
 
@@ -351,12 +387,10 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 7 — HUD.** Vida, XP, nivel, moeda e objetivo visivel. Ha numero de
-verdade para mostrar desde o M6, e hoje tudo isso so existe no overlay de debug.
-
-O M6 entregou **uma** trilha, nao duas. Antes ou junto do M7, decidir o que faz
-o Rank subir -- e ele que fecha o Pilar 2, e a HUD precisa saber que existe uma
-segunda barra antes de ser desenhada.
+**Milestone 8 — Units.** Units que seguem o jogador e atacam. E a primeira vez
+que havera mais de um ator amigo em cena, e o `combat.md` ja prevê o caso: a cor
+do numero de dano existe justamente para distinguir o dano do jogador do dano
+delas.
 
 Antes dele, duas coisas pedem decisao do desenvolvedor:
 
@@ -369,7 +403,7 @@ Antes dele, duas coisas pedem decisao do desenvolvedor:
      aparelho — os escolhidos passam do teto de ~900 triangulos e 22 ossos que a
      medicao v1 assumiu, o que invalida o v1.
 
-Area: **UI/UX Agent**, com o Tech Lead integrando.
+Area: **Progression Agent** e **Rendering Agent**, com o Tech Lead integrando.
 
 ## Direcao visual definida
 
