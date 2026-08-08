@@ -33,6 +33,19 @@ export interface GameState {
    * Ate la mora no overlay de debug.
    */
   currency: number;
+
+  /**
+   * Nivel do jogador e XP acumulado **dentro do nivel atual**.
+   *
+   * O XP e reiniciado a cada subida em vez de acumular para sempre. As duas
+   * formas funcionam; esta evita que o numero cresca sem limite e precise do
+   * formato com sufixo antes de existir decisao sobre ele.
+   *
+   * O dano nao mora aqui: sai do nivel, em `player.attackDamage`. Guardar os
+   * dois daria dois donos para o mesmo fato.
+   */
+  level: number;
+  xp: number;
 }
 
 export function createInitialState(): GameState {
@@ -40,5 +53,7 @@ export function createInitialState(): GameState {
     player: createPlayer(),
     mobs: [],
     currency: 0,
+    level: 1,
+    xp: 0,
   };
 }

@@ -6,17 +6,28 @@ Persistencia local em `localStorage`. Guarda o minimo que doi perder num reload.
 
 ## Contrato
 
-Chave `astra-sovereign/save`, JSON, versao `1`:
+Chave `astra-sovereign/save`, JSON, versao `2`:
 
 ```json
-{ "v": 1, "x": -25, "z": 25, "facing": 1.5, "hp": 77, "currency": 42 }
+{ "v": 2, "x": -25, "z": 25, "facing": 1.5, "hp": 77, "currency": 42, "level": 5, "xp": 7 }
 ```
 
-| Campo | Origem |
-|---|---|
-| `x`, `z`, `facing` | `state.player` |
-| `hp` | `state.player.hp` |
-| `currency` | `state.currency` |
+| Campo | Origem | Desde |
+|---|---|---|
+| `x`, `z`, `facing` | `state.player` | v1 |
+| `hp` | `state.player.hp` | v1 |
+| `currency` | `state.currency` | v1 |
+| `level`, `xp` | `state.level`, `state.xp` | **v2** |
+
+### A v1 ainda carrega
+
+Save v1 e aceito e completado com nivel 1 e XP 0 -- que e exatamente onde um
+jogador do M5 estava, porque o M6 nao existia.
+
+E a primeira migracao do projeto e existe por um caso concreto: ha saves v1
+gravados no aparelho do desenvolvedor. Sem esse caso, descartar seria o certo.
+Versao **acima** da atual continua sendo descartada: nao da para adivinhar um
+formato do futuro.
 
 ## O que fica de fora, e por que
 
@@ -25,6 +36,8 @@ Chave `astra-sovereign/save`, JSON, versao `1`:
   jogador enterrado.
 - **Velocidade, cooldowns, posicao anterior.** Transitorios de um tick. Zerados
   ao carregar, que e o estado correto de quem acabou de chegar.
+- **O dano do jogador.** Sai do nivel, em `ProgressionSystem`. Mesmo motivo da
+  altura: derivado nao se guarda, senao ganha dois donos e eles divergem.
 - **Os mobs.** Renascem em 6s a partir de uma semente fixa. Serializar 40
   registros para lembrar que um esta caido por mais quatro segundos e custo sem
   troca: recarregar e esperar seis segundos sao a mesma coisa para quem joga.
@@ -48,15 +61,13 @@ Qualquer campo invalido **descarta o save inteiro** e remove a chave. Nao ha
 recuperacao parcial: um arquivo em que a posicao nao faz sentido nao merece
 confianca no saldo de moeda.
 
-- JSON ilegivel, nao-objeto, ou `v` diferente de 1 → descarta.
+- JSON ilegivel, nao-objeto, ou `v` fora de {1, 2} → descarta.
 - `x`, `z`, `facing`, `hp`, `currency` nao finitos → descarta.
 - Posicao alem do alcance do mundo (com folga de 1.5x) → descarta.
+- Num save v2, `level` e `xp` nao finitos → descarta. Presos no minimo 1 e 0.
 - `hp` e `currency` sao **presos na faixa**, nao recusados: sao os dois campos
   que o balanceamento pode mudar entre versoes, e um teto que baixou nao e save
   corrompido, e save antigo de um jogo que mudou.
-
-Save de versao desconhecida e descartado, nao adivinhado. Enquanto nao houver um
-segundo formato de verdade, migrar seria codigo para um caso que nunca ocorreu.
 
 ### A validacao de posicao ja foi apertada demais
 

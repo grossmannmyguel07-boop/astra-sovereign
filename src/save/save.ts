@@ -36,7 +36,19 @@ const KEY = 'astra-sovereign/save';
  * enquanto nao houver um segundo formato de verdade, migrar seria escrever
  * codigo para um caso que nunca aconteceu.
  */
-const VERSION = 1;
+const VERSION = 2;
+
+/**
+ * Versoes anteriores que ainda carregam.
+ *
+ * A v1 nao tinha nivel nem XP. Ela e aceita e completada com nivel 1 e XP 0,
+ * que e exatamente onde um jogador do M5 estava -- o M6 nao existia.
+ *
+ * Esta e a primeira migracao do projeto, e ela existe por um caso concreto: ha
+ * saves v1 gravados no aparelho do desenvolvedor. Sem esse caso, descartar seria
+ * o certo.
+ */
+const READABLE = new Set([1, 2]);
 
 /**
  * Segundos entre gravacoes automaticas.
@@ -74,6 +86,9 @@ export interface SaveData {
   facing: number;
   hp: number;
   currency: number;
+  /** Desde a v2. Save v1 carrega com nivel 1 e XP 0. */
+  level: number;
+  xp: number;
 }
 
 function isFinitePlain(value: unknown): value is number {
@@ -110,11 +125,21 @@ export function parseSave(raw: string, maxHp: number): SaveData | null {
   if (typeof data !== 'object' || data === null) return null;
   const candidate = data as Record<string, unknown>;
 
-  if (candidate.v !== VERSION) return null;
+  if (typeof candidate.v !== 'number' || !READABLE.has(candidate.v)) return null;
   if (!isFinitePlain(candidate.x) || !isFinitePlain(candidate.z)) return null;
   if (!isFinitePlain(candidate.facing)) return null;
   if (!isFinitePlain(candidate.hp) || !isFinitePlain(candidate.currency)) return null;
   if (!plausiblePosition(candidate.x, candidate.z)) return null;
+
+  // Migracao v1 -> v2: os campos novos nascem no valor de quem nunca jogou o
+  // M6. Num save v2 eles precisam existir e ser finitos.
+  let level = 1;
+  let xp = 0;
+  if (candidate.v >= 2) {
+    if (!isFinitePlain(candidate.level) || !isFinitePlain(candidate.xp)) return null;
+    level = Math.max(Math.round(candidate.level), 1);
+    xp = Math.max(Math.round(candidate.xp), 0);
+  }
 
   // Vida e moeda sao presos na faixa em vez de recusados: sao os dois campos que
   // o balanceamento pode mudar entre versoes, e um teto que baixou nao e save
@@ -123,7 +148,16 @@ export function parseSave(raw: string, maxHp: number): SaveData | null {
   const currency = Math.max(Math.floor(candidate.currency), 0);
   if (!Number.isFinite(hp) || !Number.isFinite(currency)) return null;
 
-  return { v: VERSION, x: candidate.x, z: candidate.z, facing: candidate.facing, hp, currency };
+  return {
+    v: VERSION,
+    x: candidate.x,
+    z: candidate.z,
+    facing: candidate.facing,
+    hp,
+    currency,
+    level,
+    xp,
+  };
 }
 
 export class SaveSystem {
@@ -189,6 +223,10 @@ export class SaveSystem {
     player.hp = data.hp;
 
     this.state.currency = data.currency;
+    this.state.level = data.level;
+    this.state.xp = data.xp;
+    // O dano do jogador sai do nivel e nao e escrito aqui: quem recalcula e a
+    // progressao, no `init`, depois desta carga.
   }
 
   /**
@@ -210,6 +248,8 @@ export class SaveSystem {
       facing: player.facing,
       hp: player.hp,
       currency: this.state.currency,
+      level: this.state.level,
+      xp: this.state.xp,
     };
 
     try {

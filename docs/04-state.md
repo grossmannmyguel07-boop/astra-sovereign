@@ -3,7 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 4 concluido — combate ligado e jogavel.
+**Ultima atualizacao:** Milestone 6 concluido — XP e nivel. M4, M5 e M6 estao
+na branch de trabalho e **ainda nao publicados**; `main` esta no M4.
 
 ## O que existe e funciona
 
@@ -41,9 +42,20 @@
   **O tempo de abate e consequencia de vida/dano/intervalo, nunca regra** -- se o
   dano alcanca a vida, o alvo cai no primeiro golpe. Ver `systems/combat.md`.
 
+**Progressao**
+- **XP e nivel** (`src/game/systems/progression.ts`): XP por abate, curva
+  `30 * nivel ^ 1.5`, XP zera a cada subida. O unico efeito de subir e **dano**,
+  escolhido por ser o unico stat legivel sem HUD -- o numero de dano ja esta na
+  tela desde o M4, entao `14` virar `17` e feedback completo.
+  O dano e derivado do nivel e nao entra no save. Ver `systems/progression.md`.
+- **O Pilar 2 ainda nao esta atendido:** ele pede duas trilhas desalinhadas, e
+  moeda e XP saem os dois de abate. A segunda trilha depende de decidir o que
+  faz o Rank subir.
+
 **Save**
-- `localStorage`, chave `astra-sovereign/save`, JSON versionado (`v: 1`).
-  Persiste posicao, angulo, vida e moeda -- cinco numeros. Mobs e altura ficam
+- `localStorage`, chave `astra-sovereign/save`, JSON versionado (`v: 2`).
+  Persiste posicao, angulo, vida, moeda, nivel e XP -- sete numeros.
+  Save `v1` do M5 ainda carrega, completado com nivel 1 e XP 0. Mobs e altura ficam
   de fora de proposito. Autosave a cada 5s mais flush ao esconder ou sair.
   Save invalido e descartado inteiro e o jogo comeca do zero.
   Ver `systems/save.md`.
@@ -122,6 +134,21 @@
 **Organizacao**
 - Equipe de agentes com mapa de propriedade fixo (`docs/05-agents.md`,
   `.claude/agents/`).
+
+## Verificado no M6
+
+Playwright em iPhone paisagem sobre a build de producao.
+
+| Caso | Medido |
+|---|---|
+| Ganho de XP por abate | 10 por errante, acumulando |
+| Subida de nivel | aos 30 XP: nivel 2, XP zera, proximo alvo **85** |
+| Efeito na tela | dano **14 → 17** no golpe seguinte; texto `NIVEL 3` em `#ffca6b` |
+| Reload com progresso | nivel, XP, dano, moeda e vida voltam iguais |
+| Save `v1` do M5 | migra: vida e moeda preservadas, nivel 1 e XP 0 |
+| Save `v2` plantado no nivel 5 | dano **26** = 14 + 4x3, derivado e nao lido do save |
+| Quatro saves invalidos | descartados, jogo comeca do zero |
+| Erros de console | **nenhum** |
 
 ## Verificado no M4
 
@@ -324,9 +351,12 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 6 — Progressao.** XP, level, stats e duas trilhas simultaneas.
-Chega o painel de tuning. O M5 fechou: o save ja guarda o que o M6 vai precisar
-estender, e estender significa **subir a versao do save**.
+**Milestone 7 — HUD.** Vida, XP, nivel, moeda e objetivo visivel. Ha numero de
+verdade para mostrar desde o M6, e hoje tudo isso so existe no overlay de debug.
+
+O M6 entregou **uma** trilha, nao duas. Antes ou junto do M7, decidir o que faz
+o Rank subir -- e ele que fecha o Pilar 2, e a HUD precisa saber que existe uma
+segunda barra antes de ser desenhada.
 
 Antes dele, duas coisas pedem decisao do desenvolvedor:
 
@@ -339,7 +369,7 @@ Antes dele, duas coisas pedem decisao do desenvolvedor:
      aparelho — os escolhidos passam do teto de ~900 triangulos e 22 ossos que a
      medicao v1 assumiu, o que invalida o v1.
 
-Area: **Progression Agent** e **Data & Balance**, com o Tech Lead integrando.
+Area: **UI/UX Agent**, com o Tech Lead integrando.
 
 ## Direcao visual definida
 

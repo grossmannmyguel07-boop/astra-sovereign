@@ -8,7 +8,7 @@
  * de `src/render/views/player-view.ts`.
  */
 
-import { PLAYER_MAX_HP } from '@/config/balance';
+import { PLAYER_ATTACK_DAMAGE, PLAYER_MAX_HP } from '@/config/balance';
 
 export interface PlayerState {
   /** Posicao no plano do mundo. */
@@ -46,6 +46,18 @@ export interface PlayerState {
   maxHp: number;
 
   /**
+   * Dano por golpe.
+   *
+   * Deixou de ser constante no M6: e o unico efeito que subir de nivel produz.
+   * Derivado de `state.level`, entao **nao entra no save** -- recalcular a
+   * partir do nivel evita dois donos para o mesmo numero.
+   *
+   * E tambem o efeito mais legivel possivel sem HUD: o numero de dano ja esta
+   * na tela desde o M4, entao ver `14` virar `17` nao precisa de nada novo.
+   */
+  attackDamage: number;
+
+  /**
    * Segundos restantes ate o proximo golpe. O ataque e automatico: sai sozinho
    * quando zera e ha alvo no alcance.
    */
@@ -77,6 +89,7 @@ export function createPlayer(): PlayerState {
     prevFacing: 0,
     hp: PLAYER_MAX_HP,
     maxHp: PLAYER_MAX_HP,
+    attackDamage: PLAYER_ATTACK_DAMAGE,
     attackCooldown: 0,
     dead: false,
     respawnTimer: 0,

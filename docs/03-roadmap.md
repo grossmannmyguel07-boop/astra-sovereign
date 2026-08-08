@@ -28,8 +28,8 @@ paralelo e execucao direta. Integracao e QA nunca sao delegados.
 | 3 | Mobs | Benchmark no aparelho, personagem animado, mobs estacionarios com deteccao e alerta | Combat, Render, Data | **concluido** |
 | 4 | Combate | Auto attack, dano, morte, **respawn**, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data | **concluido** |
 | 5 | Save | Persistencia local em `localStorage`, formato versionado, validacao. **Sem migrations e sem exportar/importar** — ver abaixo | Save | **concluido** |
-| 6 | Progressao | XP, level, stats, duas trilhas simultaneas. Chega o painel de tuning | Progression, Data | proximo |
-| 7 | HUD | Vida, XP, nivel, moeda, objetivo visivel. Resolver a disputa entre botoes e area de rotacao | UI |
+| 6 | Progressao | XP, level, dano por nivel. **Uma trilha, nao duas** -- ver abaixo. Sem painel de tuning | Progression, Data | **concluido** |
+| 7 | HUD | Vida, XP, nivel, moeda, objetivo visivel. Resolver a disputa entre botoes e area de rotacao | UI | proximo |
 | 8 | Units | Units seguindo e atacando | Progression, Render |
 | 9 | Gacha | Invocacao, raridades, pity | Progression, Data, UI |
 | 10 | Boss | Boss com fases e arena | Combat, Render |
@@ -84,6 +84,19 @@ ancora de orientacao. Faz parte de dar rumo ao espaco.
 **Sistema de transicao: M12.** Trocar de mundo exige descarregar cena, liberar
 memoria, reposicionar player e persistir onde ele estava. Isso e trabalho de
 sistema, nao de cenario, e so tem sentido quando existe um segundo mundo.
+
+### O M6 entregou uma trilha, e isso e uma divida registrada
+
+O escopo previa "duas trilhas simultaneas", que e o Pilar 2. Saiu uma: nivel por
+XP de abate. A segunda seria o Rank, e o que o faz subir continua `[PENDENTE]`
+em `design/progression.md` — a regra do projeto proibe transformar pendencia em
+codigo.
+
+Moeda nao conta como segunda trilha: ela sai de abate igual ao XP, entao as duas
+andam juntas e o desalinhamento que o pilar exige nao acontece.
+
+O painel de tuning tambem nao entrou. Ele so se paga quando houver muitos
+numeros para ajustar no aparelho, e hoje sao tres.
 
 ### Por que HUD depois de Progressao
 

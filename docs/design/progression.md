@@ -1,6 +1,6 @@
 # Progressao
 
-**Milestone:** M6 · **Estado:** estrutura proposta, curvas indefinidas
+**Milestone:** M6 · **Estado:** trilha de nivel implementada; segunda trilha em aberto
 
 ## Definido
 
@@ -15,12 +15,26 @@ com sufixo comunica progresso melhor que numero exato pequeno.
 **Isso precisa ser decidido no M5, nao no M6** — o formato entra no save, e
 mudar depois exige migration.
 
+`[PENDENTE]` **Nao foi decidido no M5, e o M6 passou sem precisar.** O XP zera a
+cada nivel em vez de acumular, entao nenhum numero do jogo chega perto da faixa
+que exige sufixo. Continua em aberto, e a divida so vence quando existir um
+contador que cresca sem limite.
+
 `[DEFINIDO]` **Curvas progressivas, nao lineares.** Nivel 10 precisa parecer
 conquista; nivel 100 precisa continuar possivel.
 
-## Trilhas propostas
+## Trilhas
 
-`[PROPOSTA]`
+`[DEFINIDO]` **A trilha de Nivel existe e sobe com XP de abate.** Implementada no
+M6 — ver `systems/progression.md`. Curva `30 * nivel ^ 1.5`, XP por tipo de mob,
+e o unico efeito e **dano**: escolhido por ser o unico stat legivel sem HUD,
+porque o numero de dano ja esta na tela desde o M4.
+
+`[DEFINIDO]` **Tudo automatico, sem distribuicao de pontos.** Distribuir exige
+tela e contradiz o pilar 4, que quer a decisao do jogador em onde estar e nao em
+que botao apertar.
+
+`[PROPOSTA]` A tabela abaixo continua valendo para o **Rank**, que nao existe.
 
 | Trilha | Sobe com | Concede | Ritmo |
 |---|---|---|---|
@@ -33,9 +47,18 @@ duas subissem com XP, elas andariam juntas e o pilar 2 se perderia.
 `[PENDENTE]` **O rank sobe com o que?** Bosses derrotados, mundos alcancados,
 quests completas, ou um recurso proprio.
 
+**Enquanto isso nao for decidido, o Pilar 2 nao esta atendido.** Ele exige duas
+trilhas com curvas desalinhadas; hoje ha nivel e moeda, e as duas saem de abate,
+entao andam juntas. O M6 entregou uma trilha, nao duas — e isso esta registrado
+em vez de disfarcado.
+
 ## Stats
 
-`[PROPOSTA]` Comecar com o minimo que o combate exige:
+`[DEFINIDO]` **So dano, no M6.** Cada stat novo multiplica o custo de
+balanceamento e precisa aparecer na HUD, que nao existe. Os demais entram quando
+houver onde mostra-los.
+
+`[PROPOSTA]` O conjunto maior, para quando a HUD existir:
 
 ```
 Vida        quanto aguenta
@@ -46,10 +69,6 @@ Alcance
 
 Sem stats derivados, sem critico, sem penetracao. Cada stat novo multiplica o
 custo de balanceamento e precisa aparecer na HUD.
-
-`[PENDENTE]` **O jogador distribui pontos ou tudo e automatico?** Distribuicao
-manual da agencia e exige tela; automatico e mais simples e mais compativel com
-o pilar 4.
 
 ## Progressao entre mundos
 
@@ -68,8 +87,9 @@ M6, M10, M11 e M12.
 
 ## Pendencias
 
-`[PENDENTE]` **Curva de XP.** So calibravel com combate existindo — depende de
-quanto tempo leva para matar um mob.
+`[PENDENTE]` **Curva de XP.** Existe em `balance.ts` como `30 * nivel ^ 1.5`,
+mas e **valor de partida declarado**, nao medicao: o primeiro nivel sai em tres
+abates e o quinto em ~34. So jogando no aparelho da para dizer se agrada.
 
 `[PENDENTE]` **Teto de nivel no MVP?** Ou aberto.
 

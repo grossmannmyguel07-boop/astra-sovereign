@@ -45,6 +45,13 @@ export interface GameEventMap {
   'player:respawned': { x: number; z: number };
   /** Moeda concedida por um abate. */
   'currency:gained': { amount: number; x: number; y: number; z: number };
+  /**
+   * O jogador subiu de nivel. `damage` e o valor **novo**, ja aplicado.
+   *
+   * Nao traz posicao: quem desenha sabe onde o jogador esta, e a subida sempre
+   * acontece nele.
+   */
+  'player:leveled': { level: number; damage: number };
 }
 
 export type GameEventName = keyof GameEventMap;

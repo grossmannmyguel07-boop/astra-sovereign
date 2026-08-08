@@ -1,6 +1,5 @@
 import {
   MOB_RESPAWN_DELAY,
-  PLAYER_ATTACK_DAMAGE,
   PLAYER_ATTACK_INTERVAL,
   PLAYER_ATTACK_RANGE,
   PLAYER_RESPAWN_DELAY,
@@ -104,7 +103,8 @@ export class CombatSystem {
     ATTACKED.targetId = target.id;
     this.events.emit('player:attacked', ATTACKED);
 
-    this.damageMob(state, target, PLAYER_ATTACK_DAMAGE);
+    // O dano vem do jogador, nao da constante: ele sobe com o nivel desde o M6.
+    this.damageMob(state, target, player.attackDamage);
   }
 
   /**

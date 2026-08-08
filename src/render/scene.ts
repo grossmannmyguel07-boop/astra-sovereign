@@ -163,6 +163,21 @@ export class Scene {
       );
     });
 
+    events.on('player:leveled', (payload) => {
+      // Reaproveita o pool de numeros de dano em vez de abrir HUD: a subida de
+      // nivel precisa de um quadro que se veja, e o M7 e que traz interface.
+      // O efeito de verdade ja e o proprio dano, que muda de 14 para 17 no
+      // numero seguinte -- isto aqui so diz quando aconteceu.
+      const player = state.player;
+      this.damageNumbers.spawn(
+        player.x,
+        player.y + REWARD_HEIGHT,
+        player.z,
+        `NIVEL ${payload.level}`,
+        COLOR_REWARD
+      );
+    });
+
     events.on('currency:gained', (payload) => {
       this.damageNumbers.spawn(
         payload.x,

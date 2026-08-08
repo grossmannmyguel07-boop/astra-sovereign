@@ -47,6 +47,8 @@ export interface MobType {
   attackRange: number;
   /** Moeda concedida ao morrer. */
   reward: number;
+  /** XP concedido ao morrer. Ver `docs/design/progression.md`. */
+  xp: number;
 }
 
 /**
@@ -77,6 +79,7 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     attackInterval: 1.6,
     attackRange: 4,
     reward: 3,
+    xp: 10,
   },
   // Ruinas: entre muros. Maior, para ser visto por cima da geometria quebrada,
   // e mais duro -- e a segunda regiao do percurso.
@@ -90,6 +93,7 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     attackInterval: 1.5,
     attackRange: 4,
     reward: 6,
+    xp: 20,
   },
   // Floresta: pouca visibilidade. Menor e mais aceso, bate rapido e fraco --
   // combina com a regiao onde o perigo aparece de perto.
@@ -103,6 +107,7 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     attackInterval: 1.05,
     attackRange: 4,
     reward: 5,
+    xp: 15,
   },
 };
 

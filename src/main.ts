@@ -5,6 +5,7 @@ import { playerSpeed } from '@/game/entities/player';
 import { CombatSystem } from '@/game/systems/combat';
 import { MovementSystem, type MoveIntent } from '@/game/systems/movement';
 import { MobSystem } from '@/game/systems/mobs';
+import { ProgressionSystem, xpToNext } from '@/game/systems/progression';
 import { WorldSystem } from '@/game/systems/world';
 import { SaveSystem } from '@/save/save';
 import { VirtualJoystick } from '@/input/joystick';
@@ -77,11 +78,14 @@ function boot(): void {
   const movement = new MovementSystem();
   const overlay = new DebugOverlay();
 
-  // O jogador volta onde nasceu. A regiao Inicial nao tem mobs de proposito
-  // (`src/data/mobs.ts`), entao renascer nunca cai em cima de quem matou.
+  // Depois do save: o nivel vem do disco e o dano do jogador e derivado dele.
+  const progression = new ProgressionSystem(events);
+  progression.init(state);
+
   const combat = new CombatSystem(events);
   // O ponto de respawn e o **nascimento**, nao onde o save deixou o jogador:
-  // morrer devolve para a Inicial, que nao tem mobs de proposito.
+  // morrer devolve para a Inicial, que nao tem mobs de proposito
+  // (`src/data/mobs.ts`) -- renascer nunca cai em cima de quem matou.
   combat.setRespawnPoint(spawn.x, spawnY, spawn.z);
 
   scene.snapCamera(state);
@@ -133,7 +137,8 @@ function boot(): void {
           // Vida e moeda so tem onde aparecer aqui: a HUD e do M7. Ate la o
           // overlay e o unico lugar em que se confere que o combate resolveu.
           `vida   ${p.hp}/${p.maxHp}${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}\n` +
-          `moeda  ${state.currency}`
+          `moeda  ${state.currency}\n` +
+          `nivel  ${state.level}  xp ${state.xp}/${xpToNext(state.level)}  dano ${p.attackDamage}`
       );
     },
   });

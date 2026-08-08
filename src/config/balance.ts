@@ -296,3 +296,35 @@ export const DAMAGE_NUMBER_RISE = 1.6;
  * saiu do lugar.
  */
 export const IMPACT_RECOIL = 0.28;
+
+// ---------------------------------------------------------------------------
+// Progressao (M6)
+// ---------------------------------------------------------------------------
+
+/**
+ * XP para sair do nivel N: `XP_BASE * N ^ XP_CURVE`.
+ *
+ * Progressiva, nao linear, como `docs/design/progression.md` marca `[DEFINIDO]`.
+ * O expoente e o que faz o nivel 10 parecer conquista sem tornar o 100
+ * impossivel -- linear faria os dois valerem o mesmo esforco relativo.
+ *
+ * Com 30 e 1.5: o primeiro nivel sai em **3 abates** do mob mais fraco, o
+ * segundo em ~8, o quinto em ~34. Comecar barato importa porque o Pilar 1 exige
+ * retorno visivel nos primeiros segundos de jogo.
+ *
+ * Sao **valores de partida**, nao medicao. A curva so se calibra jogando.
+ */
+export const XP_BASE = 30;
+export const XP_CURVE = 1.5;
+
+/**
+ * Dano ganho por nivel.
+ *
+ * Unico efeito de subir de nivel no M6, e escolhido por ser o unico visivel sem
+ * HUD: o numero de dano ja esta na tela desde o M4. Vida maxima seria invisivel
+ * ate o M7.
+ *
+ * Some em vez de multiplicar. Multiplicador composto foge rapido demais para
+ * uma curva que ainda nao foi calibrada contra o aparelho.
+ */
+export const DAMAGE_PER_LEVEL = 3;
