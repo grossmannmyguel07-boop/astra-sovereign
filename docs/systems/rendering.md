@@ -10,6 +10,7 @@ Dono: **Rendering Agent** (`src/render/`, exceto `world/`).
 | `camera.ts` | Camera em terceira pessoa seguindo o player |
 | `scene.ts` | Monta a cena e espelha o estado nela |
 | `views/player-view.ts` | Representacao visual do player |
+| `mob-health-bars.ts` | Barra de vida sobre cada mob, em DOM |
 
 `world/` pertence ao World Agent.
 
@@ -99,6 +100,41 @@ O marcador de frente nao e enfeite: sem ele nao da para perceber que o corpo
 gira, e o giro e metade da sensacao de controle. A marca no chao evita a
 sensacao de estar flutuando.
 
+## Barra de vida dos mobs
+
+Um retangulo dentro de outro, em DOM, projetado a mao para a tela — a mesma
+tecnica dos numeros de dano, e pelo mesmo motivo: em malha seriam **duas draw
+calls por mob visivel** numa cena que tem 23 a 50. Em DOM custa zero.
+
+**Um elemento por mob, criado uma vez.** Numero de dano precisa de pool porque e
+evento — nasce aos montes e nao tem dono. Barra e propriedade de um mob, e a
+lista de mobs e fixa desde o spawn. Distribuir slots a cada frame resolveria um
+problema que nao existe.
+
+**Quem aparece:** so mob vivo, dentro do alcance da nevoa, que esteja **em alerta
+ou ja machucado**. Quarenta barras permanentes seriam ruido — um mob intacto do
+outro lado do campo nao esta acontecendo. Medido em combate: 3 simultaneas.
+
+A consequencia aceita e que um mob ferido e abandonado mantem a barra visivel
+enquanto estiver perto. E informacao util (diz o que ja foi amolecido) e o corte
+por nevoa limita quantas cabem na tela.
+
+**A cor e a do proprio mob** (`MOB_TYPES[type].color`). O `combat.md` ja usa esse
+criterio para o flash no jogador: o que pertence a uma criatura sai na cor dela.
+Nenhuma cor nova entrou na paleta, e `#ffca6b` continua exclusiva de recompensa.
+
+**Camada 39**, logo abaixo dos numeros de dano (40), para que o numero nunca
+seja tapado pela barra. `pointer-events:none`, como todas as camadas de
+feedback.
+
+**A largura do preenchimento so e escrita quando a vida muda.** A posicao muda
+todo frame porque a camera se mexe; a vida, nao. Verificado com
+`MutationObserver`: com o HP constante e a camera girando, 86 escritas de
+posicao e **zero** no preenchimento.
+
 ## Custo atual
 
 8 draw calls, 474 triangulos, 2 luzes. Medido no overlay de debug.
+
+> Numero do M1, nunca atualizado. Com mundo, mobs e combate na tela a medicao
+> real esta em `docs/04-state.md`, por milestone.

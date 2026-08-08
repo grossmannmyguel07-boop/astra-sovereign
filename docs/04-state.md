@@ -117,6 +117,11 @@ o M5, o M6 e o M7 estao em `main` e publicados.
 - **Numeros de dano em DOM** (`src/render/damage-numbers.ts`), pool fixo de 24,
   projetados a mao para a tela. Zero draw calls; em sprite seriam 24 a mais numa
   cena que tem 16 a 26.
+- **Barra de vida sobre os mobs** (`src/render/mob-health-bars.ts`), mesma
+  tecnica: DOM projetado a mao, zero draw calls. Um elemento por mob, criado uma
+  vez. Aparece so em quem esta **em alerta ou machucado** e some com a morte —
+  quarenta barras permanentes seriam ruido. Cor do proprio mob, camada 39 para
+  ficar **abaixo** dos numeros de dano. Ver `systems/rendering.md`.
 
 **Cores do feedback**
 - Numeros: dano do jogador `#e8ecff`, dano levado `#ff7b8a`, moeda `#ffca6b`.
@@ -185,6 +190,25 @@ Playwright em iPhone paisagem sobre a build de producao.
 | Save `v2` plantado no nivel 5 | dano **26** = 14 + 4x3, derivado e nao lido do save |
 | Quatro saves invalidos | descartados, jogo comeca do zero |
 | Erros de console | **nenhum** |
+
+## Verificado depois do M7 — barra de vida dos mobs
+
+Playwright em iPhone paisagem sobre a build de producao. Correcao pequena de
+feedback, fora de milestone: o combate mostrava flash, recuo e numero, mas nada
+dizia **quanto falta** para o alvo cair.
+
+| Caso | Medido |
+|---|---|
+| Regiao sem mobs | 40 elementos no DOM, **0 visiveis** |
+| Mob em alerta, intacto | barra em **100%**, 26x3 px, cor `rgb(192,118,60)` — a do errante |
+| Mob depois de apanhar | **46.2%** |
+| Morte | corpo caido **sem barra**; nenhuma barra em 0% |
+| Respawn | sem barra fantasma; volta cheia ao entrar em alerta de novo |
+| Varios ao mesmo tempo | **3** simultaneas, sem poluir a tela |
+| HP constante, camera girando | **0** escritas no preenchimento contra 86 na posicao |
+| Numeros de dano | camada 40 **por cima** da barra (39); `+3` e `14` legiveis no quadro do abate |
+| Toque | camada com `pointer-events:none`; nenhum toque cai nela |
+| Erros de console | **nenhum**, fora o 404 de favicon |
 
 ## Verificado no M5
 

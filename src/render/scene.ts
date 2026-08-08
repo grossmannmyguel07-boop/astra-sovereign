@@ -5,6 +5,7 @@ import type { GameState } from '@/game/state';
 import type { WorldSystem } from '@/game/systems/world';
 import { CameraRig } from '@/render/camera';
 import { DamageNumbers } from '@/render/damage-numbers';
+import { MobHealthBars } from '@/render/mob-health-bars';
 import { PlayerView } from '@/render/views/player-view';
 import { MobView } from '@/render/views/mob-view';
 import { WorldView } from '@/render/world/world-view';
@@ -72,6 +73,7 @@ export class Scene {
   private playerView: PlayerView;
   private mobView: MobView;
   private damageNumbers: DamageNumbers;
+  private mobHealthBars: MobHealthBars;
   /** Uma geometria para todos os personagens do jogo, player incluso. */
   private characterGeometry: THREE.BufferGeometry;
   private hemisphere: THREE.HemisphereLight;
@@ -120,6 +122,7 @@ export class Scene {
     this.three.add(this.mobView.group);
 
     this.damageNumbers = new DamageNumbers();
+    this.mobHealthBars = new MobHealthBars(state.mobs);
     this.rig = new CameraRig();
 
     this.listen(events, state);
@@ -216,6 +219,15 @@ export class Scene {
     // camera do frame anterior e escorregariam atras dela ao girar.
     this.camera.updateMatrixWorld();
     this.damageNumbers.update(this.camera, frameDt);
+    // Mesma matriz, mesmo frame. As barras nao tem vida propria: nao recebem
+    // `frameDt` porque nao animam nada -- so seguem o mob e a vida dele.
+    this.mobHealthBars.update(
+      state.mobs,
+      this.camera,
+      this.camera.position.x,
+      this.camera.position.z,
+      this.fog.far
+    );
   }
 
   /**
@@ -277,6 +289,7 @@ export class Scene {
     this.playerView.dispose();
     this.mobView.dispose();
     this.damageNumbers.dispose();
+    this.mobHealthBars.dispose();
     this.characterGeometry.dispose();
   }
 }
