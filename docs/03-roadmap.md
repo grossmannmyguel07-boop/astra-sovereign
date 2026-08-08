@@ -27,8 +27,8 @@ paralelo e execucao direta. Integracao e QA nunca sao delegados.
 | 2 | Mundo 1 | Terreno, colisao, iluminacao, organizacao espacial, atmosfera, estrutura do mapa, marco visual do portal | World, Render | **concluido** |
 | 3 | Mobs | Benchmark no aparelho, personagem animado, mobs estacionarios com deteccao e alerta | Combat, Render, Data | **concluido** |
 | 4 | Combate | Auto attack, dano, morte, **respawn**, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data | **concluido** |
-| 5 | Save | Persistencia local, versionamento, migrations, exportar/importar | Save | proximo |
-| 6 | Progressao | XP, level, stats, duas trilhas simultaneas. Chega o painel de tuning | Progression, Data |
+| 5 | Save | Persistencia local em `localStorage`, formato versionado, validacao. **Sem migrations e sem exportar/importar** — ver abaixo | Save | **concluido** |
+| 6 | Progressao | XP, level, stats, duas trilhas simultaneas. Chega o painel de tuning | Progression, Data | proximo |
 | 7 | HUD | Vida, XP, nivel, moeda, objetivo visivel. Resolver a disputa entre botoes e area de rotacao | UI |
 | 8 | Units | Units seguindo e atacando | Progression, Render |
 | 9 | Gacha | Invocacao, raridades, pity | Progression, Data, UI |
@@ -53,9 +53,28 @@ mas hoje o estado do jogo e a posicao do player: salvar isso e teatro.
 No M5 existem mundo, mobs e combate — ha estado de verdade para persistir, e o
 formato do save nasce a partir de algo real em vez de ser adivinhado.
 
-**A protecao contra o retrofit continua obrigatoria:** todo sistema criado do
-M2 em diante ja nasce com `serialize()` e `deserialize()` na fatia dele, mesmo
-sem ninguem chamando ainda. O custo e de minutos por sistema.
+**O que aconteceu de fato, e o que este texto dizia antes.** Esta secao afirmava
+que "todo sistema criado do M2 em diante ja nasce com `serialize()` e
+`deserialize()` na fatia dele". Isso **nunca foi implementado** — nenhum sistema
+tem esses metodos — e a afirmacao ficou aqui como memoria falsa ate o M5 ser
+escrito e o codigo desmentir o documento.
+
+O retrofit temido nao aconteceu, e a razao e que o save ficou pequeno: ele le e
+escreve **cinco numeros** direto do estado, sem pedir nada aos sistemas. Cada um
+com `serialize()` teria custado o dobro do sistema inteiro para persistir o que
+cabe numa linha.
+
+A licao continua valendo ao contrario da regra antiga: **o que protege contra
+retrofit e o save ser pequeno, nao os sistemas serem preparados.** Quando algo
+grande precisar persistir — mobs que se movem, boss com fase, inventario — a
+versao do save sobe e a decisao se toma ali, com o caso concreto na mao. Ver
+`systems/save.md`.
+
+**Migrations e exportar/importar sairam do M5 pelo mesmo motivo.** Migration
+exige um formato anterior para migrar, e a versao 1 e a primeira: save de versao
+desconhecida e descartado, nao adivinhado. Exportar em arquivo e utilidade de
+quem troca de aparelho, e nao ha o que trocar antes do MVP fechar. Os dois
+entram quando existir o caso, nao antes.
 
 ### Por que o portal se divide em dois
 

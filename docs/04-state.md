@@ -324,9 +324,9 @@ transicao, do M12.
 
 ## Proximo passo
 
-**Milestone 5 — Save.** Persistencia local, versionamento, migrations e
-exportar/importar. Agora ha estado de verdade para guardar: posicao, vida, moeda
-e quais mobs estao mortos com quanto tempo de respawn.
+**Milestone 6 — Progressao.** XP, level, stats e duas trilhas simultaneas.
+Chega o painel de tuning. O M5 fechou: o save ja guarda o que o M6 vai precisar
+estender, e estender significa **subir a versao do save**.
 
 Antes dele, duas coisas pedem decisao do desenvolvedor:
 
@@ -337,10 +337,9 @@ Antes dele, duas coisas pedem decisao do desenvolvedor:
    - escrever o pipeline (`docs/assets/estrutura-e-pipeline.md`);
    - subir o benchmark para **protocolo v2** e medir os modelos reais no
      aparelho — os escolhidos passam do teto de ~900 triangulos e 22 ossos que a
-     medicao v1 assumiu, o que invalida o v1;
-   - corrigir a cor dos mobs do M3 para a faixa quente.
+     medicao v1 assumiu, o que invalida o v1.
 
-Area: **Save Agent**, com o Tech Lead integrando.
+Area: **Progression Agent** e **Data & Balance**, com o Tech Lead integrando.
 
 ## Direcao visual definida
 
