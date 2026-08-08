@@ -6,6 +6,7 @@ import { CombatSystem } from '@/game/systems/combat';
 import { MovementSystem, type MoveIntent } from '@/game/systems/movement';
 import { MobSystem } from '@/game/systems/mobs';
 import { WorldSystem } from '@/game/systems/world';
+import { SaveSystem } from '@/save/save';
 import { VirtualJoystick } from '@/input/joystick';
 import { CameraDrag } from '@/input/camera-drag';
 import { Renderer } from '@/render/renderer';
@@ -47,12 +48,21 @@ function boot(): void {
 
   // O jogador nasce no centro da regiao inicial, sobre o terreno.
   const spawn = REGIONS[0]!;
+  const spawnY = world.heightAt(spawn.x, spawn.z);
   state.player.x = spawn.x;
   state.player.z = spawn.z;
-  state.player.y = world.heightAt(spawn.x, spawn.z);
+  state.player.y = spawnY;
   state.player.prevX = state.player.x;
   state.player.prevZ = state.player.z;
   state.player.prevY = state.player.y;
+
+  // O save entra **depois** do nascimento e sobrescreve o que existir. Assim o
+  // caminho sem save e o caminho normal, nao um caso especial: quem chega pela
+  // primeira vez simplesmente nao tem nada sobrescrevendo.
+  const saves = new SaveSystem(state, world);
+  const loaded = saves.load();
+  saves.install();
+
   world.updateRegionWeights(state.player.x, state.player.z);
 
   // Os mobs nascem antes da cena porque a cena constroi uma malha por mob. Eles
@@ -70,7 +80,9 @@ function boot(): void {
   // O jogador volta onde nasceu. A regiao Inicial nao tem mobs de proposito
   // (`src/data/mobs.ts`), entao renascer nunca cai em cima de quem matou.
   const combat = new CombatSystem(events);
-  combat.setRespawnPoint(state.player.x, state.player.y, state.player.z);
+  // O ponto de respawn e o **nascimento**, nao onde o save deixou o jogador:
+  // morrer devolve para a Inicial, que nao tem mobs de proposito.
+  combat.setRespawnPoint(spawn.x, spawnY, spawn.z);
 
   scene.snapCamera(state);
   installCheats(state, world, scene);
@@ -137,7 +149,7 @@ function boot(): void {
   if (!gate.blocked) loop.start();
 
   document.getElementById('boot')?.classList.add('hidden');
-  console.log('[boot] Astra Sovereign iniciado. Milestone 4.');
+  console.log(`[boot] Astra Sovereign iniciado. Save ${loaded ? 'carregado' : 'ausente'}.`);
 }
 
 try {

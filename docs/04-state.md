@@ -41,6 +41,13 @@
   **O tempo de abate e consequencia de vida/dano/intervalo, nunca regra** -- se o
   dano alcanca a vida, o alvo cai no primeiro golpe. Ver `systems/combat.md`.
 
+**Save**
+- `localStorage`, chave `astra-sovereign/save`, JSON versionado (`v: 1`).
+  Persiste posicao, angulo, vida e moeda -- cinco numeros. Mobs e altura ficam
+  de fora de proposito. Autosave a cada 5s mais flush ao esconder ou sair.
+  Save invalido e descartado inteiro e o jogo comeca do zero.
+  Ver `systems/save.md`.
+
 **Conteudo**
 - `src/data/world-01.ts`: as seis regioes do Mundo 1, os cinco corredores e a
   semente dos bloqueadores. Primeiro arquivo de `src/data/`.
