@@ -218,7 +218,30 @@ export function installDebugConsole(): void {
   };
 
   window.addEventListener('error', (event) => {
-    push('error', [`${event.message} @ ${event.filename}:${event.lineno}`]);
+    // **Erro de outra origem chega mascarado pelo navegador**: mensagem generica
+    // `Script error.`, arquivo vazio, linha zero e `error` nulo. Nao ha o que
+    // extrair -- e o navegador se recusando a expor codigo de terceiro.
+    //
+    // Isso **nunca e o jogo**. O bundle e servido da mesma origem da pagina, e
+    // erro de script same-origin sempre traz o objeto `Error` junto, mesmo com o
+    // atributo `crossorigin` que o Vite poe na tag (verificado). Quando esta
+    // linha aparecer, o culpado esta fora do jogo: extensao do navegador, script
+    // injetado, leitor de tela, tradutor.
+    //
+    // Dizer isso aqui e o ponto: a versao anterior imprimia `Script error. @ :0`
+    // seco, e um erro que nao e nosso passava por bug nosso.
+    if (!event.error && !event.filename) {
+      push('warn', [
+        'Script error de OUTRA ORIGEM (extensao do navegador ou script externo).',
+        'Nao vem do jogo -- o navegador mascara e nao ha detalhe a extrair.',
+      ]);
+      return;
+    }
+
+    // Do jogo: a pilha diz mais que arquivo e linha, principalmente com o
+    // sourcemap que a build de producao publica.
+    const stack = event.error instanceof Error ? event.error.stack : null;
+    push('error', [stack ?? `${event.message} @ ${event.filename}:${event.lineno}`]);
   });
 
   window.addEventListener('unhandledrejection', (event) => {
