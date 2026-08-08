@@ -2,7 +2,13 @@
 
 **Arquivo:** `src/game/systems/progression.ts` · **Dono:** Progression Agent · **Desde:** M6
 
-XP e nivel. Ouve `mob:killed`, emite `player:leveled`. Nada mais.
+Duas trilhas independentes: **Nivel** e **Poder**. Ouve `mob:killed`, emite
+`player:leveled`. Nada mais.
+
+```
+abate  -> XP    -> Nivel -> vida maxima
+clique -> Poder ---------> dano
+```
 
 ## Contrato
 
@@ -10,26 +16,67 @@ XP e nivel. Ouve `mob:killed`, emite `player:leveled`. Nada mais.
 |---|---|---|
 | `state.level` | `src/game/state.ts` | Nivel atual, comeca em 1 |
 | `state.xp` | `src/game/state.ts` | XP **dentro do nivel atual**, zera a cada subida |
-| `player.attackDamage` | `src/game/entities/player.ts` | Derivado do nivel, nunca salvo |
+| `state.power` | `src/game/state.ts` | Poder acumulado. **Salvo** (v3) |
+| `player.maxHp` | `entities/player.ts` | Derivado do nivel, nunca salvo |
+| `player.attackDamage` | `entities/player.ts` | Derivado do Poder, nunca salvo |
 | `MOB_TYPES[].xp` | `src/data/mobs.ts` | 10 / 20 / 15 por tipo |
 
 ```
-xpToNext(nivel)      = round(XP_BASE * nivel ^ XP_CURVE)   // 30, 85, 156, 240...
-damageAtLevel(nivel) = PLAYER_ATTACK_DAMAGE + (nivel - 1) * DAMAGE_PER_LEVEL
+xpToNext(nivel)      = round(XP_BASE * nivel ^ XP_CURVE)     // 60, 170, 312, 480...
+maxHpAtLevel(nivel)  = PLAYER_MAX_HP + (nivel - 1) * HP_PER_LEVEL
+damageFromPower(pod) = round(PLAYER_BASE_DAMAGE * (1 + pod * POWER_DAMAGE_SCALE))
 ```
 
 Curva progressiva, nao linear, como `design/progression.md` marca `[DEFINIDO]`.
 O XP zera a cada nivel em vez de acumular: evita que o numero cresca sem limite
 e precise do formato com sufixo, que continua sem decisao.
 
-## Subir de nivel da dano, e so
+## A correcao do M6: nivel nao produz dano
 
-Escolha deliberada, e o motivo e de leitura, nao de design de RPG: **o numero de
-dano ja esta na tela desde o M4**. Ver `14` virar `17` no golpe seguinte e
-feedback completo sem uma linha de HUD. Vida maxima seria invisivel ate o M7.
+O M6 fazia `nivel -> dano`, com uma funcao `damageAtLevel`. **As duas coisas
+deixaram de existir**, e o motivo e estrutural, nao de gosto: com uma unica
+fonte (abate) movendo o unico stat que importa, nao ha como existir a segunda
+trilha que o Pilar 2 exige. Qualquer trilha nova andaria junto da primeira.
 
-O texto `NIVEL N` que aparece na subida reaproveita o pool de numeros de dano,
-na cor de recompensa. Nao ha interface nova.
+Dano passou a sair do **Poder**, que sobe por clique. Fonte diferente, curva
+diferente, e o desalinhamento acontece sozinho.
+
+Nivel ficou com a **vida maxima**. A escolha usa o argumento que o proprio
+`DAMAGE_PER_LEVEL` registrava para recusa-la — "vida maxima seria invisivel ate
+o M7". O M7 existe: a HUD mostra `vida X/Y`, entao subir de nivel aparece na
+tela sem nada novo ser desenhado, e `120/120` virando `130/130` e tao legivel
+quanto o numero de dano mudando.
+
+Ao subir de nivel a vida ganha entra como vida cheia daquele tanto. O Pilar 1
+proibe punir, e subir de nivel nunca pode parecer que nao aconteceu nada.
+
+## Poder nao e recurso
+
+**Forca acumulada, nao energia.** Nunca diminui, nunca e gasta, nao limita acao
+nenhuma, e atacar **nao** a consome. Nao e stamina, nao e mana, nao e cooldown e
+nao e barra que esvazia. A unica coisa que ela faz e multiplicar o dano.
+
+Morrer nao tira Poder — verificado no QA.
+
+A forma `base * (1 + poder * escala)` vem da referencia do genero. A escala
+(0.008) nao veio: foi derivada do combate que existe, para o dano dobrar em ~2
+minutos de jogo. Multiplicativa e nao aditiva, para o Poder continuar valendo
+quando o dano base subir por outra via.
+
+## Uma operacao para clique e Auto Click
+
+`gainPower` e chamada pelo toque na tela e pelo temporizador do Auto Click. **Nao
+existem dois caminhos.** Se o ganho mudar de valor, ou passar a emitir evento, os
+dois herdam a mudanca sem ninguem lembrar de sincronizar.
+
+O toque chega por `CameraDrag.consumeTaps()`: a zona de camera cobre a tela
+inteira e ignorava toques ate agora, entao o clique nao tirou nada de ninguem —
+girar continua sendo arrastar, e a pinca continua sendo dois dedos. Verificado:
+8 segundos arrastando geram exatamente o mesmo Poder que 8 segundos parado.
+
+O Auto Click usa laco e nao `if`: um quadro longo pode cobrir mais de um
+intervalo, e perder cliques por engasgo seria perder progresso por causa do
+framerate.
 
 ## O laco de subida existe por um motivo
 
@@ -47,11 +94,12 @@ outros tres tambem.
 
 ## O que **nao** existe
 
-Sem segunda trilha, sem distribuicao de pontos, sem teto de nivel, sem prestige,
-sem stat alem de dano. Os cinco continuam `[PENDENTE]` ou `[PROPOSTA]` em
-`design/progression.md`, e a regra do projeto proibe transformar pendencia em
-codigo.
+Sem Rank, sem distribuicao de pontos, sem teto de nivel, sem prestige, sem
+multiplicador comprado, sem stat alem de vida e dano. Continuam `[PENDENTE]` ou
+`[PROPOSTA]` em `design/progression.md`, e a regra do projeto proibe transformar
+pendencia em codigo.
 
-**O Pilar 2 ainda nao esta atendido.** Ele exige duas trilhas com curvas
-desalinhadas, e moeda e XP saem os dois de abate -- ou seja, andam juntas. A
-segunda trilha de verdade depende de decidir o que faz o Rank subir.
+**O Pilar 2 passou a ter duas trilhas com fontes diferentes** — abate move o
+Nivel, clique move o Poder. Se isso basta para "sempre haver algo perto de
+completar" so o aparelho responde: o Poder nao tem marco visivel, ele cresce
+continuamente. Fica como pergunta aberta para quando quests existirem (M11).

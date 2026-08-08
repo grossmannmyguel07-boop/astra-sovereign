@@ -36,19 +36,19 @@ const KEY = 'astra-sovereign/save';
  * enquanto nao houver um segundo formato de verdade, migrar seria escrever
  * codigo para um caso que nunca aconteceu.
  */
-const VERSION = 2;
+const VERSION = 3;
 
 /**
  * Versoes anteriores que ainda carregam.
  *
- * A v1 nao tinha nivel nem XP. Ela e aceita e completada com nivel 1 e XP 0,
- * que e exatamente onde um jogador do M5 estava -- o M6 nao existia.
+ * A v1 nao tinha nivel nem XP; a v2 nao tinha Poder. As duas sao aceitas e
+ * completadas com o valor de quem nunca teve aquilo -- nivel 1, XP 0, Poder 0 --
+ * que e exatamente onde o jogador daquela versao estava.
  *
- * Esta e a primeira migracao do projeto, e ela existe por um caso concreto: ha
- * saves v1 gravados no aparelho do desenvolvedor. Sem esse caso, descartar seria
- * o certo.
+ * As migracoes existem por casos concretos: ha saves v1 e v2 gravados no
+ * aparelho do desenvolvedor. Sem esse caso, descartar seria o certo.
  */
-const READABLE = new Set([1, 2]);
+const READABLE = new Set([1, 2, 3]);
 
 /**
  * Segundos entre gravacoes automaticas.
@@ -89,6 +89,15 @@ export interface SaveData {
   /** Desde a v2. Save v1 carrega com nivel 1 e XP 0. */
   level: number;
   xp: number;
+  /**
+   * Desde a v3. Save v1 ou v2 carrega com Poder 0.
+   *
+   * **Entra no save porque nao e derivavel de nada.** Vida maxima e dano ficam
+   * de fora justamente por serem derivados -- de nivel e de Poder. O Poder e a
+   * ponta da corrente: perde-lo num reload seria perder progresso de verdade,
+   * que e a unica coisa que este arquivo existe para impedir.
+   */
+  power: number;
 }
 
 function isFinitePlain(value: unknown): value is number {
@@ -114,7 +123,7 @@ function plausiblePosition(x: number, z: number): boolean {
  * saldo de moeda. Comecar do zero e um resultado previsivel; comecar de metade
  * de um save quebrado nao e.
  */
-export function parseSave(raw: string, maxHp: number): SaveData | null {
+export function parseSave(raw: string): SaveData | null {
   let data: unknown;
   try {
     data = JSON.parse(raw);
@@ -132,7 +141,7 @@ export function parseSave(raw: string, maxHp: number): SaveData | null {
   if (!plausiblePosition(candidate.x, candidate.z)) return null;
 
   // Migracao v1 -> v2: os campos novos nascem no valor de quem nunca jogou o
-  // M6. Num save v2 eles precisam existir e ser finitos.
+  // M6. Num save v2 ou maior eles precisam existir e ser finitos.
   let level = 1;
   let xp = 0;
   if (candidate.v >= 2) {
@@ -141,10 +150,23 @@ export function parseSave(raw: string, maxHp: number): SaveData | null {
     xp = Math.max(Math.round(candidate.xp), 0);
   }
 
-  // Vida e moeda sao presos na faixa em vez de recusados: sao os dois campos que
-  // o balanceamento pode mudar entre versoes, e um teto que baixou nao e save
-  // corrompido -- e um save antigo de um jogo que mudou.
-  const hp = Math.min(Math.max(Math.round(candidate.hp), 1), maxHp);
+  // Migracao v2 -> v3: quem jogou antes do Poder existir comeca com zero.
+  let power = 0;
+  if (candidate.v >= 3) {
+    if (!isFinitePlain(candidate.power)) return null;
+    power = Math.max(Math.round(candidate.power), 0);
+  }
+
+  // Vida e moeda sao presos por baixo em vez de recusados: sao os dois campos
+  // que o balanceamento pode mudar entre versoes, e um numero fora da faixa nao
+  // e save corrompido -- e save antigo de um jogo que mudou.
+  //
+  // **O teto da vida nao e checado aqui**, e essa e a diferenca em relacao ao
+  // M6. A vida maxima passou a depender do nivel, e o nivel esta sendo lido
+  // agora: recortar contra um teto que este arquivo nao conhece cortaria a vida
+  // de todo save de nivel alto. Quem tem o teto e a progressao, que o aplica no
+  // `init` logo depois desta carga.
+  const hp = Math.max(Math.round(candidate.hp), 1);
   const currency = Math.max(Math.floor(candidate.currency), 0);
   if (!Number.isFinite(hp) || !Number.isFinite(currency)) return null;
 
@@ -157,6 +179,7 @@ export function parseSave(raw: string, maxHp: number): SaveData | null {
     currency,
     level,
     xp,
+    power,
   };
 }
 
@@ -186,7 +209,7 @@ export class SaveSystem {
     }
     if (raw === null) return false;
 
-    const data = parseSave(raw, this.state.player.maxHp);
+    const data = parseSave(raw);
     if (!data) {
       console.warn('[save] save invalido, descartado');
       this.clear();
@@ -225,8 +248,10 @@ export class SaveSystem {
     this.state.currency = data.currency;
     this.state.level = data.level;
     this.state.xp = data.xp;
-    // O dano do jogador sai do nivel e nao e escrito aqui: quem recalcula e a
-    // progressao, no `init`, depois desta carga.
+    this.state.power = data.power;
+    // Vida maxima e dano nao sao escritos aqui: saem do nivel e do Poder, e quem
+    // recalcula os dois e a progressao, no `init`, depois desta carga. E la
+    // tambem que a vida atual e presa ao teto do nivel carregado.
   }
 
   /**
@@ -250,6 +275,7 @@ export class SaveSystem {
       currency: this.state.currency,
       level: this.state.level,
       xp: this.state.xp,
+      power: this.state.power,
     };
 
     try {

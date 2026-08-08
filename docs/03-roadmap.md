@@ -28,7 +28,7 @@ paralelo e execucao direta. Integracao e QA nunca sao delegados.
 | 3 | Mobs | Benchmark no aparelho, personagem animado, mobs estacionarios com deteccao e alerta | Combat, Render, Data | **concluido** |
 | 4 | Combate | Auto attack, dano, morte, **respawn**, numeros de dano, drop. Chega o barramento de eventos | Combat, Render, Data | **concluido** |
 | 5 | Save | Persistencia local em `localStorage`, formato versionado, validacao. **Sem migrations e sem exportar/importar** — ver abaixo | Save | **concluido** |
-| 6 | Progressao | XP, level, dano por nivel. **Uma trilha, nao duas** -- ver abaixo. Sem painel de tuning | Progression, Data | **concluido** |
+| 6 | Progressao | XP, level, Poder. Nivel da vida; Poder da dano. Corrigido depois do M7: era `nivel -> dano`, numa trilha so | Progression, Data | **concluido** |
 | 7 | HUD | Vida, XP, nivel, moeda. **Sem objetivo** (M11) e **sem Rank**. A disputa botoes/rotacao nao disparou: nao ha botao | UI | **concluido** |
 | 8 | Units | Units seguindo e atacando | Progression, Render | proximo |
 | 9 | Gacha | Invocacao, raridades, pity | Progression, Data, UI |

@@ -41,11 +41,25 @@ export interface GameState {
    * formas funcionam; esta evita que o numero cresca sem limite e precise do
    * formato com sufixo antes de existir decisao sobre ele.
    *
-   * O dano nao mora aqui: sai do nivel, em `player.attackDamage`. Guardar os
-   * dois daria dois donos para o mesmo fato.
+   * Nem o dano nem a vida moram aqui: os dois sao **derivados** e vivem em
+   * `player`. Guardar um numero e o que o produz daria dois donos para o mesmo
+   * fato.
    */
   level: number;
   xp: number;
+
+  /**
+   * Poder acumulado.
+   *
+   * **Trilha independente do nivel**, e a segunda que o Pilar 2 pede: sobe por
+   * clique, nao por abate, entao as duas nao andam juntas. Ver
+   * `docs/design/progression.md`.
+   *
+   * E **forca acumulada, nao recurso**: nunca diminui, nunca e gasta e nao
+   * limita acao nenhuma. O ataque nao a consome. Quem multiplica o dano por ela
+   * e `damageFromPower`, na progressao.
+   */
+  power: number;
 }
 
 export function createInitialState(): GameState {
@@ -55,5 +69,6 @@ export function createInitialState(): GameState {
     currency: 0,
     level: 1,
     xp: 0,
+    power: 0,
   };
 }

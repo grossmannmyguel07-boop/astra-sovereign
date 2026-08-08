@@ -8,7 +8,7 @@
  * de `src/render/views/player-view.ts`.
  */
 
-import { PLAYER_ATTACK_DAMAGE, PLAYER_MAX_HP } from '@/config/balance';
+import { PLAYER_BASE_DAMAGE, PLAYER_MAX_HP } from '@/config/balance';
 
 export interface PlayerState {
   /** Posicao no plano do mundo. */
@@ -43,17 +43,25 @@ export interface PlayerState {
   // --- Combate (M4) ---
 
   hp: number;
+
+  /**
+   * Vida maxima.
+   *
+   * Derivada de `state.level`, entao **nao entra no save** -- recalcular a
+   * partir do nivel evita dois donos para o mesmo numero. Quem reescreve e a
+   * progressao, em `maxHpAtLevel`.
+   */
   maxHp: number;
 
   /**
    * Dano por golpe.
    *
-   * Deixou de ser constante no M6: e o unico efeito que subir de nivel produz.
-   * Derivado de `state.level`, entao **nao entra no save** -- recalcular a
-   * partir do nivel evita dois donos para o mesmo numero.
+   * Derivado de `state.power`, **nao do nivel**. Ate o M6 saia de
+   * `damageAtLevel`, que nao existe mais: nivel e Poder sao trilhas
+   * independentes, e dano e o efeito do Poder.
    *
-   * E tambem o efeito mais legivel possivel sem HUD: o numero de dano ja esta
-   * na tela desde o M4, entao ver `14` virar `17` nao precisa de nada novo.
+   * Como a vida maxima, nao entra no save: sai de `damageFromPower` a cada
+   * ganho de Poder e no carregamento.
    */
   attackDamage: number;
 
@@ -89,7 +97,7 @@ export function createPlayer(): PlayerState {
     prevFacing: 0,
     hp: PLAYER_MAX_HP,
     maxHp: PLAYER_MAX_HP,
-    attackDamage: PLAYER_ATTACK_DAMAGE,
+    attackDamage: PLAYER_BASE_DAMAGE,
     attackCooldown: 0,
     dead: false,
     respawnTimer: 0,

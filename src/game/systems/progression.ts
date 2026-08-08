@@ -1,28 +1,57 @@
-import { DAMAGE_PER_LEVEL, PLAYER_ATTACK_DAMAGE, XP_BASE, XP_CURVE } from '@/config/balance';
+import {
+  AUTO_CLICK_INTERVAL,
+  HP_PER_LEVEL,
+  PLAYER_BASE_DAMAGE,
+  PLAYER_MAX_HP,
+  POWER_DAMAGE_SCALE,
+  POWER_PER_CLICK,
+  XP_BASE,
+  XP_CURVE,
+} from '@/config/balance';
 import { MOB_TYPES } from '@/data/mobs';
 import type { EventBus } from '@/game/events';
 import type { GameState } from '@/game/state';
 
 /**
- * Nivel e XP.
+ * Duas trilhas: **Nivel** e **Poder**.
  *
  * Dono: **Progression Agent**.
  *
  * Nunca importa `three` e nunca importa outro sistema. Ouve `mob:killed` do
  * combate e emite `player:leveled` -- e so.
  *
- * ## Por que e um sistema e nao tres linhas dentro do combate
+ * ## As duas trilhas sao independentes, e essa e a correcao do M6
  *
- * Porque o combate nao pode saber que XP existe. Ele emite "este mob morreu" e
- * quem quiser que faca algo com isso: hoje progressao e o numero de recompensa,
- * amanha quests contam e inventario solta drop. Enfiar XP no combate obrigaria
- * a enfiar os outros tres tambem.
+ * O M6 fazia `nivel -> dano`. Estava errado para o modelo do projeto, e o erro
+ * era estrutural: com uma unica fonte (abate) movendo o unico stat que importa,
+ * nao existe a segunda trilha que o Pilar 2 exige.
+ *
+ * ```
+ * abate  -> XP    -> Nivel -> vida maxima
+ * clique -> Poder ---------> dano
+ * ```
+ *
+ * **Fontes diferentes** e o que garante o desalinhamento: quem esta longe de
+ * subir de nivel pode estar perto de sentir o Poder, e vice-versa. Ver
+ * `docs/design/progression.md`.
+ *
+ * ## Poder nao e recurso
+ *
+ * Nunca diminui, nunca e gasto, nao limita acao nenhuma. Atacar **nao** consome
+ * Poder. Nao e stamina, nao e mana, nao e cooldown e nao e barra que esvazia --
+ * e forca acumulada, e a unica coisa que ela faz e multiplicar o dano.
+ *
+ * ## Uma operacao para clique e Auto Click
+ *
+ * `gainPower` e chamada pelo toque na tela e pelo temporizador automatico. **Nao
+ * ha dois caminhos**: se um dia o ganho passar a valer o dobro, ou a emitir um
+ * evento, os dois herdam a mudanca sem ninguem lembrar de sincronizar.
  *
  * ## O que **nao** esta aqui
  *
- * Sem segunda trilha, sem distribuicao de pontos, sem teto de nivel, sem
- * prestige. Os quatro continuam `[PENDENTE]` em `docs/design/progression.md` e
- * a regra do projeto proibe transformar pendencia em codigo.
+ * Sem Rank, sem distribuicao de pontos, sem teto de nivel, sem prestige, sem
+ * multiplicador comprado. Continuam `[PENDENTE]` em `docs/design/progression.md`
+ * e a regra do projeto proibe transformar pendencia em codigo.
  */
 
 /** XP necessario para sair deste nivel. Progressiva, nunca linear. */
@@ -30,31 +59,79 @@ export function xpToNext(level: number): number {
   return Math.round(XP_BASE * Math.pow(level, XP_CURVE));
 }
 
-/** Dano do jogador num dado nivel. Derivado, nunca guardado. */
-export function damageAtLevel(level: number): number {
-  return PLAYER_ATTACK_DAMAGE + (level - 1) * DAMAGE_PER_LEVEL;
+/**
+ * Dano de um golpe, dado o Poder acumulado. Derivado, nunca guardado.
+ *
+ * ```
+ * dano = base * (1 + poder * escala)
+ * ```
+ *
+ * **O nivel nao entra nesta conta.** Era `damageAtLevel(level)` ate o M6 e a
+ * funcao deixou de existir, junto com a ideia: dois donos para o dano era
+ * exatamente o que impedia as trilhas de serem independentes.
+ */
+export function damageFromPower(power: number): number {
+  return Math.round(PLAYER_BASE_DAMAGE * (1 + power * POWER_DAMAGE_SCALE));
+}
+
+/** Vida maxima num dado nivel. Derivada, nunca guardada. */
+export function maxHpAtLevel(level: number): number {
+  return PLAYER_MAX_HP + (level - 1) * HP_PER_LEVEL;
 }
 
 /** Payload reaproveitado -- ver a nota no topo de `events.ts`. */
-const LEVELED = { level: 0, damage: 0 };
+const LEVELED = { level: 0, maxHp: 0 };
 
 export class ProgressionSystem {
+  /** Tempo acumulado desde o ultimo clique automatico. */
+  private autoClickTimer = 0;
+
   constructor(private events: EventBus) {}
 
   /**
-   * Liga a escuta e poe o jogador coerente com o nivel que ele ja tem.
+   * Liga a escuta e poe o jogador coerente com o que ele ja tem.
    *
-   * O segundo passo importa no carregamento de um save: o nivel vem do disco e
-   * o dano precisa acompanhar, sem que ninguem tenha subido de nivel agora.
+   * O segundo passo importa no carregamento de um save: nivel e Poder vem do
+   * disco e vida maxima e dano precisam acompanhar, sem que ninguem tenha subido
+   * de nivel nem clicado agora.
    */
   init(state: GameState): void {
     this.applyLevel(state);
+    this.applyPower(state);
 
     this.events.on('mob:killed', (payload) => {
       const mob = state.mobs[payload.mobId];
       if (!mob) return;
       this.award(state, MOB_TYPES[mob.type].xp);
     });
+  }
+
+  /**
+   * Concede Poder. **A operacao unica.**
+   *
+   * O toque na tela chama isto uma vez; o Auto Click chama isto em intervalo
+   * fixo. Nao existe outro caminho para o Poder subir, e e assim que os dois
+   * nunca divergem.
+   */
+  gainPower(state: GameState, amount: number = POWER_PER_CLICK): void {
+    if (amount <= 0) return;
+    state.power += amount;
+    this.applyPower(state);
+  }
+
+  /**
+   * Toca o Auto Click.
+   *
+   * Um laco, e nao um `if`, porque um quadro longo pode cobrir mais de um
+   * intervalo -- perder cliques por engasgo seria perder progresso por causa do
+   * framerate, e a simulacao e de passo fixo justamente para isso nao acontecer.
+   */
+  update(dt: number, state: GameState): void {
+    this.autoClickTimer += dt;
+    while (this.autoClickTimer >= AUTO_CLICK_INTERVAL) {
+      this.autoClickTimer -= AUTO_CLICK_INTERVAL;
+      this.gainPower(state);
+    }
   }
 
   /**
@@ -76,14 +153,32 @@ export class ProgressionSystem {
     }
     if (!leveled) return;
 
+    const before = state.player.maxHp;
     this.applyLevel(state);
+    // A vida ganha no nivel entra como vida cheia daquele tanto: subir de nivel
+    // nunca pode parecer que nao aconteceu nada, e o Pilar 1 proibe punir.
+    state.player.hp += state.player.maxHp - before;
+
     LEVELED.level = state.level;
-    LEVELED.damage = state.player.attackDamage;
+    LEVELED.maxHp = state.player.maxHp;
     this.events.emit('player:leveled', LEVELED);
   }
 
-  /** Reescreve o que o nivel determina. Hoje so o dano. */
+  /**
+   * Reescreve o que o nivel determina. Hoje so a vida maxima.
+   *
+   * O corte da vida atual acontece aqui porque este e o unico lugar que sabe o
+   * teto novo: um save gravado com vida acima do teto do nivel dele -- de uma
+   * versao em que a curva era outra -- carrega preso ao teto atual em vez de
+   * andar por ai com vida impossivel.
+   */
   private applyLevel(state: GameState): void {
-    state.player.attackDamage = damageAtLevel(state.level);
+    state.player.maxHp = maxHpAtLevel(state.level);
+    if (state.player.hp > state.player.maxHp) state.player.hp = state.player.maxHp;
+  }
+
+  /** Reescreve o que o Poder determina. Hoje so o dano. */
+  private applyPower(state: GameState): void {
+    state.player.attackDamage = damageFromPower(state.power);
   }
 }

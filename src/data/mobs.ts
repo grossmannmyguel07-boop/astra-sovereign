@@ -34,6 +34,16 @@ export interface MobType {
   // teto(vida / dano do jogador) * intervalo do jogador. Um jogador com dano
   // maior que `hp` mata em um golpe, e isso e o comportamento correto.
   // Ver `docs/design/combat.md`.
+  //
+  // **Rebalanceados depois do M7.** O jogador batia a 0.55s contra 1.6s do
+  // errante: quase tres golpes para cada um, e o mob caia em 2.2s tendo
+  // respondido **uma vez**. Nao era combate, era demolicao com plateia.
+  //
+  // A correcao nao foi deixar tudo lento: o intervalo do jogador subiu pouco
+  // (0.55 -> 0.75) e o dos mobs caiu bastante, entao quem ganhou ritmo foi o
+  // lado que nao tinha nenhum. A vida subiu ~35% para a troca durar. As
+  // diferencas entre os tres foram preservadas: o errante continua o mais
+  // brando, a sentinela a mais dura e a espreita a mais rapida.
 
   hp: number;
   /** Dano por golpe no jogador. */
@@ -43,6 +53,14 @@ export interface MobType {
   /**
    * Alcance do golpe, em unidades. Bem menor que os 11 da deteccao: o alerta e
    * o aviso, nao a ameaca.
+   *
+   * **Igual ao alcance do jogador (`PLAYER_ATTACK_RANGE`, 5), e isso importa.**
+   * Valia 4 contra os 5 dele, e a folga de uma unidade era um buraco de
+   * balanceamento: parado entre 4 e 5 o jogador matava sem nunca poder ser
+   * atingido. Medido no QA -- sete golpes dados, **zero** recebidos.
+   *
+   * Quem alcanca pode ser alcancado. Se um dia um mob tiver alcance maior ou
+   * menor que o do jogador, que seja pela ideia daquele mob e nao por descuido.
    */
   attackRange: number;
   /** Moeda concedida ao morrer. */
@@ -74,10 +92,10 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     color: 0xc0763c,
     emissive: 0x2e1608,
     scale: 1,
-    hp: 52,
-    damage: 4,
-    attackInterval: 1.6,
-    attackRange: 4,
+    hp: 70,
+    damage: 5,
+    attackInterval: 0.95,
+    attackRange: 5,
     reward: 3,
     xp: 10,
   },
@@ -88,10 +106,10 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     color: 0xa8443c,
     emissive: 0x330f0e,
     scale: 1.18,
-    hp: 84,
-    damage: 7,
-    attackInterval: 1.5,
-    attackRange: 4,
+    hp: 115,
+    damage: 8,
+    attackInterval: 0.9,
+    attackRange: 5,
     reward: 6,
     xp: 20,
   },
@@ -102,10 +120,10 @@ export const MOB_TYPES: Record<MobTypeId, MobType> = {
     color: 0xd0562e,
     emissive: 0x351007,
     scale: 0.88,
-    hp: 66,
-    damage: 5,
-    attackInterval: 1.05,
-    attackRange: 4,
+    hp: 90,
+    damage: 6,
+    attackInterval: 0.75,
+    attackRange: 5,
     reward: 5,
     xp: 15,
   },

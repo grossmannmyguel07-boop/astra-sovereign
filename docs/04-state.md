@@ -43,12 +43,23 @@ o M5, o M6 e o M7 estao em `main` e publicados.
   dano alcanca a vida, o alvo cai no primeiro golpe. Ver `systems/combat.md`.
 
 **Progressao**
-- **XP e nivel** (`src/game/systems/progression.ts`): XP por abate, curva
-  `30 * nivel ^ 1.5`, XP zera a cada subida. O unico efeito de subir e **dano**,
-  escolhido por ser o unico stat legivel sem HUD -- o numero de dano ja esta na
-  tela desde o M4, entao `14` virar `17` e feedback completo.
-  O dano e derivado do nivel e nao entra no save. Ver `systems/progression.md`.
-- **O Pilar 2 nao esta atendido, e isso e decisao de produto tomada.** Rank
+- **Duas trilhas independentes** (`src/game/systems/progression.ts`):
+  ```
+  abate  -> XP    -> Nivel -> vida maxima
+  clique -> Poder ---------> dano
+  ```
+- **XP e nivel**: XP por abate, curva `60 * nivel ^ 1.5`, XP zera a cada subida.
+  Subir de nivel da **vida maxima** (+10). Aparece na HUD, que mostra `vida X/Y`
+  desde o M7.
+- **Poder**: sobe por clique na tela e pelo Auto Click (1/s), pela **mesma
+  operacao** `gainPower`. Nunca diminui, nunca e gasto, e o ataque nao o consome
+  -- nao e stamina, mana nem cooldown. Dano =
+  `round(10 * (1 + poder * 0.008))`.
+- Vida maxima e dano sao **derivados** e nao entram no save; **Poder entra**
+  (v3), porque nao sai de nada. Ver `systems/progression.md` e `systems/save.md`.
+- **O Pilar 2 ganhou duas fontes diferentes** (abate e clique), mas o Poder nao
+  tem marco: ele cresce continuamente, sem um "falta pouco". Se isso basta, so o
+  aparelho responde. Rank
   ficou **fora do MVP**: ele so teria dois marcos no jogo inteiro (boss e Mundo
   2), e uma trilha que se move duas vezes nunca esta perto de completar. Moeda
   nao conta como segunda: sai de abate igual ao XP. Nao havera trilha artificial
@@ -190,6 +201,51 @@ Playwright em iPhone paisagem sobre a build de producao.
 | Save `v2` plantado no nivel 5 | dano **26** = 14 + 4x3, derivado e nao lido do save |
 | Quatro saves invalidos | descartados, jogo comeca do zero |
 | Erros de console | **nenhum** |
+
+## Verificado depois do M7 — Poder, Level e combate
+
+Correcao estrutural do M6, fora de milestone. **Level e Poder viraram trilhas
+independentes**: abate move o nivel, que move a vida maxima; clique move o Poder,
+que move o dano. `damageAtLevel` deixou de existir.
+
+Playwright em iPhone paisagem sobre a build de producao.
+
+| Caso | Medido |
+|---|---|
+| Clique manual | 58 toques em 8s → **+65** Poder (58 do toque + 7 do Auto Click) |
+| Auto Click | parado 8s → **+8** Poder, sem tocar em nada |
+| Arrastar (girar camera) | 8s de arrasto continuo → **+8**, identico a parado: **arrasto nao e clique** |
+| Poder → dano | poder 0 → dano **10**; poder 500 → dano **50**; poder 161 → dano **23** = `round(10*(1+161*0.008))` |
+| Level → dano | poder 100 no nivel 1 e no nivel 9 → dano **18 nos dois**. O nivel nao toca no dano |
+| Level → vida | nivel 1 → **120**; nivel 9 → **200**; subir para 2 em jogo → **120/120 → 130/130** |
+| Combate, errante, poder 0 | barra do alvo em degraus de **14.2%** (10 de dano / 70 de vida) → **7 golpes** |
+| Mob reage | vida **105 → 95**, dois golpes do errante dentro da janela observada |
+| Morte e respawn | vida a 0 → volta com **120/120** |
+| Poder na morte | **2 → 2**: morrer nao tira Poder |
+| Save v3 | `{...,"level":3,"xp":5,"power":250}` grava e carrega exato |
+| Migracao v1 → v3 | vida e moeda preservadas, nivel 1, XP 0, **Poder 0** |
+| Migracao v2 → v3 | nivel 3 e vida **90/140** preservados, **Poder 0** |
+| `power` nulo ou ausente num v3 | **descartado**, jogo do zero |
+| Barra de vida dos mobs | continua funcionando, degraus corretos |
+| Erros de console | **nenhum**, fora o 404 de favicon |
+
+### Combate: antes → depois
+
+| | Antes | Depois |
+|---|---|---|
+| Intervalo do jogador | 0.55s | **0.75s** |
+| Intervalo do errante | 1.6s | **0.95s** |
+| Dano do jogador | 14 (nivel 1) | **10** (poder 0), sobe com Poder |
+| Vida do errante | 52 | **70** |
+| Alcance do golpe do mob | 4 (contra 5 do jogador) | **5**, igual |
+| Golpes ate matar | 4 | **7** |
+| Golpes que o mob dava antes de cair | **1** | **~5** |
+| Duracao da luta | ~2.2s | **~5.25s** |
+| Dano levado por luta | 4 | **~25** |
+| XP para o nivel 2 | 30 (**3 abates**) | 60 (**6 abates**) |
+
+O XP por mob **nao mudou** (10/20/15). O que mudou foi o piso da curva, junto
+com a correcao do combate — nao no lugar dela.
 
 ## Verificado depois do M7 — barra de vida dos mobs
 

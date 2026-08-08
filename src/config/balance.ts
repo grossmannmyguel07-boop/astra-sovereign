@@ -224,16 +224,37 @@ export const JOYSTICK_ZONE_REACH = 1.6;
  * regra. Se o dano alcancar a vida, o alvo morre em um golpe. Ver a secao
  * "O tempo para matar e consequencia" em `docs/design/combat.md`.
  *
- * Os valores abaixo foram escolhidos para o primeiro mob cair em torno de dois
- * segundos. Isso e **ponto de partida de balanceamento**, nao comportamento:
- * dobrar `PLAYER_ATTACK_DAMAGE` precisa matar na metade dos golpes, e nada no
- * codigo pode impedir.
+ * Os valores abaixo foram escolhidos para o primeiro mob cair em torno de
+ * **cinco segundos**, trocando golpes. Eram dois segundos ate o M7, e dois
+ * segundos era o mob morrendo antes de conseguir responder.
+ *
+ * Isso e **ponto de partida de balanceamento**, nao comportamento: dobrar
+ * `PLAYER_BASE_DAMAGE` precisa matar na metade dos golpes, e nada no codigo
+ * pode impedir.
  */
 export const PLAYER_MAX_HP = 120;
-export const PLAYER_ATTACK_DAMAGE = 14;
 
-/** Segundos entre golpes. Atributo, nao limite de sistema. */
-export const PLAYER_ATTACK_INTERVAL = 0.55;
+/**
+ * Dano de um golpe com **Poder zero**.
+ *
+ * Chamava-se `PLAYER_ATTACK_DAMAGE` e valia 14, somando 3 por nivel. O dano
+ * deixou de sair do nivel: sai do Poder, e este e o piso sobre o qual o Poder
+ * multiplica. Ver `POWER_DAMAGE_SCALE` e `docs/design/progression.md`.
+ *
+ * Baixou de 14 para 10 porque agora ha um multiplicador crescendo por cima: com
+ * 14 de piso, o primeiro mob ja caia em quatro golpes e o Poder nao teria o que
+ * melhorar nos primeiros minutos.
+ */
+export const PLAYER_BASE_DAMAGE = 10;
+
+/**
+ * Segundos entre golpes. Atributo, nao limite de sistema.
+ *
+ * Era 0.55 -- quase tres golpes para cada um do mob mais lento, que so
+ * conseguia responder uma vez antes de cair. A 0.75 o jogador continua
+ * respondendo rapido, mas a troca de golpes passa a existir.
+ */
+export const PLAYER_ATTACK_INTERVAL = 0.75;
 
 /**
  * Alcance do auto attack, em unidades.
@@ -308,23 +329,76 @@ export const IMPACT_RECOIL = 0.28;
  * O expoente e o que faz o nivel 10 parecer conquista sem tornar o 100
  * impossivel -- linear faria os dois valerem o mesmo esforco relativo.
  *
- * Com 30 e 1.5: o primeiro nivel sai em **3 abates** do mob mais fraco, o
- * segundo em ~8, o quinto em ~34. Comecar barato importa porque o Pilar 1 exige
- * retorno visivel nos primeiros segundos de jogo.
+ * **Era 30, e o nivel 2 saia em tres abates** -- rapido demais, e nao por causa
+ * do XP: o mob caia em 2.2 segundos. O piso subiu para 60 **junto** com a
+ * correcao do combate, nao no lugar dela. O XP por mob nao foi tocado.
+ *
+ * Com 60 e 1.5: o primeiro nivel sai em **6 abates** do mob mais fraco, o
+ * quinto em ~34 no total. Comecar barato importa porque o Pilar 1 exige retorno
+ * visivel nos primeiros segundos de jogo.
  *
  * Sao **valores de partida**, nao medicao. A curva so se calibra jogando.
  */
-export const XP_BASE = 30;
+export const XP_BASE = 60;
 export const XP_CURVE = 1.5;
 
 /**
- * Dano ganho por nivel.
+ * Vida maxima ganha por nivel.
  *
- * Unico efeito de subir de nivel no M6, e escolhido por ser o unico visivel sem
- * HUD: o numero de dano ja esta na tela desde o M4. Vida maxima seria invisivel
- * ate o M7.
+ * **Substitui o `DAMAGE_PER_LEVEL`, que valia 3 e nao existe mais.** Level e
+ * Poder passaram a ser trilhas independentes: dano e do Poder, e o nivel precisa
+ * de um efeito proprio para nao virar um contador inerte.
  *
- * Some em vez de multiplicar. Multiplicador composto foge rapido demais para
- * uma curva que ainda nao foi calibrada contra o aparelho.
+ * Vida foi escolhida pelo motivo que o proprio `DAMAGE_PER_LEVEL` registrava
+ * para recusa-la -- "vida maxima seria invisivel ate o M7". O M7 existe: a HUD
+ * mostra `vida X/Y` desde entao, entao subir de nivel agora aparece na tela sem
+ * nada novo ser desenhado.
+ *
+ * Some em vez de multiplicar, pelo mesmo motivo de antes: multiplicador composto
+ * foge rapido demais para uma curva que ainda nao foi calibrada no aparelho.
  */
-export const DAMAGE_PER_LEVEL = 3;
+export const HP_PER_LEVEL = 10;
+
+// ---------------------------------------------------------------------------
+// Poder
+// ---------------------------------------------------------------------------
+
+/**
+ * Poder ganho por clique.
+ *
+ * **Poder e forca acumulada, nao energia gasta.** Nao diminui ao atacar, nao se
+ * esgota e nao bloqueia acao nenhuma -- nao e stamina, mana nem cooldown. So
+ * sobe.
+ *
+ * O clique manual e o Auto Click concedem exatamente isto, pela **mesma
+ * operacao** (`ProgressionSystem.gainPower`). Clicar mais rapido que o intervalo
+ * automatico e o que faz o clique manual valer a pena, como no genero.
+ */
+export const POWER_PER_CLICK = 1;
+
+/**
+ * Segundos entre cliques automaticos.
+ *
+ * O Auto Click nao e um sistema paralelo: e um temporizador que chama a mesma
+ * `gainPower` do toque. Existe para o Poder nao depender de o jogador martelar a
+ * tela, que e desconforto sem decisao.
+ */
+export const AUTO_CLICK_INTERVAL = 1;
+
+/**
+ * Quanto cada ponto de Poder multiplica o dano.
+ *
+ * ```
+ * dano = PLAYER_BASE_DAMAGE * (1 + poder * POWER_DAMAGE_SCALE)
+ * ```
+ *
+ * A forma vem da referencia do genero (`Dano_Base x [1 + Poder x Escala]`); a
+ * escala **nao** foi copiada, foi derivada do combate que existe: com 0.008 e um
+ * clique por segundo, o dano dobra em ~2 minutos de jogo e triplica em ~4. Isso
+ * poe a primeira melhora perceptivel dentro da primeira luta longa, sem que o
+ * mob inicial vire irrelevante no mesmo minuto.
+ *
+ * Multiplicativo, e nao aditivo, de proposito: e o que faz o Poder continuar
+ * valendo quando o dano base subir por outra via no futuro.
+ */
+export const POWER_DAMAGE_SCALE = 0.008;

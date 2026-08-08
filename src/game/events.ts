@@ -46,12 +46,15 @@ export interface GameEventMap {
   /** Moeda concedida por um abate. */
   'currency:gained': { amount: number; x: number; y: number; z: number };
   /**
-   * O jogador subiu de nivel. `damage` e o valor **novo**, ja aplicado.
+   * O jogador subiu de nivel. `maxHp` e o valor **novo**, ja aplicado.
+   *
+   * Trazia `damage` ate o M6, quando o nivel determinava o dano. Nao determina
+   * mais: dano e do Poder, e o nivel move a vida maxima.
    *
    * Nao traz posicao: quem desenha sabe onde o jogador esta, e a subida sempre
    * acontece nele.
    */
-  'player:leveled': { level: number; damage: number };
+  'player:leveled': { level: number; maxHp: number };
 }
 
 export type GameEventName = keyof GameEventMap;

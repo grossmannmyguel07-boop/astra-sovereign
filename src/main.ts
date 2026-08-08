@@ -106,6 +106,13 @@ function boot(): void {
       intent.z = joystick.intent.z;
       intent.yaw = scene.rig.worldYaw;
 
+      // O clique do jogador e o Auto Click entram pela **mesma** operacao,
+      // `progression.gainPower`. O toque chama uma vez por toque; o `update`
+      // chama por temporizador. Nao ha um segundo caminho para o Poder subir.
+      const taps = cameraDrag.consumeTaps();
+      for (let i = 0; i < taps; i++) progression.gainPower(state);
+      progression.update(dt, state);
+
       movement.update(dt, state, intent, world);
       mobs.update(dt, state);
       // Depois dos mobs, para o combate ver o alerta deste tick e nao o do
@@ -142,7 +149,11 @@ function boot(): void {
           // Vida, moeda, nivel e XP sairam daqui no M7: a HUD mostra os quatro,
           // e `references/hud/README.md` lista informacao duplicada em dois
           // lugares da tela como defeito. Fica so o que a HUD nao mostra.
-          `dano   ${p.attackDamage}${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}`
+          // Poder fica no debug, nao na HUD: e ferramenta para o QA enxergar a
+          // trilha nova. Onde ele aparece para o jogador e no numero de dano,
+          // que ja esta na tela desde o M4 e sobe junto.
+          `poder  ${state.power}  ->  dano ${p.attackDamage}` +
+          `${p.dead ? `  MORTO ${p.respawnTimer.toFixed(1)}s` : ''}`
       );
     },
   });

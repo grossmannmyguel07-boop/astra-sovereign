@@ -51,8 +51,12 @@ Isso nao e caso especial nem excecao a tratar: e a formula acima com
 - limitar o dano para o alvo sobreviver ao primeiro acerto
 - dano escalado para o abate durar um tempo alvo
 
-A referencia de ~2 segundos serve apenas para escolher os **valores iniciais**
-de vida e dano. E ponto de partida de balanceamento, nao comportamento.
+A referencia de tempo serve apenas para escolher os **valores iniciais** de vida
+e dano. E ponto de partida de balanceamento, nao comportamento.
+
+Depois do M7 essa referencia passou de ~2 para **~5 segundos**. Dois segundos
+era o mob morrendo antes de conseguir responder: quatro golpes do jogador contra
+**um** dele.
 
 ### O que o codigo precisa respeitar
 
@@ -125,13 +129,21 @@ espera.
 Isso tem uma consequencia medida no M4, e ela e desejada: atravessar uma regiao
 correndo **leva dano sem produzir abate**. A 8.5 unidades por segundo o alvo sai
 do alcance antes dos golpes necessarios saírem. Parar ao encostar num mob abate
-em ~2s e reabre o ciclo. Quem corre paga; quem escolhe onde ficar colhe.
+em ~5s e reabre o ciclo. Quem corre paga; quem escolhe onde ficar colhe.
 
-`[DEFINIDO]` **Alcance do auto attack: 5 unidades.** Contra 11 de deteccao do
-mob e 4 do golpe dele. Essa faixa de 11 a 5 e o **aviso**: o mob levanta a
-guarda bem antes de qualquer um poder acertar o outro, e da tempo de decidir se
-entra ou passa reto. Verificado no M4: 24 segundos parado dentro da faixa de
-alerta, sem um ponto de dano dos dois lados.
+`[DEFINIDO]` **Alcance do auto attack: 5 unidades — e o do mob tambem.** Contra
+11 de deteccao. A faixa de 11 a 5 e o **aviso**: o mob levanta a guarda bem antes
+de qualquer um poder acertar o outro, e da tempo de decidir se entra ou passa
+reto. Verificado no M4: 24 segundos parado dentro da faixa de alerta, sem um
+ponto de dano dos dois lados.
+
+**O golpe do mob valia 4 contra os 5 do jogador, e isso era um buraco.** Parado
+na folga entre 4 e 5, o jogador matava sem nunca poder ser atingido — medido no
+QA depois do M7: sete golpes dados, **zero** recebidos, vida intacta. Nao era
+faixa de aviso, era faixa de impunidade.
+
+`[DEFINIDO]` **Quem alcanca pode ser alcancado.** Alcance diferente entre os dois
+lados so vale se for a ideia daquele mob, nunca por descuido.
 
 `[DEFINIDO]` **Alvo: o mais proximo, com aderencia de 1.5 unidades.** O alvo
 atual so e trocado se outro estiver mais perto por essa margem. Sem aderencia,
