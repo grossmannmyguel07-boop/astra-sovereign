@@ -376,14 +376,17 @@ export const HP_PER_LEVEL = 10;
  */
 export const POWER_PER_CLICK = 1;
 
-/**
- * Segundos entre cliques automaticos.
+/*
+ * **Nao existe intervalo de Auto Click, e nao deve voltar a existir.**
  *
- * O Auto Click nao e um sistema paralelo: e um temporizador que chama a mesma
- * `gainPower` do toque. Existe para o Poder nao depender de o jogador martelar a
- * tela, que e desconforto sem decisao.
+ * Havia `AUTO_CLICK_INTERVAL = 1`, um temporizador livre, e o efeito era o
+ * jogo ficar mais forte sozinho: com a aba aberta e ninguem jogando, dez
+ * minutos bastavam para o mob inicial virar irrelevante.
+ *
+ * O Auto Click passou a ser o **proprio auto attack** -- cada golpe e um clique
+ * automatico. O ritmo dele e `PLAYER_ATTACK_INTERVAL`, que ja existe, e o Poder
+ * passou a ser pago com combate em vez de com tempo de tela.
  */
-export const AUTO_CLICK_INTERVAL = 1;
 
 /**
  * Quanto cada ponto de Poder multiplica o dano.

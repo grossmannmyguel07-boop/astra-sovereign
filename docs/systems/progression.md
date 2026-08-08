@@ -74,9 +74,23 @@ inteira e ignorava toques ate agora, entao o clique nao tirou nada de ninguem �
 girar continua sendo arrastar, e a pinca continua sendo dois dedos. Verificado:
 8 segundos arrastando geram exatamente o mesmo Poder que 8 segundos parado.
 
-O Auto Click usa laco e nao `if`: um quadro longo pode cobrir mais de um
-intervalo, e perder cliques por engasgo seria perder progresso por causa do
-framerate.
+### O Auto Click e o proprio auto attack
+
+Era um temporizador livre de 1 segundo, e estava errado: **o Poder subia com o
+jogo aberto e ninguem jogando**. Dez minutos de aba esquecida bastavam para o mob
+inicial virar irrelevante, sem nenhuma decisao do jogador.
+
+Na referencia do genero o clique **e** a acao — clica-se para bater, e o passe
+"Fast Click" automatiza esse clique enquanto se farma. Aqui o golpe ja sai
+sozinho, entao o Auto Click e ele: a progressao escuta `player:attacked` e chama
+a mesma `gainPower`.
+
+A consequencia e a que se quer: **Poder e pago com combate, nao com tempo de
+tela**. Parado num campo vazio nao sobe nada — verificado: 15 segundos parados na
+Inicial, Poder inalterado.
+
+Isso nao transforma Poder em recurso. Ele continua sem ser gasto, sem teto e sem
+limitar acao nenhuma; o que mudou foi **de onde vem**, nao o que e.
 
 ## O laco de subida existe por um motivo
 

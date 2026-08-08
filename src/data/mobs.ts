@@ -41,9 +41,27 @@ export interface MobType {
   //
   // A correcao nao foi deixar tudo lento: o intervalo do jogador subiu pouco
   // (0.55 -> 0.75) e o dos mobs caiu bastante, entao quem ganhou ritmo foi o
-  // lado que nao tinha nenhum. A vida subiu ~35% para a troca durar. As
-  // diferencas entre os tres foram preservadas: o errante continua o mais
-  // brando, a sentinela a mais dura e a espreita a mais rapida.
+  // lado que nao tinha nenhum.
+  //
+  // ## Tres tiers, um por regiao
+  //
+  // A ordem de percurso do Mundo 1 e Inicial, Campos, Ruinas, Floresta
+  // (`docs/worlds/world-01.md`), e cada regiao com mob e um degrau:
+  //
+  // ```
+  // tier 1  Campos    errante     inicial       vida  90  dano  6
+  // tier 2  Ruinas    sentinela   intermediario vida 190  dano 12
+  // tier 3  Floresta  espreita    avancado      vida 380  dano 18
+  // ```
+  //
+  // A vida dobra por degrau e o dano quase dobra. Nao e numero grande por ser
+  // grande: com o dano base de 10 do jogador sem Poder, o errante custa 9
+  // golpes, a sentinela 19 e a espreita 38 -- ou seja, **as duas ultimas nao
+  // sao vencidas sem Poder acumulado**, que e exatamente o que se quer que o
+  // jogador descubra ao atravessar o mundo.
+  //
+  // Recompensa e XP sobem junto, senao a regiao mais perigosa seria a menos
+  // eficiente e ninguem sairia de Campos.
 
   hp: number;
   /** Dano por golpe no jogador. */
@@ -85,47 +103,54 @@ export interface MobType {
  * terracota, tijolo e brasa.
  */
 export const MOB_TYPES: Record<MobTypeId, MobType> = {
-  // Campos: aberto e claro. O mob mais neutro do mundo, e o primeiro que se ve.
-  // E o unico calibrado de proposito para nao matar sozinho: e onde se aprende.
+  // TIER 1 -- Campos. Aberto e claro, primeiro mob que se ve, e onde se aprende.
+  // Nove golpes para cair com o dano base: da tempo de entender que o combate e
+  // troca e nao demolicao. Custa ~42 de vida por abate, entao tres seguidos ja
+  // pedem cuidado -- e o unico tier que perdoa alguma coisa.
   errante: {
     id: 'errante',
     color: 0xc0763c,
     emissive: 0x2e1608,
     scale: 1,
-    hp: 70,
-    damage: 5,
-    attackInterval: 0.95,
+    hp: 90,
+    damage: 6,
+    attackInterval: 1,
     attackRange: 5,
-    reward: 3,
-    xp: 10,
+    reward: 4,
+    xp: 12,
   },
-  // Ruinas: entre muros. Maior, para ser visto por cima da geometria quebrada,
-  // e mais duro -- e a segunda regiao do percurso.
+  // TIER 2 -- Ruinas. Entre muros, maior para ser visto por cima da geometria
+  // quebrada. Com dano base sao 19 golpes contra 16 dele: **o jogador morre**.
+  // E proposital -- Ruinas e o primeiro lugar que exige ter acumulado Poder em
+  // Campos, e nao ha texto explicando isso em lugar nenhum: a vida caindo
+  // explica.
   sentinela: {
     id: 'sentinela',
     color: 0xa8443c,
     emissive: 0x330f0e,
     scale: 1.18,
-    hp: 115,
-    damage: 8,
-    attackInterval: 0.9,
+    hp: 190,
+    damage: 12,
+    attackInterval: 0.85,
     attackRange: 5,
-    reward: 6,
-    xp: 20,
+    reward: 10,
+    xp: 28,
   },
-  // Floresta: pouca visibilidade. Menor e mais aceso, bate rapido e fraco --
-  // combina com a regiao onde o perigo aparece de perto.
+  // TIER 3 -- Floresta. Pouca visibilidade, menor e mais aceso, e o que bate
+  // mais rapido do mundo: combina com a regiao onde o perigo aparece de perto.
+  // Ultimo degrau antes da Arena. Sem Poder acumulado nas duas regioes
+  // anteriores nao ha luta aqui, so morte.
   espreita: {
     id: 'espreita',
     color: 0xd0562e,
     emissive: 0x351007,
     scale: 0.88,
-    hp: 90,
-    damage: 6,
-    attackInterval: 0.75,
+    hp: 380,
+    damage: 18,
+    attackInterval: 0.8,
     attackRange: 5,
-    reward: 5,
-    xp: 15,
+    reward: 22,
+    xp: 60,
   },
 };
 

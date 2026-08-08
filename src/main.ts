@@ -106,12 +106,11 @@ function boot(): void {
       intent.z = joystick.intent.z;
       intent.yaw = scene.rig.worldYaw;
 
-      // O clique do jogador e o Auto Click entram pela **mesma** operacao,
-      // `progression.gainPower`. O toque chama uma vez por toque; o `update`
-      // chama por temporizador. Nao ha um segundo caminho para o Poder subir.
+      // O clique do jogador entra pela mesma `gainPower` que o Auto Click usa.
+      // O Auto Click nao aparece aqui: ele e o proprio auto attack, e a
+      // progressao o escuta pelo barramento (`player:attacked`).
       const taps = cameraDrag.consumeTaps();
       for (let i = 0; i < taps; i++) progression.gainPower(state);
-      progression.update(dt, state);
 
       movement.update(dt, state, intent, world);
       mobs.update(dt, state);

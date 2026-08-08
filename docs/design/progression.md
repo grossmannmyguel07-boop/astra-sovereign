@@ -145,11 +145,17 @@ mas e **valor de partida declarado**, nao medicao: o primeiro nivel sai em
 **seis** abates do mob mais fraco. Era 30, e saia em tres — subiu junto com a
 correcao do combate, nao no lugar dela. O XP por mob nao foi tocado.
 
-`[PENDENTE]` **Escala do Poder.** `POWER_DAMAGE_SCALE` e 0.008 e o Auto Click
-corre a 1/s, entao o dano dobra em ~2 minutos. Valor de partida. A consequencia
-a vigiar e o outro extremo: o Poder **nao tem teto**, entao muito tempo de jogo
-torna o mob comum irrelevante. Ainda nao ha resposta para isso — vida de mob por
-regiao ja ajuda, e o Mundo 2 (M12) e o degrau natural.
+`[PENDENTE]` **Escala do Poder.** `POWER_DAMAGE_SCALE` e 0.008 e o ganho e de 1
+por golpe. Valor de partida.
+
+`[DEFINIDO]` **Poder e pago com combate, nao com tempo de tela.** O Auto Click
+era um temporizador livre e o jogo ficava mais forte sozinho: aba aberta, ninguem
+jogando, e em dez minutos o mob inicial virava irrelevante. Agora o Auto Click e
+o proprio auto attack — parado num campo vazio o Poder nao sobe.
+
+O Poder continua **sem teto**, e isso e do genero. O que segura a inflacao e o
+mundo ter degraus: os tiers por regiao fazem o Poder acumulado em Campos ser
+gasto em Ruinas e o de Ruinas em Floresta. O Mundo 2 (M12) e o degrau seguinte.
 
 `[PENDENTE]` **Teto de nivel no MVP?** Ou aberto.
 

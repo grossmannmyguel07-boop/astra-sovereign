@@ -51,10 +51,14 @@ o M5, o M6 e o M7 estao em `main` e publicados.
 - **XP e nivel**: XP por abate, curva `60 * nivel ^ 1.5`, XP zera a cada subida.
   Subir de nivel da **vida maxima** (+10). Aparece na HUD, que mostra `vida X/Y`
   desde o M7.
-- **Poder**: sobe por clique na tela e pelo Auto Click (1/s), pela **mesma
-  operacao** `gainPower`. Nunca diminui, nunca e gasto, e o ataque nao o consome
-  -- nao e stamina, mana nem cooldown. Dano =
-  `round(10 * (1 + poder * 0.008))`.
+- **Poder**: sobe por toque na tela e pelo Auto Click, pela **mesma operacao**
+  `gainPower`. O Auto Click e o **proprio auto attack** -- cada golpe e um clique
+  automatico, entao Poder e pago com combate e nao com tempo de tela. Nunca
+  diminui, nunca e gasto, e o ataque nao o consome -- nao e stamina, mana nem
+  cooldown. Dano = `round(10 * (1 + poder * 0.008))`.
+- **Tres tiers de mob, um por regiao**, na ordem do percurso: Campos (errante,
+  90 de vida), Ruinas (sentinela, 190), Floresta (espreita, 380). As duas
+  ultimas **nao sao vencidas sem Poder acumulado**.
 - Vida maxima e dano sao **derivados** e nao entram no save; **Poder entra**
   (v3), porque nao sai de nada. Ver `systems/progression.md` e `systems/save.md`.
 - **O Pilar 2 ganhou duas fontes diferentes** (abate e clique), mas o Poder nao
@@ -201,6 +205,44 @@ Playwright em iPhone paisagem sobre a build de producao.
 | Save `v2` plantado no nivel 5 | dano **26** = 14 + 4x3, derivado e nao lido do save |
 | Quatro saves invalidos | descartados, jogo comeca do zero |
 | Erros de console | **nenhum** |
+
+## Verificado depois do M7 — tiers por regiao e Poder por combate
+
+Segundo ajuste, sobre o anterior. Duas correcoes: o Poder subia parado, e o
+combate inicial continuava facil.
+
+**Auto Click virou o proprio auto attack.** Era temporizador livre de 1s: com a
+aba aberta e ninguem jogando, dez minutos tornavam o mob inicial irrelevante.
+Agora cada golpe do auto attack e um clique automatico, pela mesma `gainPower`.
+
+**Tres tiers, um por regiao**, na ordem do percurso do Mundo 1.
+
+| Tier | Regiao | Mob | Vida | Dano | Intervalo | XP | Moeda |
+|---|---|---|---|---|---|---|---|
+| 1 inicial | Campos | errante | 90 | 6 | 1.0s | 12 | 4 |
+| 2 intermediario | Ruinas | sentinela | 190 | 12 | 0.85s | 28 | 10 |
+| 3 avancado | Floresta | espreita | 380 | 18 | 0.8s | 60 | 22 |
+
+Playwright em iPhone paisagem sobre a build de producao.
+
+| Caso | Medido |
+|---|---|
+| 15s parado na Inicial | Poder **0 → 0**. Nao sobe mais sem combate |
+| 27 toques em 4s, parado | Poder **0 → 27**: exatamente 1 por toque |
+| 12s em combate | Poder **3 → 12**, sem tocar na tela: o auto attack e o Auto Click |
+| **Tier 1** Campos, Poder 0 | 9 golpes para matar, degrau da barra **11.1%** (= 10/90), abate em ~4s, levou **18** de dano |
+| **Tier 2** Ruinas, Poder 0 | vida **120 → 0**: **morreu sem abater**. Precisaria de 19 golpes |
+| **Tier 2** Ruinas, Poder 400 | dano 42, degrau **22.1%** (= 42/190), abate em **2.0s**, levou 48 |
+| **Tier 3** Floresta, Poder 0 | vida **66 → 0**: **morreu sem abater**. Precisaria de 38 golpes |
+| **Tier 3** Floresta, Poder 900 | dano 82, abate em **1.1s**, levou 18 (um golpe) |
+| Level nao mexe no dano | Poder 100 no nivel 1 e no nivel 9 → **18 nos dois** |
+| Poder mexe no dano | Poder 100 → **18**; Poder 600 → **58** |
+| Level mexe na vida | nivel 1 → **120**; nivel 9 → **200** |
+| Save v3 e reload | Poder **19 → 19**, dano **12 → 12** |
+| Erros de console | **nenhum**, fora o 404 de favicon |
+
+As duas ultimas regioes **exigem Poder acumulado** — nao ha texto explicando
+isso, a vida caindo explica.
 
 ## Verificado depois do M7 — Poder, Level e combate
 

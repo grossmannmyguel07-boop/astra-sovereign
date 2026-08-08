@@ -1,5 +1,4 @@
 import {
-  AUTO_CLICK_INTERVAL,
   HP_PER_LEVEL,
   PLAYER_BASE_DAMAGE,
   PLAYER_MAX_HP,
@@ -43,9 +42,24 @@ import type { GameState } from '@/game/state';
  *
  * ## Uma operacao para clique e Auto Click
  *
- * `gainPower` e chamada pelo toque na tela e pelo temporizador automatico. **Nao
- * ha dois caminhos**: se um dia o ganho passar a valer o dobro, ou a emitir um
- * evento, os dois herdam a mudanca sem ninguem lembrar de sincronizar.
+ * `gainPower` e chamada pelo toque na tela e pelo Auto Click. **Nao ha dois
+ * caminhos**: se um dia o ganho passar a valer o dobro, ou a emitir um evento,
+ * os dois herdam a mudanca sem ninguem lembrar de sincronizar.
+ *
+ * ## O Auto Click e o proprio auto attack
+ *
+ * Era um temporizador livre, e isso estava errado: o Poder subia com o jogo
+ * aberto e ninguem jogando. Em dez minutos parado o mob inicial virava
+ * irrelevante sem uma decisao tomada.
+ *
+ * Na referencia do genero o clique **e** a acao — se clica para bater, e o
+ * "Fast Click" automatiza esse clique enquanto se farma. Aqui o golpe ja sai
+ * sozinho, entao o Auto Click e exatamente ele: cada golpe do auto attack e um
+ * clique automatico, e concede Poder pela mesma `gainPower`.
+ *
+ * A consequencia e a que se quer: **Poder e pago com combate**. Parado num campo
+ * vazio nao sobe nada. E nao vira recurso por isso — continua sem ser gasto, sem
+ * ter teto e sem limitar acao nenhuma.
  *
  * ## O que **nao** esta aqui
  *
@@ -83,9 +97,6 @@ export function maxHpAtLevel(level: number): number {
 const LEVELED = { level: 0, maxHp: 0 };
 
 export class ProgressionSystem {
-  /** Tempo acumulado desde o ultimo clique automatico. */
-  private autoClickTimer = 0;
-
   constructor(private events: EventBus) {}
 
   /**
@@ -104,6 +115,12 @@ export class ProgressionSystem {
       if (!mob) return;
       this.award(state, MOB_TYPES[mob.type].xp);
     });
+
+    // O Auto Click. Cada golpe do auto attack e um clique automatico -- mesma
+    // operacao do toque, so que disparada por lutar em vez de por encostar.
+    this.events.on('player:attacked', () => {
+      this.gainPower(state);
+    });
   }
 
   /**
@@ -117,21 +134,6 @@ export class ProgressionSystem {
     if (amount <= 0) return;
     state.power += amount;
     this.applyPower(state);
-  }
-
-  /**
-   * Toca o Auto Click.
-   *
-   * Um laco, e nao um `if`, porque um quadro longo pode cobrir mais de um
-   * intervalo -- perder cliques por engasgo seria perder progresso por causa do
-   * framerate, e a simulacao e de passo fixo justamente para isso nao acontecer.
-   */
-  update(dt: number, state: GameState): void {
-    this.autoClickTimer += dt;
-    while (this.autoClickTimer >= AUTO_CLICK_INTERVAL) {
-      this.autoClickTimer -= AUTO_CLICK_INTERVAL;
-      this.gainPower(state);
-    }
   }
 
   /**
