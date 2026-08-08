@@ -3,8 +3,8 @@
 > Este arquivo e a memoria do projeto entre sessoes. Sempre atualizar ao fim
 > de um milestone. Quem chega sem contexto deve conseguir retomar so lendo isto.
 
-**Ultima atualizacao:** Milestone 7 concluido — HUD na tela. M4 a M7 estao na
-branch de trabalho e **ainda nao publicados**; `main` esta no M4.
+**Ultima atualizacao:** Milestone 7 concluido — HUD na tela. O polimento do M4,
+o M5, o M6 e o M7 estao em `main` e publicados.
 
 ## O que existe e funciona
 
@@ -185,6 +185,31 @@ Playwright em iPhone paisagem sobre a build de producao.
 | Save `v2` plantado no nivel 5 | dano **26** = 14 + 4x3, derivado e nao lido do save |
 | Quatro saves invalidos | descartados, jogo comeca do zero |
 | Erros de console | **nenhum** |
+
+## Verificado no M5
+
+Playwright em iPhone paisagem sobre a build de producao. O registro nasceu no
+corpo do commit `f5b54d9` e ficou so la ate agora — estas sao as medicoes
+daquela sessao, promovidas para a memoria do projeto sem alteracao.
+
+| Caso | Medido |
+|---|---|
+| Primeiro acesso, sem save | nasce na Inicial |
+| Ciclo completo, isolado numa regiao sem mobs para a leitura nao competir com o combate | vida **116 → 116**, moeda **3 → 3**, posicao exata apos recarregar |
+| Save valido plantado antes do jogo subir | carrega exato: x **-25**, z **25**, hp **77**, moeda **42** |
+| Sete saves invalidos — JSON quebrado, versao 99, posicao em 1e9, hp nulo, x nulo, string vazia e array | **todos descartados**, chave removida, jogo comecando do zero |
+| Erros de console | **nenhum**, em nenhum dos sete casos |
+
+**Bug encontrado e corrigido durante o QA.** A primeira validacao perguntava se
+a posicao caia dentro de alguma regiao. Quem salva andando por um **corredor**
+nao esta dentro de regiao nenhuma: o save legitimo era recusado e apagado sem o
+jogador saber, e o teste de reload voltava ao nascimento com o progresso
+perdido. A checagem virou grosseira de proposito — so o alcance do mundo, com
+folga de 1.5x. Decidir se um ponto e caminhavel e do limite do mundo, a cada
+tick.
+
+Os casos de save que aparecem no M6 — migracao `v1` → `v2` e nivel plantado —
+ficam la de proposito: sao formato novo, criado pelo M6, nao pelo M5.
 
 ## Verificado no M4
 
@@ -375,11 +400,12 @@ Pages. A confirmacao na URL publicada e do desenvolvedor.
 
 ## O que NAO existe ainda
 
-Save, XP, HUD, units, gacha, quests, boss. Tambem nao existem: painel de tuning
-(M6) e transicao entre mundos (M12).
+Units, gacha, quests, boss. Tambem nao existem: painel de tuning em runtime
+(adiado, hoje sem milestone dono — ver `03-roadmap.md`) e transicao entre mundos
+(M12).
 
-A moeda acumula mas **nao tem dreno nenhum** ate o M9. Vida e moeda so aparecem
-no overlay de debug — a HUD e do M7.
+A moeda acumula e **aparece na HUD** desde o M7, mas continua **sem dreno
+nenhum** ate o M9.
 
 O portal existe como marco visual nos dois estados, mas **nao leva a lugar
 nenhum** — atravessa-lo nao faz nada. O despertar de verdade e do M10; a
